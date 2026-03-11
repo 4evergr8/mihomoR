@@ -80,24 +80,23 @@ Future<void> showErrorDialog(BuildContext context, String title, Object error) a
     ),
   );
 }
-Future<VoidCallback> showLoadingDialog(BuildContext context, {String? title}) async {
-  final dialogContext = await showDialog(
+Future<VoidCallback> showLoadingDialog(BuildContext context, {String title = '加载中...'}) async {
+  final dialog = showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (ctx) => AlertDialog(
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
+    builder: (_) => AlertDialog(
+      content: Row(
         children: [
           const CircularProgressIndicator(),
-          if (title != null) ...[
-            const SizedBox(height: 12),
-            Text(title),
-          ],
+          const SizedBox(width: 16),
+          Text(title),
         ],
       ),
     ),
   );
 
-  // 返回一个关闭函数
-  return () => Navigator.of(context, rootNavigator: true).pop();
+  // 返回关闭函数
+  return () {
+    if (Navigator.canPop(context)) Navigator.pop(context);
+  };
 }
