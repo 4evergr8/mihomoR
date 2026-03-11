@@ -15,26 +15,26 @@ class _ControlViewState extends State<ControlView> {
   List<String> delays = ["--", "--", "--"];
 
   Future<void> start() async {
-    final settings = await readYamlAsObject("/data/adb/mihono/settings.yaml");
+    final settings = await readYamlAsObject("/data/adb/mihomo/settings.yaml");
     final start = settings['start'];
     await Process.start("sh", ["-c", start]);
   }
 
   Future<void> kill() async {
-    final settings = await readYamlAsObject("/data/adb/mihono/settings.yaml");
+    final settings = await readYamlAsObject("/data/adb/mihomo/settings.yaml");
     final kill = settings['kill'];
     await Process.start("sh", ["-c", kill]);
   }
 
   Future<void> openWeb() async {
-    final settings = await readYamlAsObject("/data/adb/mihono/settings.yaml");
+    final settings = await readYamlAsObject("/data/adb/mihomo/settings.yaml");
     final port = settings['port'];
     final uri = Uri.parse("http://127.0.0.1:$port");
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Future<void> reloadConfig() async {
-    final settings = await readYamlAsObject("/data/adb/mihono/settings.yaml");
+    final settings = await readYamlAsObject("/data/adb/mihomo/settings.yaml");
     final dio = Dio();
     final port = settings['port'];
     await dio.put('http://127.0.0.1:$port/configs?force=true');
