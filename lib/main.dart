@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/theme.dart';
 import '../theme/util.dart';
-import '../widget/bottom_nav_bar.dart';
+import '../widget.dart';
 
 
 
