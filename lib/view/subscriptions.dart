@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../service/sub.dart';
 import '../service/yaml.dart';
 import '../widget.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 
 class SubscriptionView extends StatefulWidget {
@@ -156,9 +157,15 @@ class _SubscriptionViewState extends State<SubscriptionView> {
       final settings = await readYamlAsObject(settingsPath);
       final ua = settings['ua'];
       final id = DateTime.now().millisecondsSinceEpoch.toString();
-
       final downloadResult = await downloadYamlFile(result, ua,id);
-
+      Fluttertoast.showToast(
+        msg: "下载完成",
+        toastLength: Toast.LENGTH_SHORT, // 显示时长，SHORT 或 LONG
+        gravity: ToastGravity.BOTTOM,     // 显示在屏幕底部
+        backgroundColor: Colors.black87,  // 背景色
+        textColor: Colors.white,          // 文字颜色
+        fontSize: 14.0,                   // 文字大小
+      );
       subscriptions.add(
         SubscriptionInfo(
           id: downloadResult.id,
@@ -176,6 +183,14 @@ class _SubscriptionViewState extends State<SubscriptionView> {
       };
 
       await writeYamlFromObject(data, subscriptionsPath);
+      Fluttertoast.showToast(
+        msg: "更新完成",
+        toastLength: Toast.LENGTH_SHORT, // 显示时长，SHORT 或 LONG
+        gravity: ToastGravity.BOTTOM,     // 显示在屏幕底部
+        backgroundColor: Colors.black87,  // 背景色
+        textColor: Colors.white,          // 文字颜色
+        fontSize: 14.0,                   // 文字大小
+      );
 
       setState(() {});
       close();
@@ -184,11 +199,6 @@ class _SubscriptionViewState extends State<SubscriptionView> {
       if (!mounted) return;
       await showErrorDialog(context, '加载错误', e);
 
-    } finally {
-      close();
-      if (mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-      }
     }
   }
 
