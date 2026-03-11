@@ -1,0 +1,8 @@
+subscriptions: 
+  - id: example
+    link:
+    label: 示例配置
+    download: 0
+    upload: 0
+    total: 0
+    expire: 0
