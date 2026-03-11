@@ -1,0 +1,53 @@
+port:
+mixed-port:
+sniffer:
+tunnels:
+tun:
+  enable: true
+  stack: system
+  device: utun0
+  auto-route: true
+  auto-detect-interface: true
+  strict-route: true
+mode: rule
+external-controller: 127.0.0.1:9090
+external-ui: ./metacubexd
+allow-lan: false
+log-level: silent
+ipv6: true
+disable-keep-alive: true
+unified-delay: true
+tcp-concurrent: true
+geodata-loader: memconservative
+
+
+dns:
+  enable: true
+  cache-algorithm: lru
+  prefer-h3: false
+  listen: 0.0.0.0:1053
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter-mode: blacklist
+  fake-ip-filter:
+    - geosite:cn
+    - geosite:geolocation-cn
+    - geosite:private
+  use-hosts: false
+  use-system-hosts: true
+  respect-rules: true
+  default-nameserver:
+    - tls://1.12.12.12:853
+    - tls://223.5.5.5:853
+  proxy-server-nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://dns.pub/dns-query
+  nameserver-policy:
+    geosite:cn,geolocation-cn,private:
+      - tls://1.12.12.12:853
+      - tls://223.5.5.5:853
+  nameserver:
+    - https://dns.cloudflare.com/dns-query
+    - https://dns.google/dns-query
+
