@@ -25,10 +25,9 @@ class DownloadResult {
 }
 
 /// 下载 YAML 文件并保存到 /data/adb/mihomo
-Future<DownloadResult> downloadYamlFile(String url, String ua) async {
+Future<DownloadResult> downloadYamlFile(String url, String ua, String id) async {
   final dio = Dio();
   final dir = await getApplicationDocumentsDirectory();
-  final id = DateTime.now().millisecondsSinceEpoch.toString();
   final filePath = '${dir.path}/$id.yaml';
 
   try {
@@ -41,12 +40,12 @@ Future<DownloadResult> downloadYamlFile(String url, String ua) async {
         headers: {
           'User-Agent': ua,
         },
-        validateStatus: (s) => s != null && s < 500,
+        validateStatus: (s) => s == 200,
+        sendTimeout: const Duration(seconds: 2),
+        receiveTimeout: const Duration(seconds: 2),
       ),
     );
-
     final headers = response.headers.map;
-
     String label = id;
     final cd = headers['content-disposition']?.first;
     if (cd != null) {
@@ -122,29 +121,11 @@ Future<DownloadResult> downloadYamlFile(String url, String ua) async {
 
 /// 合并 YAML 对象
 Map<String, dynamic> overwriteYamlObject(Map<String, dynamic> base, Map<String, dynamic> patch) {
-  final result = <String, dynamic>{};
+  final result = Map<String, dynamic>.from(base);
 
-  for (final key in base.keys) {
-    if (patch.containsKey(key)) {
-      final baseValue = base[key];
-      final patchValue = patch[key];
-      if (baseValue is Map && patchValue is Map) {
-        result[key] = overwriteYamlObject(
-          Map<String, dynamic>.from(baseValue),
-          Map<String, dynamic>.from(patchValue),
-        );
-      } else {
-        result[key] = patchValue;
-      }
-    } else {
-      result[key] = base[key];
-    }
-  }
-
+  // patch 中的键直接覆盖 base
   for (final key in patch.keys) {
-    if (!base.containsKey(key)) {
-      result[key] = patch[key];
-    }
+    result[key] = patch[key];
   }
 
   return result;
