@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:yaml_codec/yaml_codec.dart';
-import '../service/subscriptions.dart';
+import '../service/sub.dart';
 import '../service/yaml.dart';
 
 class SubscriptionView extends StatefulWidget {
@@ -14,8 +13,9 @@ class SubscriptionView extends StatefulWidget {
 class _SubscriptionViewState extends State<SubscriptionView> {
   List<SubscriptionInfo> subscriptions = [];
   bool isLoading = true;
-  final String yamlPath = '/data/adb/mihomo/subscriptions.yaml';
-  final YamlCodec yamlCodec = const YamlCodec();
+  final String subscriptionsPath = '/data/adb/mihomo/subscriptions.yaml';
+  final String settingsPath = '/data/adb/mihomo/subscriptions.yaml';
+
 
   @override
   void initState() {
@@ -26,19 +26,13 @@ class _SubscriptionViewState extends State<SubscriptionView> {
   /// 读取 YAML 加载订阅
   Future<void> _loadSubscriptions() async {
     try {
-      final f = File(yamlPath);
-      if (!await f.exists()) {
-        subscriptions = [];
-      } else {
-        final text = await f.readAsString();
-        final data = yamlCodec.decode(text);
-        final list = (data is Map && data['subscriptions'] is List)
-            ? (data['subscriptions'] as List)
-            : [];
-        subscriptions = list
-            .map((e) => SubscriptionInfo.fromMap(Map<String, dynamic>.from(e)))
-            .toList();
-      }
+      final data = await readYamlAsObject(subscriptionsPath);
+
+      final list = (data['subscriptions'] is List) ? (data['subscriptions'] as List) : [];
+      subscriptions = list
+          .map((e) => SubscriptionInfo.fromMap(Map<String, dynamic>.from(e)))
+          .toList();
+
       setState(() => isLoading = false);
     } catch (_) {
       subscriptions = [];
@@ -46,28 +40,6 @@ class _SubscriptionViewState extends State<SubscriptionView> {
     }
   }
 
-  /// 保存订阅到 YAML
-  Future<void> _saveSubscriptions() async {
-    try {
-      final data = {
-        'subscriptions': subscriptions.map((s) => s.toMap()).toList(),
-      };
-      final yamlText = yamlCodec.encode(data);
-
-      final f = File(yamlPath);
-      if (!await f.exists()) await f.create(recursive: true);
-      await f.writeAsString(yamlText);
-
-      // 用 root 设置权限
-      final result = await Process.run(
-        'su',
-        ['-c', 'chmod 600 $yamlPath'],
-      );
-      if (result.exitCode != 0) throw Exception(result.stderr);
-    } catch (e) {
-      rethrow;
-    }
-  }
 
   /// 添加订阅
   Future<void> _addSubscription() async {
@@ -109,8 +81,11 @@ class _SubscriptionViewState extends State<SubscriptionView> {
         total: downloadResult.total,
         expireDate: DateTime.fromMillisecondsSinceEpoch(downloadResult.expire * 1000),
       ));
+      final data = {
+        'subscriptions': subscriptions.map((s) => s.toMap()).toList(),
+      };
+      await writeYamlFromObject(data, subscriptionsPath);
 
-      await _saveSubscriptions();
       setState(() {});
     } catch (e) {
       rethrow;
@@ -122,37 +97,14 @@ class _SubscriptionViewState extends State<SubscriptionView> {
   /// 删除订阅
   Future<void> _deleteSubscription(String id) async {
     subscriptions.removeWhere((s) => s.id == id);
-    await _saveSubscriptions();
+    final data = {
+      'subscriptions': subscriptions.map((s) => s.toMap()).toList(),
+    };
+    await writeYamlFromObject(data, subscriptionsPath);
     setState(() {});
   }
 
-  /// 编辑订阅
-  Future<void> _editSubscription(String id) async {
-    final sub = subscriptions.firstWhere((s) => s.id == id);
-    final controller = TextEditingController(text: sub.label);
 
-    final result = await showDialog<String>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('修改订阅'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(hintText: '输入新的订阅名称'),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
-            ElevatedButton(onPressed: () => Navigator.pop(context, controller.text), child: const Text('确认')),
-          ],
-        );
-      },
-    );
-
-    if (result == null || result.isEmpty) return;
-    sub.label = result;
-    await _saveSubscriptions();
-    setState(() {});
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +176,6 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       IconButton(icon: const Icon(Icons.delete_outlined, size: 20), onPressed: () => _deleteSubscription(sub.id)),
-                      IconButton(icon: const Icon(Icons.edit_outlined, size: 20), onPressed: () => _editSubscription(sub.id)),
                     ],
                   ),
                 ],
