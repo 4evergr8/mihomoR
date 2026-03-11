@@ -17,9 +17,9 @@ class _ControlViewState extends State<ControlView> {
     super.initState();
     testDelays(); // 页面进入时自动检测延迟
   }
+
   List<String> delays = ["--", "--", "--"];
   final String settingsPath = '/data/adb/mihomo/settings.yaml';
-
 
   Future<void> start() async {
     final settings = await readYamlAsObject(settingsPath);
@@ -61,7 +61,7 @@ class _ControlViewState extends State<ControlView> {
     ));
 
     for (int i = 0; i < urls.length; i++) {
-      final sw = Stopwatch()..start(); // 每次循环新建计时器
+      final sw = Stopwatch()..start();
       try {
         await dio.get(urls[i]);
         sw.stop();
@@ -82,6 +82,7 @@ class _ControlViewState extends State<ControlView> {
   }
 
   Widget delayCardGroup(VoidCallback onRefresh) {
+
     Widget item(String title, String delay) {
       return Expanded(
         child: Column(
@@ -96,6 +97,7 @@ class _ControlViewState extends State<ControlView> {
     }
 
     return Card(
+      color: Theme.of(context).colorScheme.surface, // 卡片背景跟主题
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Stack(
         children: [
@@ -114,6 +116,7 @@ class _ControlViewState extends State<ControlView> {
             top: 4,
             child: IconButton(
               icon: const Icon(Icons.refresh, size: 18),
+              color: Theme.of(context).colorScheme.primary, // 图标使用主题主色
               onPressed: onRefresh,
             ),
           )
@@ -153,7 +156,8 @@ class _ControlViewState extends State<ControlView> {
         height: 50,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            backgroundColor: Theme.of(context).colorScheme.primary, // 背景跟主题
+            foregroundColor: Theme.of(context).colorScheme.onPrimary, // 字体跟主题
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -167,6 +171,8 @@ class _ControlViewState extends State<ControlView> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       appBar: AppBar(title: const Text('控制')),
       body: Padding(
