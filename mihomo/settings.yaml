@@ -1,0 +1,4 @@
+start: su -c "cd /data/adb/mihomo && nohup ./mihomo -d . >/dev/null 2>&1 &"
+kill: su -c "killall mihomo"
+ua: clash.meta
+port: 9090
