@@ -13,7 +13,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
   List<SubscriptionInfo> subscriptions = [];
   bool isLoading = true;
   final String subscriptionsPath = '/data/adb/mihomo/subscriptions.yaml';
-  final String settingsPath = '/data/adb/mihomo/subscriptions.yaml';
+  final String settingsPath = '/data/adb/mihomo/settings.yaml';
 
   @override
   void initState() {
@@ -95,7 +95,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
         barrierDismissible: false,
         builder: (_) => const Center(child: CircularProgressIndicator()),
       );
-      final settings = await readYamlAsObject("/data/adb/mihono/settings.yaml");
+      final settings = await readYamlAsObject(settingsPath);
       final ua = settings['ua'];
       final downloadResult = await downloadYamlFile(result, ua);
 
@@ -137,14 +137,6 @@ class _SubscriptionViewState extends State<SubscriptionView> {
     }
   }
 
-  Future<void> _deleteSubscription(String id) async {
-    subscriptions.removeWhere((s) => s.id == id);
-    final data = {
-      'subscriptions': subscriptions.map((s) => s.toMap()).toList(),
-    };
-    await writeYamlFromObject(data, subscriptionsPath);
-    setState(() {});
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -232,6 +224,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                 '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).day}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
+                          /*
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
@@ -244,6 +237,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                               ),
                             ],
                           ),
+                      */
                         ],
                       ),
                     ),
