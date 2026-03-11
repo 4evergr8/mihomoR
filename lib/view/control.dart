@@ -12,6 +12,11 @@ class ControlView extends StatefulWidget {
 }
 
 class _ControlViewState extends State<ControlView> {
+  @override
+  void initState() {
+    super.initState();
+    testDelays(); // 页面进入时自动检测延迟
+  }
   List<String> delays = ["--", "--", "--"];
   final String settingsPath = '/data/adb/mihomo/settings.yaml';
 
@@ -31,7 +36,7 @@ class _ControlViewState extends State<ControlView> {
   Future<void> openWeb() async {
     final settings = await readYamlAsObject(settingsPath);
     final port = settings['port'];
-    final uri = Uri.parse("http://127.0.0.1:$port");
+    final uri = Uri.parse("http://127.0.0.1:$port/ui");
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
@@ -56,12 +61,13 @@ class _ControlViewState extends State<ControlView> {
     ));
 
     for (int i = 0; i < urls.length; i++) {
+      final sw = Stopwatch()..start(); // 每次循环新建计时器
       try {
-        final sw = Stopwatch()..start();
         await dio.get(urls[i]);
         sw.stop();
         results.add(sw.elapsedMilliseconds.toString());
       } catch (_) {
+        sw.stop();
         results.add("超时");
         for (int j = i + 1; j < urls.length; j++) {
           results.add("超时");
