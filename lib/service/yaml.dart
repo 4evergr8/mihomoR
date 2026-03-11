@@ -41,7 +41,7 @@ Future<void> writeYamlFromObject(
 
     final result = await Process.run(
       'su',
-      ['-c', 'cp $localPath $targetPath && chmod 600 $targetPath'],
+      ['-c', 'cp $localPath $targetPath && chmod 777 $targetPath'],
     );
 
     if (result.exitCode != 0) {
