@@ -158,14 +158,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
       final ua = settings['ua'];
       final id = DateTime.now().millisecondsSinceEpoch.toString();
       final downloadResult = await downloadYamlFile(result, ua,id);
-      Fluttertoast.showToast(
-        msg: "下载完成",
-        toastLength: Toast.LENGTH_SHORT, // 显示时长，SHORT 或 LONG
-        gravity: ToastGravity.BOTTOM,     // 显示在屏幕底部
-        backgroundColor: Colors.black87,  // 背景色
-        textColor: Colors.white,          // 文字颜色
-        fontSize: 14.0,                   // 文字大小
-      );
+
       subscriptions.add(
         SubscriptionInfo(
           id: downloadResult.id,
@@ -177,29 +170,15 @@ class _SubscriptionViewState extends State<SubscriptionView> {
           expire: downloadResult.expire,
         ),
       );
-
       final data = {
         'subscriptions': subscriptions.map((s) => s.toMap()).toList(),
       };
-
       await writeYamlFromObject(data, subscriptionsPath);
-      Fluttertoast.showToast(
-        msg: "更新完成",
-        toastLength: Toast.LENGTH_SHORT, // 显示时长，SHORT 或 LONG
-        gravity: ToastGravity.BOTTOM,     // 显示在屏幕底部
-        backgroundColor: Colors.black87,  // 背景色
-        textColor: Colors.white,          // 文字颜色
-        fontSize: 14.0,                   // 文字大小
-      );
-
       setState(() {});
-      close();
     } catch (e) {
-      close();
       if (!mounted) return;
       await showErrorDialog(context, '加载错误', e);
-
-    }
+    } finally{if (mounted) close();}
   }
 
   @override
