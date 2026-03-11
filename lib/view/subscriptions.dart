@@ -102,13 +102,12 @@ class _SubscriptionViewState extends State<SubscriptionView> {
       subscriptions.add(
         SubscriptionInfo(
           id: downloadResult.id,
+          link:downloadResult.link,
           label: downloadResult.label,
           uploaded: downloadResult.upload,
           downloaded: downloadResult.download,
           total: downloadResult.total,
-          expireDate: DateTime.fromMillisecondsSinceEpoch(
-            downloadResult.expire * 1000,
-          ),
+          expireDate: downloadResult.expire
         ),
       );
       final data = {
@@ -227,7 +226,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '到期时间: ${sub.expireDate.year}-${sub.expireDate.month}-${sub.expireDate.day}',
+                            '到期时间: ${sub.expire.year}-${sub.expire.month}-${sub.expire.day}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           Row(
