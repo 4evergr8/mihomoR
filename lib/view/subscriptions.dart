@@ -1,10 +1,10 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../service/sub.dart';
 import '../service/yaml.dart';
 import '../widget.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-
 
 class SubscriptionView extends StatefulWidget {
   const SubscriptionView({super.key});
@@ -21,6 +21,8 @@ class _SubscriptionViewState extends State<SubscriptionView> {
   final String rewritePath = '/data/adb/mihomo/rewrite.yaml';
   final String configPath = '/data/adb/mihomo/config.yaml';
 
+  String formatGB(int bytes) => (bytes / 1024 / 1024 / 1024).toStringAsFixed(1);
+
   @override
   void initState() {
     super.initState();
@@ -31,13 +33,12 @@ class _SubscriptionViewState extends State<SubscriptionView> {
   Future<void> _onSubscriptionTap(String id) async {
     final base = await readYamlAsObject("data/adb/mihomo/$id.yaml");
     final patch = await readYamlAsObject(rewritePath);
-    final data= overwriteYamlObject(base,patch);
-    await writeYamlFromObject(data,configPath);
+    final data = overwriteYamlObject(base, patch);
+    await writeYamlFromObject(data, configPath);
     final settings = await readYamlAsObject(settingsPath);
     final dio = Dio();
     final port = settings['port'];
     await dio.put('http://127.0.0.1:$port/configs?force=true');
-
   }
 
   /// 刷新订阅
@@ -45,12 +46,13 @@ class _SubscriptionViewState extends State<SubscriptionView> {
     setState(() => isLoading = true);
     if (!mounted) return;
     final close = await showLoadingDialog(context, title: '加载中...');
-
     try {
       // 读取本地 YAML
       final data = await readYamlAsObject(subscriptionsPath);
       final list =
-      (data['subscriptions'] is List) ? (data['subscriptions'] as List) : [];
+          (data['subscriptions'] is List)
+              ? (data['subscriptions'] as List)
+              : [];
 
       // 遍历每个订阅，刷新
       List<SubscriptionInfo> updatedSubs = [];
@@ -65,8 +67,8 @@ class _SubscriptionViewState extends State<SubscriptionView> {
               id: downloadResult.id,
               link: downloadResult.link,
               label: downloadResult.label,
-              uploaded: downloadResult.upload,
-              downloaded: downloadResult.download,
+              upload: downloadResult.upload,
+              download: downloadResult.download,
               total: downloadResult.total,
               expire: downloadResult.expire,
             ),
@@ -100,15 +102,15 @@ class _SubscriptionViewState extends State<SubscriptionView> {
       final data = await readYamlAsObject(subscriptionsPath);
 
       final list =
-      (data['subscriptions'] is List)
-          ? (data['subscriptions'] as List)
-          : [];
+          (data['subscriptions'] is List)
+              ? (data['subscriptions'] as List)
+              : [];
 
       subscriptions =
           list
               .map(
                 (e) => SubscriptionInfo.fromMap(Map<String, dynamic>.from(e)),
-          )
+              )
               .toList();
     } catch (e) {
       subscriptions = [];
@@ -120,6 +122,45 @@ class _SubscriptionViewState extends State<SubscriptionView> {
           isLoading = false;
         });
       }
+    }
+  }
+  /// 删除指定订阅
+  Future<void> _deleteSubscription(BuildContext context, SubscriptionInfo sub) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('确认删除'),
+        content: Text('确定删除订阅 "${sub.label}" 吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('确认'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+    if (!mounted) return;
+
+    final close = await showLoadingDialog(context, title: '删除中...');
+    try {
+      subscriptions.removeWhere((s) => s.id == sub.id);
+      final data = {
+        'subscriptions': subscriptions.map((s) => s.toMap()).toList(),
+      };
+      await writeYamlFromObject(data, subscriptionsPath);
+      await Process.run('su', ['-c', 'rm -f /data/adb/mihomo/${sub.id}.yaml']);
+      setState(() {});
+    } catch (e) {
+      if (!mounted) return;
+      await showErrorDialog(context, '删除失败', e);
+    } finally {
+      if (mounted) close();
     }
   }
 
@@ -153,19 +194,18 @@ class _SubscriptionViewState extends State<SubscriptionView> {
     if (!mounted) return;
     final close = await showLoadingDialog(context, title: '加载中...');
     try {
-
       final settings = await readYamlAsObject(settingsPath);
       final ua = settings['ua'];
       final id = DateTime.now().millisecondsSinceEpoch.toString();
-      final downloadResult = await downloadYamlFile(result, ua,id);
+      final downloadResult = await downloadYamlFile(result, ua, id);
 
       subscriptions.add(
         SubscriptionInfo(
           id: downloadResult.id,
           link: downloadResult.link,
           label: downloadResult.label,
-          uploaded: downloadResult.upload,
-          downloaded: downloadResult.download,
+          upload: downloadResult.upload,
+          download: downloadResult.download,
           total: downloadResult.total,
           expire: downloadResult.expire,
         ),
@@ -178,7 +218,9 @@ class _SubscriptionViewState extends State<SubscriptionView> {
     } catch (e) {
       if (!mounted) return;
       await showErrorDialog(context, '加载错误', e);
-    } finally{if (mounted) close();}
+    } finally {
+      if (mounted) close();
+    }
   }
 
   @override
@@ -194,109 +236,121 @@ class _SubscriptionViewState extends State<SubscriptionView> {
         ],
       ),
       body:
-      isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : subscriptions.isEmpty
-          ? const Center(child: Text('暂无订阅'))
-          : ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: subscriptions.length,
-        itemBuilder: (context, index) {
-          final sub = subscriptions[index];
-
-          return InkWell(
-            onTap: () => _onSubscriptionTap(sub.id),
-            borderRadius: BorderRadius.circular(12),
-            child: Card(
-              margin: const EdgeInsets.only(bottom: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : subscriptions.isEmpty
+              ? const Center(child: Text('暂无订阅'))
+              : ListView.builder(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      sub.label,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 12),
+                itemCount: subscriptions.length,
+                itemBuilder: (context, index) {
+                  final sub = subscriptions[index];
 
-                    Container(
-                      height: 12,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-                        color: Colors.grey.shade300,
+                  return InkWell(
+                    onTap: () => _onSubscriptionTap(sub.id),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Card(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: sub.uploaded,
-                            child: Container(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              sub.label,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 12),
+
+                            Container(
+                              height: 12,
                               decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(6),
-                                  bottomLeft: Radius.circular(6),
-                                ),
+                                borderRadius: BorderRadius.circular(6),
+                                color: Colors.grey.shade300,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: sub.upload,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(6),
+                                          bottomLeft: Radius.circular(6),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: sub.download,
+                                    child: Container(
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.secondary,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: sub.total - sub.upload - sub.download,
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        color: Colors.grey,
+                                        borderRadius: BorderRadius.only(
+                                          topRight: Radius.circular(6),
+                                          bottomRight: Radius.circular(6),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                          Expanded(
-                            flex: sub.downloaded,
-                            child: Container(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .secondary,
+
+                            const SizedBox(height: 8),
+
+                            Text(
+                              sub.total == 0
+                                  ? '上传: ∞  下载: ∞  剩余: ∞'
+                                  : '上传: ${formatGB(sub.upload)}GB  下载: ${formatGB(sub.download)}GB  剩余: ${formatGB(sub.total - sub.upload - sub.downloaded)}GB',
+                              style: Theme.of(context).textTheme.bodySmall,
                             ),
-                          ),
-                          Expanded(
-                            flex: sub.total -
-                                sub.uploaded -
-                                sub.downloaded,
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                color: Colors.grey,
-                                borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(6),
-                                  bottomRight: Radius.circular(6),
+
+                            const SizedBox(height: 8),
+
+                            Text(
+                              sub.expire == 0
+                                  ? '到期时间: ∞'
+                                  : '到期时间: ${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).year}-'
+                                      '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).month}-'
+                                      '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).day}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outlined,
+                                    size: 20,
+                                  ),
+                                  onPressed: () => _deleteSubscription(context,sub),
                                 ),
-                              ),
+                              ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-
-                    const SizedBox(height: 8),
-
-                    Text(
-                      sub.total == 0
-                          ? '上传: ∞  下载: ∞  剩余: ∞'
-                          : '上传: ${sub.uploaded}GB  下载: ${sub.downloaded}GB  剩余: ${sub.total - sub.uploaded - sub.downloaded}GB',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    Text(
-                      sub.expire == 0
-                          ? '到期时间: ∞'
-                          : '到期时间: ${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).year}-'
-                          '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).month}-'
-                          '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).day}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
-            ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addSubscription,
         child: const Icon(Icons.add),
