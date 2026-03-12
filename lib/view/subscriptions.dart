@@ -20,7 +20,6 @@ class _SubscriptionViewState extends State<SubscriptionView> {
   final String settingsPath = '/data/adb/mihomo/settings.yaml';
   final String rewritePath = '/data/adb/mihomo/rewrite.yaml';
   final String configPath = '/data/adb/mihomo/config.yaml';
-
   String formatGB(int bytes) => (bytes / 1024 / 1024 / 1024).toStringAsFixed(1);
 
   @override
@@ -124,24 +123,29 @@ class _SubscriptionViewState extends State<SubscriptionView> {
       }
     }
   }
+
   /// 删除指定订阅
-  Future<void> _deleteSubscription(BuildContext context, SubscriptionInfo sub) async {
+  Future<void> _deleteSubscription(
+    BuildContext context,
+    SubscriptionInfo sub,
+  ) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定删除订阅 "${sub.label}" 吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+      builder:
+          (_) => AlertDialog(
+            title: const Text('确认删除'),
+            content: Text('确定删除订阅 "${sub.label}" 吗？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('取消'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('确认'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('确认'),
-          ),
-        ],
-      ),
     );
 
     if (confirm != true) return;
@@ -245,6 +249,8 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                 itemCount: subscriptions.length,
                 itemBuilder: (context, index) {
                   final sub = subscriptions[index];
+                  final totalValue = sub.total;
+                  int scale(int value) => totalValue == 0 ? 0 : (value * 100 ~/ totalValue);
 
                   return InkWell(
                     onTap: () => _onSubscriptionTap(sub.id),
@@ -274,7 +280,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                               child: Row(
                                 children: [
                                   Expanded(
-                                    flex: sub.upload,
+                                    flex: scale(sub.upload),
                                     child: Container(
                                       decoration: BoxDecoration(
                                         color:
@@ -289,7 +295,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                     ),
                                   ),
                                   Expanded(
-                                    flex: sub.download,
+                                    flex: scale(sub.download),
                                     child: Container(
                                       color:
                                           Theme.of(
@@ -298,7 +304,10 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                     ),
                                   ),
                                   Expanded(
-                                    flex: sub.total - sub.upload - sub.download,
+                                    flex:
+                                        100 -
+                                        scale(sub.upload) -
+                                        scale(sub.download),
                                     child: Container(
                                       decoration: const BoxDecoration(
                                         color: Colors.grey,
@@ -340,7 +349,8 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                     Icons.delete_outlined,
                                     size: 20,
                                   ),
-                                  onPressed: () => _deleteSubscription(context,sub),
+                                  onPressed:
+                                      () => _deleteSubscription(context, sub),
                                 ),
                               ],
                             ),
