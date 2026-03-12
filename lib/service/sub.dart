@@ -154,7 +154,7 @@ class SubscriptionInfo {
   factory SubscriptionInfo.fromMap(Map<String, dynamic> map) {
     return SubscriptionInfo(
       id: map['id'].toString(),
-      link: map['label'] as String? ?? 'https://raw.githubusercontent.com/4evergr8/MihomoRoot/refs/heads/main/mihomo/example.yaml',
+      link: map['link'] as String? ?? 'https://raw.githubusercontent.com/4evergr8/MihomoRoot/refs/heads/main/mihomo/example.yaml',
       label: map['label'] as String? ?? '订阅',
       upload: map['upload'] as int? ?? 0,
       download: map['download'] as int? ?? 0,
