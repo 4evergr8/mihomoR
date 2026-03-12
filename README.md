@@ -16,32 +16,22 @@
   </p>
 
 ## 主要功能
-### 分享功能
+### 订阅页面
 
-* 搜索接收到的图片
-* 对收到的图片进行OCR
-* 识别图片中的二维码
-* 分享视频备份
-* 搜索分享视频的封面
+* 下载Clash订阅
+* 删除订阅
+* 切换订阅
+* 批量更新订阅
+* 从返回头自动获取配置名称和流量信息
 
-### 在线功能
 
-* 搜索本地图片和网络图片
-* 搜索哔哩哔哩视频封面
-* 备份哔哩哔哩视频,封面,简介
-* 下载大文件测试网速
-* 加密DNS查询测试
-* IP反查域名
+### 控制页面
 
-### 离线功能
+* 启动核心
+* 停止核心
+* 打开WebUI
+* 查看核心状态
 
-* URL解码编码
-* Base64编码解码
-* 兽音译者解码
-* 离线扫码
-* 穷举乱码恢复(demo)
-* AV号BV号转换
-* 多语言文本识别(OCR)
 
 
 ## 软件截图
@@ -49,24 +39,15 @@
 <div align="center">
   <img src="./assets/1.jpg" width="30%" style="margin-right: 5%;">
   <img src="./assets/2.jpg" width="30%" style="margin-left: 5%;">
-  <img src="./assets/3.jpg" width="30%" style="margin-left: 5%;">
 </div>
 
 
 
-## 支持的图片搜索引擎
-
-* [Google（综合）](https://www.google.com/searchbyimage?client=app&image_url=https://picsum.photos/200/200?random=1)
-* [Google Lens（综合）](https://lens.google.com/uploadbyurl?url=https://picsum.photos/200/200?random=1)
-* [Yandex.ru（综合）](https://yandex.ru/images/search?url=https://picsum.photos/200/200?random=1&rpt=imageview)
-* [Bing（综合）](https://www.bing.com/images/search?q=imgurl:https://picsum.photos/200/200?random=1&view=detailv2&iss=sbi)
-* [TinEye（综合）](https://tineye.com/search/?url=https://picsum.photos/200/200?random=1)
-* [3DIQDB（Cosplay等）](https://3d.iqdb.org/?url=https://picsum.photos/200/200?random=1)
-* [IQDB（画师作品，漫画）](https://iqdb.org/?url=https://picsum.photos/200/200?random=1)
-* [SauceNAO（画师作品，漫画）](https://saucenao.com/search.php?url=https://picsum.photos/200/200?random=1)
-* [ascii2d（画师作品，漫画）](https://ascii2d.net/search/url/https://picsum.photos/200/200?random=1)
-* [WAIT（动漫截图）](https://trace.moe/?url=https://picsum.photos/200/200?random=1)
-* [Trace.moe（动漫截图）](https://trace.moe/?url=https://picsum.photos/200/200?random=1)
+## 食用方法
+* 前往Release下载对应架构的APK和mihomo.zip
+* 安装APK并授予Root权限
+* 添加订阅并启动核心
+* 前往WebUI观察运行情况
 
 
 
@@ -75,4 +56,4 @@
 
 * 本项目采用GithubAction进行编译
 * Fork或Import本项目,在Action选项卡内运行Build and Release Flutter APK
-* 等待成功运行完成后在Release里寻找最新测试版并下载对应架构的APK
+* 等待成功运行完成后在Action产物里寻找并下载
