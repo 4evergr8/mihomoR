@@ -184,44 +184,4 @@ class _ControlViewState extends State<ControlView> {
       ),
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('控制')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildButtonRow(
-              label: '启动',
-              icon: Icons.play_arrow,
-              onPressed: start,
-              value: startCmd,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            ),
-            _buildButtonRow(
-              label: '停止',
-              icon: Icons.stop,
-              onPressed: stop,
-              value: stopCmd,
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
-            ),
-            _buildButtonRow(
-              label: 'WEBUI',
-              icon: Icons.language,
-              onPressed: openWeb,
-              value: webuiUrl,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            ),
-            const SizedBox(height: 20),
-            _buildCheckBox(),
-          ],
-        ),
-      ),
-    );
-  }
 }
