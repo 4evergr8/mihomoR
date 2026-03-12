@@ -287,7 +287,9 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                     },
                     borderRadius: BorderRadius.circular(12),
                     child: Card(
-                      color: isSelected ? Colors.blue.shade100 : null, // 高亮选中
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary.withOpacity(0.2)
+                          : Theme.of(context).cardColor, // 卡片背景使用主题色
                       margin: const EdgeInsets.only(bottom: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -306,46 +308,39 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                               height: 12,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(6),
-                                color: Colors.grey.shade300,
+                                color: Theme.of(context).colorScheme.surfaceVariant, // 背景条主题色
                               ),
                               child: Row(
                                 children: [
-                                  Expanded(
-                                    flex: scale(sub.upload),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color:
-                                            Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
+                                  if (sub.upload > 0)
+                                    Expanded(
+                                      flex: scale(sub.upload),
+                                      child: ClipRRect(
                                         borderRadius: const BorderRadius.only(
                                           topLeft: Radius.circular(6),
                                           bottomLeft: Radius.circular(6),
                                         ),
+                                        child: Container(
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: scale(sub.download),
-                                    child: Container(
-                                      color:
-                                          Theme.of(
-                                            context,
-                                          ).colorScheme.secondary,
+                                  if (sub.download > 0)
+                                    Expanded(
+                                      flex: scale(sub.download),
+                                      child: Container(
+                                        color: Theme.of(context).colorScheme.secondary,
+                                      ),
                                     ),
-                                  ),
                                   Expanded(
-                                    flex:
-                                        100 -
-                                        scale(sub.upload) -
-                                        scale(sub.download),
-                                    child: Container(
-                                      decoration: const BoxDecoration(
-                                        color: Colors.grey,
-                                        borderRadius: BorderRadius.only(
-                                          topRight: Radius.circular(6),
-                                          bottomRight: Radius.circular(6),
-                                        ),
+                                    flex: 100 - scale(sub.upload) - scale(sub.download),
+                                    child: ClipRRect(
+                                      borderRadius: const BorderRadius.only(
+                                        topRight: Radius.circular(6),
+                                        bottomRight: Radius.circular(6),
+                                      ),
+                                      child: Container(
+                                        color: Theme.of(context).colorScheme.background,
                                       ),
                                     ),
                                   ),
@@ -364,20 +359,20 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                               sub.expire == 0
                                   ? '到期时间: ∞'
                                   : '到期时间: ${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).year}-'
-                                      '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).month}-'
-                                      '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).day}',
+                                  '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).month}-'
+                                  '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).day}',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.delete_outlined,
                                     size: 20,
+                                    color: Theme.of(context).colorScheme.error,
                                   ),
-                                  onPressed:
-                                      () => _deleteSubscription(context, sub),
+                                  onPressed: () => _deleteSubscription(context, sub),
                                 ),
                               ],
                             ),
