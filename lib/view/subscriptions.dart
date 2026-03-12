@@ -92,9 +92,10 @@ class _SubscriptionViewState extends State<SubscriptionView> {
               expire: downloadResult.expire,
             ),
           );
-          close();
-        } catch (_) {
-          close();
+
+        } catch (e) {
+
+
           updatedSubs.add(sub);
         }
       }
@@ -109,6 +110,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
       if (!mounted) return;
       await showErrorDialog(context, '加载错误', e);
     } finally {
+      close();
       if (mounted) setState(() => isLoading = false);
     }
   }
