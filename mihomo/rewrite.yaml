@@ -51,3 +51,47 @@ dns:
     - https://dns.cloudflare.com/dns-query
     - https://dns.google/dns-query
 
+
+rules:
+  - IP-CIDR,0.0.0.0/32,REJECT
+  - DOMAIN-REGEX,^ad\..*,REJECT
+  - DOMAIN-REGEX,.*\.ad\..*,REJECT
+  - GEOSITE,category-ads-all,REJECT
+
+  - GEOSITE,cn,DIRECT
+  - GEOSITE,geolocation-cn,DIRECT
+  - GEOSITE,private,DIRECT
+  - GEOIP,cn,DIRECT
+  - GEOIP,private,DIRECT
+
+  - GEOSITE,CATEGORY-AI-!CN,🧠人工智能🧠
+
+  - MATCH,⚡自动选择⚡
+
+
+proxy-groups:
+  - name: ⚡自动选择⚡
+    type: url-test
+    url: https://web.telegram.org
+    exclude-filter: 订阅|到期|官网|剩余|RU|俄罗斯|🇷🇺|KR|韩国|🇰🇷
+    include-all: true
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Speedtest.png
+    interval: 300
+    lazy: true
+    timeout: 2000
+    max-failed-times: 2
+    tolerance: 50
+    proxies: []
+
+  - name: 🧠人工智能🧠
+    type: url-test
+    url: https://chatgpt.com
+    exclude-filter: 订阅|到期|官网|剩余|RU|俄罗斯|🇷🇺|HK|香港|🇭🇰   #|US|美国|🇺🇸
+    include-all: true
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Bot.png
+    interval: 300
+    lazy: true
+    timeout: 2000
+    max-failed-times: 2
+    tolerance: 50
+    proxies: []
