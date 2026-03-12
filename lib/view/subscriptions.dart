@@ -325,23 +325,17 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                               if (sub.upload > 0)
                                                 Expanded(
                                                   flex: scale(sub.upload),
-                                                  child: Container(
-                                                    color: Theme.of(context).colorScheme.primary,
-                                                  ),
+                                                  child: Container(color: Theme.of(context).colorScheme.primary),
                                                 ),
                                               if (sub.download > 0)
                                                 Expanded(
                                                   flex: scale(sub.download),
-                                                  child: Container(
-                                                    color: Theme.of(context).colorScheme.secondary,
-                                                  ),
+                                                  child: Container(color: Theme.of(context).colorScheme.secondary),
                                                 ),
+                                              // 保证第三段始终显示，即使总和 >= 100，也保留最小 flex
                                               Expanded(
-                                                flex: (100 - scale(sub.upload) - scale(sub.download))
-                                                    .clamp(0, 100),
-                                                child: Container(
-                                                  color: Theme.of(context).colorScheme.surface,
-                                                ),
+                                                flex: 100 - scale(sub.upload + sub.download),
+                                                child: Container(color: Theme.of(context).colorScheme.surface),
                                               ),
                                             ],
                                           ),
@@ -350,8 +344,8 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                       const SizedBox(height: 6),
                                       Text(
                                         sub.total == 0
-                                            ? '上传: ∞  下载: ∞  剩余: ∞'
-                                            : '上传: ${formatGB(sub.upload)}GB  下载: ${formatGB(sub.download)}GB  剩余: ${formatGB(sub.total - sub.upload - sub.download)}GB',
+                                            ? '上传: ∞  下载: ∞  总量: ∞'
+                                            : '上传: ${formatGB(sub.upload)}GB  下载: ${formatGB(sub.download)}GB  总量: ${formatGB(sub.total)}GB',
                                         style: Theme.of(context).textTheme.bodySmall,
                                       ),
                                       const SizedBox(height: 4),
