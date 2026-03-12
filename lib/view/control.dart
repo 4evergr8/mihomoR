@@ -76,49 +76,11 @@ class _ControlViewState extends State<ControlView> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 核心操作按钮
+            // 第一块：测速，二级颜色
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 60,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                        ),
-                        onPressed: start,
-                        child: const Text('启动', style: TextStyle(fontSize: 18)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: SizedBox(
-                      height: 60,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.error,
-                        ),
-                        onPressed: kill,
-                        child: const Text('停止', style: TextStyle(fontSize: 18)),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            // 测速容器
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.tertiaryContainer,
+                color: Theme.of(context).colorScheme.secondaryContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -154,39 +116,77 @@ class _ControlViewState extends State<ControlView> {
               ),
             ),
             const SizedBox(height: 20),
-            // WEBUI 和重载配置
+            // 第二块：四个按钮，一级颜色
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondaryContainer,
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Row(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 60,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 60,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                            ),
+                            onPressed: start,
+                            icon: const Icon(Icons.play_arrow),
+                            label: const Text('启动', style: TextStyle(fontSize: 18)),
+                          ),
                         ),
-                        onPressed: openWeb,
-                        child: const Text('WEBUI', style: TextStyle(fontSize: 18)),
                       ),
-                    ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: SizedBox(
+                          height: 60,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.error,
+                            ),
+                            onPressed: kill,
+                            icon: const Icon(Icons.stop),
+                            label: const Text('停止', style: TextStyle(fontSize: 18)),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: SizedBox(
-                      height: 60,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 60,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                            ),
+                            onPressed: openWeb,
+                            icon: const Icon(Icons.language),
+                            label: const Text('WEBUI', style: TextStyle(fontSize: 18)),
+                          ),
                         ),
-                        onPressed: reloadConfig,
-                        child: const Text('重载配置', style: TextStyle(fontSize: 18)),
                       ),
-                    ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: SizedBox(
+                          height: 60,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                            ),
+                            onPressed: reloadConfig,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('重载配置', style: TextStyle(fontSize: 18)),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
