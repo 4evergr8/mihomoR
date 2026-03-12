@@ -74,22 +74,20 @@ class _ControlViewState extends State<ControlView> {
     required IconData icon,
     required VoidCallback onPressed,
     required String value,
-    Color? backgroundColor,
+    required Color backgroundColor,
+    required Color foregroundColor,
   }) {
-    final textColor = backgroundColor != null
-        ? Theme.of(context).colorScheme.onError
-        : Theme.of(context).colorScheme.onPrimary;
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           ElevatedButton.icon(
             onPressed: onPressed,
-            icon: Icon(icon, color: textColor),
-            label: Text(label, style: TextStyle(color: textColor)),
+            icon: Icon(icon),
+            label: Text(label),
             style: ElevatedButton.styleFrom(
               backgroundColor: backgroundColor,
+              foregroundColor: foregroundColor,
               minimumSize: const Size(120, 50),
             ),
           ),
@@ -159,6 +157,8 @@ class _ControlViewState extends State<ControlView> {
               icon: Icons.play_arrow,
               onPressed: start,
               value: startCmd,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
             ),
             _buildButtonRow(
               label: '停止',
@@ -166,12 +166,15 @@ class _ControlViewState extends State<ControlView> {
               onPressed: stop,
               value: stopCmd,
               backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
             ),
             _buildButtonRow(
               label: 'WEBUI',
               icon: Icons.language,
               onPressed: openWeb,
               value: webuiUrl,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
             ),
             const SizedBox(height: 20),
             _buildCheckBox(),
