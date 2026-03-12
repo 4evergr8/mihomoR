@@ -52,7 +52,7 @@ Flutter的SDK真占内存,16G内存,开个IDEA,开个GitHub Desktop,再开两个
 
 ## 食用方法
 * 前往[Release](https://github.com/4evergr8/mihomoR/releases)下载对应架构的APK和mihomo.zip
-* 安装APK并授予Root权限
+* 安装APK并授予Root权限,解压mihomo.zip到data/adb文件夹下,确保mihomo核心位于/data/adb/mihomo/mohomo
 * 添加订阅并启动核心
 * 前往WebUI观察运行情况
 
