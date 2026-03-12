@@ -317,7 +317,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                         borderRadius: BorderRadius.circular(6),
                                         child: Container(
                                           height: 12,
-                                          color: Theme.of(context).colorScheme.surfaceVariant,
+                                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                                           child: Row(
                                             children: [
                                               if (sub.upload > 0)
