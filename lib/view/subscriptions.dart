@@ -37,12 +37,23 @@ class _SubscriptionViewState extends State<SubscriptionView> {
     try {
       final base = await readYamlAsObject("/data/adb/mihomo/$id.yaml");
       final patch = await readYamlAsObject(rewritePath);
-      final data = overwriteYamlObject(base, patch);
-      await writeYamlFromObject(data, configPath);
+      final yaml = overwriteYamlObject(base, patch);
+      await writeYamlFromObject(yaml, configPath);
       final settings = await readYamlAsObject(settingsPath);
       final dio = Dio();
+      final params = {'force': 'true'};
+      final data = {"path": "", "payload": ""};
       final port = settings['port'];
-      await dio.put('http://127.0.0.1:$port/configs?force=true');
+      try{ await dio.put(
+        'http://127.0.0.1:$port/configs',
+        queryParameters: params,
+        data: data,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+      );}catch(e){}
     } catch (e) {
       if (!mounted) return;
       await showErrorDialog(context, '加载错误', e);
