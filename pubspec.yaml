@@ -13,19 +13,13 @@ environment:
   sdk: ^3.7.2
 
 dependencies:
-  sqflite: any
-  flutter_js: any
   yaml_codec: any
   fluttertoast: any
-  dart_ping: any
-
   dio: any
   flutter:
     sdk: flutter
   google_fonts: any
-
   archive: any
-  json2yaml: any
   network_info_plus: any
   http: any
   url_launcher: any
