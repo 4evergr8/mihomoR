@@ -124,8 +124,10 @@ class _SubscriptionViewState extends State<SubscriptionView> {
           list
               .map(
                 (e) => SubscriptionInfo.fromMap(Map<String, dynamic>.from(e)),
-              )
+          )
               .toList();
+
+      subscriptions.sort((a, b) => a.label.compareTo(b.label));
 
       final settings = await readYamlAsObject(settingsPath);
       selectedId = settings['selected'] as String?;
