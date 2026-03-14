@@ -27,7 +27,7 @@ Flutter的SDK真占内存,16G内存,开个IDEA,开个GitHub Desktop,再开两个
 
 ### 订阅页面
 
-* 下载Clash订阅
+* 批量添加Clash订阅
 * 删除订阅
 * 切换订阅
 * 批量更新订阅
