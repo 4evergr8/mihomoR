@@ -72,6 +72,8 @@ ua: "clash.meta"
 #下载订阅时使用的User-Agent
 port: 9090
 #软件打开的控制端口,需要和配置中的端口对应
+timeout: 5
+#下载订阅超时,秒
 selected: example
 #当前选中的订阅的ID
 ```
