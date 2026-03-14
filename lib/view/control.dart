@@ -31,7 +31,7 @@ class _ControlViewState extends State<ControlView> {
     setState(() {
       startCmd = settings['start'] ?? '';
       stopCmd = settings['kill'] ?? '';
-      webuiUrl = 'http://127.0.0.1:${settings['port'] ?? 9090}/ui';
+      webuiUrl = 'http://127.0.0.1:${settings['port'] ?? 9090}';
       checkCmd = settings['check'] ?? '';
     });
     _runCheck();
