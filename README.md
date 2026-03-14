@@ -70,7 +70,7 @@ check: "su -c 'ps -p $(pidof mihomo) -o pid,ppid,%cpu,%mem,cmd; cat /proc/$(pido
 #查看mihomo状态
 ua: "clash.meta"
 #下载订阅时使用的User-Agent
-port: "9090/ui/#proxies"
+port: "9090"
 #软件打开的控制端口,需要和配置中的端口对应
 timeout: 5
 #下载订阅超时,秒
