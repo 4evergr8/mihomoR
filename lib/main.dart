@@ -39,20 +39,24 @@ Future<void> _startMihomo() async {
 /// Tile 点击回调
 @pragma('vm:entry-point')
 Tile onTileClicked(Tile tile) {
-  if (_mihomoRunning) {
-    _stopMihomo();
-    _mihomoRunning = false;
-    tile.subtitle = "点击启动";
+  final oldStatus = tile.tileStatus;
+
+  if (oldStatus == TileStatus.active) {
+    // 关闭 mihomo
+    tile.label = "mihomo";
+    tile.tileStatus = TileStatus.inactive;
+    tile.drawableName = "quick_settings_base_icon";
     tile.contentDescription = "mihomo 已停止";
+    _stopMihomo();
   } else {
-    _stopMihomo().then((_) => _startMihomo());
-    _mihomoRunning = true;
-    tile.subtitle = "点击停止";
+    // 启动/重启 mihomo
+    tile.label = "mihomo";
+    tile.tileStatus = TileStatus.active;
+    tile.drawableName = "quick_settings_base_icon";
     tile.contentDescription = "mihomo 已启动";
+    _stopMihomo().then((_) => _startMihomo());
   }
 
-  tile.label = "mihomo";
-  tile.drawableName = "quick_settings_base_icon";
   return tile;
 }
 
