@@ -1,14 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
-    <service
-            android:name="com.fluttercandies.quick_settings.QuickSettingsTileService"
-            android:label="重启 mihomo"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            android:exported="true">
-        <intent-filter>
-            <action android:name="android.service.quicksettings.action.QS_TILE"/>
-        </intent-filter>
-    </service>
+    
     <application
         android:label="mihomoR"
         android:name="${applicationName}"
