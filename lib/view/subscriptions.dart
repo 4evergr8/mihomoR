@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../service/sub.dart';
@@ -198,48 +198,94 @@ class _SubscriptionViewState extends State<SubscriptionView> {
       builder: (context) {
         return AlertDialog(
           title: const Text('添加订阅'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(hintText: '输入订阅地址'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: TextField(
+              controller: controller,
+              minLines: 5,
+              maxLines: 10,
+              decoration: const InputDecoration(
+                hintText: '每行一个订阅地址',
+                border: OutlineInputBorder(),
+              ),
+            ),
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('取消'),
+            ElevatedButton.icon(
+              onPressed: () async {
+                final data = await Clipboard.getData('text/plain');
+                if (data?.text != null) {
+                  controller.text = data!.text!;
+                }
+              },
+              icon: const Icon(Icons.paste),
+              label: const Text('粘贴'),
             ),
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: () => Navigator.pop(context, controller.text),
-              child: const Text('确认'),
+              icon: const Icon(Icons.check),
+              label: const Text('确认'),
             ),
           ],
         );
       },
     );
 
-    if (result == null || result.isEmpty) return;
+    if (result == null || result.trim().isEmpty) return;
     if (!mounted) return;
+
     final close = await showLoadingDialog(context, title: '加载中...');
     try {
       final settings = await readYamlAsObject(settingsPath);
       final ua = settings['ua'];
-      final id = DateTime.now().millisecondsSinceEpoch.toString();
-      final downloadResult = await downloadYamlFile(result, ua, id);
 
-      subscriptions.add(
-        SubscriptionInfo(
-          id: downloadResult.id,
-          link: downloadResult.link,
-          label: downloadResult.label,
-          upload: downloadResult.upload,
-          download: downloadResult.download,
-          total: downloadResult.total,
-          expire: downloadResult.expire,
-        ),
-      );
+      final links = result
+          .split('\n')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+
+      for (final link in links) {
+        if (subscriptions.any((s) => s.link == link)) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('订阅已存在: $link')),
+            );
+          }
+          continue;
+        }
+
+        try {
+          final id = DateTime.now().millisecondsSinceEpoch.toString();
+
+          final downloadResult = await downloadYamlFile(link, ua, id);
+
+          subscriptions.add(
+            SubscriptionInfo(
+              id: downloadResult.id,
+              link: downloadResult.link,
+              label: downloadResult.label,
+              upload: downloadResult.upload,
+              download: downloadResult.download,
+              total: downloadResult.total,
+              expire: downloadResult.expire,
+            ),
+          );
+        } catch (_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('下载失败: $link')),
+            );
+          }
+        }
+      }
+
       final data = {
         'subscriptions': subscriptions.map((s) => s.toMap()).toList(),
       };
+
       await writeYamlFromObject(data, subscriptionsPath);
+
       setState(() {});
     } catch (e) {
       if (!mounted) return;
