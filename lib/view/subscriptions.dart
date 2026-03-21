@@ -90,15 +90,11 @@ class _SubscriptionViewState extends State<SubscriptionView> {
 
       final settings = await readYamlAsObject(settingsPath);
       final dio = Dio();
-      final params = {'force': 'true'};
-      final data = {"path": "", "payload": ""};
       final port = settings['port'];
 
       try {
         await dio.put(
-          'http://127.0.0.1:$port/configs',
-          queryParameters: params,
-          data: data,
+          'http://127.0.0.1:$port/restart',
           options: Options(headers: {'Content-Type': 'application/json'}),
         );
       } catch (_) {}
