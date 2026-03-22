@@ -93,7 +93,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
       final port = settings['port'];
 
       try {
-        await dio.put(
+        await dio.post(
           'http://127.0.0.1:$port/restart',
           options: Options(headers: {'Content-Type': 'application/json'}),
         );
