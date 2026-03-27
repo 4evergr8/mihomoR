@@ -9,6 +9,8 @@ tun:
   auto-route: true
   auto-detect-interface: true
   strict-route: true
+
+
 mode: rule
 external-controller: 127.0.0.1:9090
 external-ui: ./metacubexd
@@ -36,21 +38,16 @@ dns:
     - geosite:private
   use-hosts: false
   use-system-hosts: true
-  respect-rules: true
-  proxy-server-nameserver:
+  default-nameserver:
     - tls://1.12.12.12:853
     - tls://223.5.5.5:853
-  nameserver-policy:
-    geosite:cn,geolocation-cn,private:
-      - tls://1.12.12.12:853
-      - tls://223.5.5.5:853
   nameserver:
-    - tls://8.8.8.8:853
-    - tls://1.1.1.1:853
+    - https://dns.alidns.com/dns-query#h3=true
+    - https://doh.pub/dns-query
 
 
 rules:
-  - IP-CIDR,0.0.0.0/32,REJECT
+  - IP-CIDR,0.0.0.0/32,REJECT,no-resolve
   - DOMAIN-REGEX,^ad\..*,REJECT
   - DOMAIN-REGEX,.*\.ad\..*,REJECT
   - GEOSITE,category-ads-all,REJECT
@@ -58,8 +55,8 @@ rules:
   - GEOSITE,cn,DIRECT
   - GEOSITE,geolocation-cn,DIRECT
   - GEOSITE,private,DIRECT
-  - GEOIP,cn,DIRECT
-  - GEOIP,private,DIRECT
+  - GEOIP,cn,DIRECT,no-resolve
+  - GEOIP,private,DIRECT,no-resolve
 
   - GEOSITE,CATEGORY-AI-!CN,🧠人工智能🧠
 
@@ -70,11 +67,10 @@ proxy-groups:
   - name: ⚡自动选择⚡
     type: url-test
     url: https://web.telegram.org
-    exclude-filter: 订阅|到期|官网|剩余|RU|俄罗斯|🇷🇺|KR|韩国|🇰🇷
-    include-all: true
+    exclude-filter: 直连|订阅|到期|官网|剩余|RU|俄罗斯|🇷🇺|KR|韩国|🇰🇷
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Speedtest.png
-    interval: 300
-    lazy: true
+    interval: 600
+    lazy: false
     timeout: 2000
     max-failed-times: 2
     tolerance: 50
@@ -83,10 +79,9 @@ proxy-groups:
   - name: 🧠人工智能🧠
     type: url-test
     url: https://chatgpt.com
-    exclude-filter: 订阅|到期|官网|剩余|RU|俄罗斯|🇷🇺|HK|香港|🇭🇰   #|US|美国|🇺🇸
-    include-all: true
+    exclude-filter: 直连|订阅|到期|官网|剩余|RU|俄罗斯|🇷🇺|HK|香港|🇭🇰   #|US|美国|🇺🇸
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Bot.png
-    interval: 300
+    interval: 617
     lazy: true
     timeout: 2000
     max-failed-times: 2
