@@ -37,19 +37,16 @@ dns:
   use-hosts: false
   use-system-hosts: true
   respect-rules: true
-  default-nameserver:
+  proxy-server-nameserver:
     - tls://1.12.12.12:853
     - tls://223.5.5.5:853
-  proxy-server-nameserver:
-    - https://dns.alidns.com/dns-query
-    - https://dns.pub/dns-query
   nameserver-policy:
     geosite:cn,geolocation-cn,private:
       - tls://1.12.12.12:853
       - tls://223.5.5.5:853
   nameserver:
-    - https://dns.cloudflare.com/dns-query
-    - https://dns.google/dns-query
+    - tls://8.8.8.8:853
+    - tls://1.1.1.1:853
 
 
 rules:
