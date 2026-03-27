@@ -66,6 +66,7 @@ Tile? onTileAdded(Tile tile) {
   tile.label = "mihomo";
   tile.drawableName = "quick_settings_base_icon";
   tile.contentDescription = "mihomo 核心开关";
+  tile.tileStatus=TileStatus.inactive;
   return tile;
 }
 
@@ -110,14 +111,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    QuickSettings.addTileToQuickSettings(
-      label: "mihomo",
-      drawableName: "quick_settings_base_icon",
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
