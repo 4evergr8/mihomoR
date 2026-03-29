@@ -210,7 +210,10 @@ class _SubscriptionViewState extends State<SubscriptionView> {
             ElevatedButton.icon(
               onPressed: () async {
                 final data = await Clipboard.getData('text/plain');
-                if (data?.text != null) controller.text = data.text!;
+                final text = data?.text;
+                if (text != null) {
+                  controller.text = text;
+                }
               },
               icon: const Icon(Icons.paste),
               label: const Text('粘贴'),
