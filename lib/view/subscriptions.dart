@@ -110,7 +110,6 @@ class _SubscriptionViewState extends State<SubscriptionView> {
   Future<void> _refreshSubscriptions() async {
     if (!mounted) return;
 
-    setState(() => isLoading = true);
     final close = await showLoadingDialog(context, title: '加载中...');
 
     try {
