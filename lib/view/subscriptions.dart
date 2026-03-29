@@ -379,45 +379,51 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                           ),
                           Column(
                             children: [
-                              IconButton(
-                                icon: Icon(Icons.refresh, size: 20, color: Theme.of(context).colorScheme.primary),
-                                onPressed: () async {
+                              PopupMenuButton<int>(
+                                icon: Icon(Icons.more_vert, size: 20, color: Theme.of(context).colorScheme.onSurface),
+                                onSelected: (value) async {
                                   final settings = await readYamlAsObject(settingsPath);
                                   final ua = settings['ua'];
                                   final timeout = settings['timeout'];
-                                  final close = await showLoadingDialog(context, title: '刷新中...');
-                                  try {
-                                    final downloadResult = await downloadYamlFile(sub.link, ua, sub.id, timeout);
-                                    final updatedSub = SubscriptionInfo(
-                                      id: downloadResult.id,
-                                      link: downloadResult.link,
-                                      label: downloadResult.label,
-                                      upload: downloadResult.upload,
-                                      download: downloadResult.download,
-                                      total: downloadResult.total,
-                                      expire: downloadResult.expire,
-                                      update: downloadResult.update,
-                                    );
-                                    final index = subscriptions.indexWhere((s) => s.id == sub.id);
-                                    if (index != -1) subscriptions[index] = updatedSub;
-
-                                    final data = {'subscriptions': subscriptions.map((s) => s.toMap()).toList()};
-                                    await writeYamlFromObject(data, subscriptionsPath);
-                                    setState(() {});
-                                  } catch (e) {
-                                    if (!mounted) return;
-                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('刷新失败: $e')));
-                                  } finally {
-                                    if (mounted) close();
+                                  switch (value) {
+                                    case 1: // 刷新
+                                      final close = await showLoadingDialog(context, title: '刷新中...');
+                                      try {
+                                        final downloadResult = await downloadYamlFile(sub.link, ua, sub.id, timeout);
+                                        final updatedSub = SubscriptionInfo(
+                                          id: downloadResult.id,
+                                          link: downloadResult.link,
+                                          label: downloadResult.label,
+                                          upload: downloadResult.upload,
+                                          download: downloadResult.download,
+                                          total: downloadResult.total,
+                                          expire: downloadResult.expire,
+                                          update: downloadResult.update,
+                                        );
+                                        final index = subscriptions.indexWhere((s) => s.id == sub.id);
+                                        if (index != -1) subscriptions[index] = updatedSub;
+                                        final data = {'subscriptions': subscriptions.map((s) => s.toMap()).toList()};
+                                        await writeYamlFromObject(data, subscriptionsPath);
+                                        setState(() {});
+                                      } catch (e) {
+                                        if (!mounted) return;
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('刷新失败: $e')));
+                                      } finally {
+                                        if (mounted) close();
+                                      }
+                                      break;
+                                    case 2: // 删除
+                                      _deleteSubscription(context, sub);
+                                      break;
                                   }
                                 },
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.delete_outline, size: 20, color: Theme.of(context).colorScheme.error),
-                                onPressed: () => _deleteSubscription(context, sub),
+                                itemBuilder: (_) => [
+                                  const PopupMenuItem(value: 1, child: Text('刷新')),
+                                  const PopupMenuItem(value: 2, child: Text('删除')),
+                                ],
                               ),
                             ],
-                          ),
+                          )
                         ],
                       ),
                     ],
