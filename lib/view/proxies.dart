@@ -98,7 +98,7 @@ class _ProxiesViewState extends State<ProxiesView> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('代理节点延迟')),
+      appBar: AppBar(title: const Text('节点')),
       body: isTesting && delayList.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : delayList.isEmpty
