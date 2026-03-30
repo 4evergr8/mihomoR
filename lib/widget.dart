@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mihomoR/view/proxies.dart';
 import 'view/subscriptions.dart';
 import 'view/control.dart';
 
@@ -17,7 +18,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     SubscriptionView(),
-    ControlView(),
+    ProxiesView(),
     ControlView(),
 
 
@@ -44,6 +45,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
           BottomNavigationBarItem(
             icon: Icon(Icons.add_circle),
             label: '订阅',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.link),
+            label: '节点',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.control_camera),
