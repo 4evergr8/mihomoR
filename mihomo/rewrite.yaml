@@ -1,26 +1,36 @@
-port:
-mixed-port:
+port: 0
+mixed-port: 0
 sniffer:
 tunnels:
-tun:
-  enable: true
-  stack: system
-  device: utun0
-  auto-route: true
-  auto-detect-interface: true
-  strict-route: true
-
-
 mode: rule
 external-controller: 127.0.0.1:9090
 external-ui: ./metacubexd
 allow-lan: false
-log-level: silent
+log-level: warning
 ipv6: true
+keep-alive-idle: 0
+keep-alive-interval: 30
 disable-keep-alive: true
 unified-delay: true
 tcp-concurrent: true
 geodata-loader: memconservative
+find-process-mode: off
+geo-auto-update: true
+geo-update-interval: 24
+etag-support: true
+geodata-mode: true
+geox-url:
+  geoip: "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat"
+  geosite: "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat"
+
+
+tun:
+  enable: true
+  stack: system
+  device: tun0
+  auto-route: true
+  auto-detect-interface: true
+  strict-route: true
 
 
 dns:
@@ -34,7 +44,6 @@ dns:
   fake-ip-filter-mode: blacklist
   fake-ip-filter:
     - geosite:cn
-    - geosite:geolocation-cn
     - geosite:private
   use-hosts: false
   use-system-hosts: true
@@ -44,46 +53,8 @@ dns:
   nameserver:
     - https://dns.alidns.com/dns-query#h3=true
     - https://doh.pub/dns-query
-
-
-rules:
-  - IP-CIDR,0.0.0.0/32,REJECT,no-resolve
-  - DOMAIN-REGEX,^ad\..*,REJECT
-  - DOMAIN-REGEX,.*\.ad\..*,REJECT
-  - GEOSITE,category-ads-all,REJECT
-
-  - GEOSITE,cn,DIRECT
-  - GEOSITE,geolocation-cn,DIRECT
-  - GEOSITE,private,DIRECT
-  - GEOIP,cn,DIRECT,no-resolve
-  - GEOIP,private,DIRECT,no-resolve
-
-  - GEOSITE,CATEGORY-AI-!CN,🧠人工智能🧠
-
-  - MATCH,⚡自动选择⚡
-
-
-proxy-groups:
-  - name: ⚡自动选择⚡
-    type: url-test
-    url: https://web.telegram.org
-    exclude-filter: 直连|订阅|到期|官网|剩余|RU|俄罗斯|🇷🇺|KR|韩国|🇰🇷
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Speedtest.png
-    interval: 600
-    lazy: false
-    timeout: 2000
-    max-failed-times: 2
-    tolerance: 50
-    proxies: []
-
-  - name: 🧠人工智能🧠
-    type: url-test
-    url: https://chatgpt.com
-    exclude-filter: 直连|订阅|到期|官网|剩余|RU|俄罗斯|🇷🇺|HK|香港|🇭🇰   #|US|美国|🇺🇸
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Bot.png
-    interval: 617
-    lazy: true
-    timeout: 2000
-    max-failed-times: 2
-    tolerance: 50
-    proxies: []
+  proxy-server-nameserver:
+    - https://cloudflare-dns.com/dns-query#h3=true
+    - https://dns.google/dns-query#h3=true
+    - tls://1.1.1.1:853
+    - tls://8.8.8.8:853
