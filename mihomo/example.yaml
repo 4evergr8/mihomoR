@@ -1,57 +1,36 @@
-tun:
-  enable: true
-  stack: system
-  device: utun0
-  auto-route: true
-  auto-detect-interface: true
-  strict-route: true
-  exclude-package:
-    - com.byyoung.setting
-    - com.tencent.mm
-    - com.xunmeng.pinduoduo
-    - com.zhihu.android
-    - com.autonavi.minimap
-    - com.taobao.taobao
-    - com.android.bluetooth
-    - com.eg.android.AlipayGphone
-    - org.localsend.localsend_app
-    - com.coolapk.market
-    - com.coloros.accessibilityassistant
-    - com.oplus.blacklistapp
-    - com.coloros.directui
-    - com.coloros.ocrscanner
-    - com.quark.browser
-    - tv.danmaku.bili
-    - com.xunlei.downloadprovider
-    - com.tmall.wireless
-    - com.oplus.cast
-    - com.ss.android.ugc.aweme
-    - com.bilibili.app.in
-    - com.heytap.cloud
-    - com.mfcloudcalculate.networkdisk
-    - com.tencent.androidqqmail
-    - com.oplus.account
-    - com.hpbr.bosszhipin
-    - com.MobileTicket
-    - cn.bd.dt
-    - com.baidu.netdisk
-    - com.bilibili.studio
-    - com.tencent.tim
-    - com.coloros.translate
-    - com.taobao.litetao
-    - com.oplus.vdc
-    - com.heytap.speechassist
-    - com.oplus.aimemory
+port: 0
+mixed-port: 0
+sniffer:
+tunnels:
 mode: rule
 external-controller: 127.0.0.1:9090
 external-ui: ./metacubexd
 allow-lan: false
-log-level: silent
+log-level: warning
 ipv6: true
+keep-alive-idle: 0
+keep-alive-interval: 30
 disable-keep-alive: true
 unified-delay: true
 tcp-concurrent: true
 geodata-loader: memconservative
+find-process-mode: off
+geo-auto-update: true
+geo-update-interval: 24
+etag-support: true
+geodata-mode: true
+geox-url:
+  geoip: "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat"
+  geosite: "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat"
+
+
+tun:
+  enable: true
+  stack: system
+  device: tun0
+  auto-route: true
+  auto-detect-interface: true
+  strict-route: true
 
 
 dns:
@@ -65,7 +44,6 @@ dns:
   fake-ip-filter-mode: blacklist
   fake-ip-filter:
     - geosite:cn
-    - geosite:geolocation-cn
     - geosite:private
   use-hosts: false
   use-system-hosts: true
@@ -75,29 +53,22 @@ dns:
   nameserver:
     - https://dns.alidns.com/dns-query#h3=true
     - https://doh.pub/dns-query
+  proxy-server-nameserver:
+    - https://cloudflare-dns.com/dns-query#h3=true
+    - https://dns.google/dns-query#h3=true
+    - tls://1.1.1.1:853
+    - tls://8.8.8.8:853
 
 rules:
-  - IP-CIDR,0.0.0.0/32,REJECT,no-resolve
-  - DOMAIN-REGEX,^ad\..*,REJECT
-  - DOMAIN-REGEX,.*\.ad\..*,REJECT
-  - GEOSITE,category-ads-all,REJECT
-
-  - DOMAIN-KEYWORD,teracloud,⚡自动选择⚡
+  - GEOSITE,category-ads-all,REJECT-DROP
+  - IP-CIDR,0.0.0.0/32,REJECT-DROP,no-resolve
 
   - GEOSITE,cn,DIRECT
-  - GEOSITE,geolocation-cn,DIRECT
   - GEOSITE,private,DIRECT
   - GEOIP,cn,DIRECT,no-resolve
   - GEOIP,private,DIRECT,no-resolve
 
   - GEOSITE,CATEGORY-AI-!CN,🧠人工智能🧠
-
-  - DOMAIN-SUFFIX,jp,🇯🇵日本网站🇯🇵
-  - GEOSITE,DLSITE,🇯🇵日本网站🇯🇵
-  - GEOSITE,DMM,🇯🇵日本网站🇯🇵
-  - DOMAIN,rss.4evergr8.workers.dev,🇯🇵日本网站🇯🇵
-
-  - GEOSITE,category-cryptocurrency,🪙加密货币🪙
 
   - GEOSITE,youtube,🌍国外媒体🌍
 
@@ -107,12 +78,12 @@ rules:
 proxy-groups:
   - name: ⚡自动选择⚡
     type: url-test
-    url: https://web.telegram.org
+    url: https://www.google.com
     exclude-filter: 直连|订阅|到期|官网|剩余|RU|俄罗斯|🇷🇺|KR|韩国|🇰🇷
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Speedtest.png
     interval: 600
     lazy: false
-    timeout: 2000
+    timeout: 1000
     max-failed-times: 2
     tolerance: 50
     proxies: []
@@ -124,8 +95,18 @@ proxy-groups:
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Bot.png
     interval: 617
     lazy: true
-    timeout: 2000
+    timeout: 1000
     max-failed-times: 2
     tolerance: 50
     proxies: []
 
+  - name: 🌍国外媒体🌍
+    type: url-test
+    url: https://music.youtube.com
+    exclude-filter: 直连|订阅|到期|官网|剩余|RU|俄罗斯|🇷🇺|KR|韩国|🇰🇷|VN|越南|🇻🇳|MY|马来西亚|🇲🇾|🇷🇺|HK|香港|🇭🇰
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/YouTube_Music.png
+    interval: 631
+    lazy: true
+    timeout: 1000
+    max-failed-times: 2
+    proxies: []
