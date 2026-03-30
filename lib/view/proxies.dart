@@ -24,6 +24,7 @@ class _ProxiesViewState extends State<ProxiesView> {
 
   int successCount = 0;
   int totalCount = 0;
+  int timeout = 0;
 
   final String settingsPath = '/data/adb/mihomo/settings.yaml';
   final String configPath = '/data/adb/mihomo/config.yaml';
@@ -51,7 +52,7 @@ class _ProxiesViewState extends State<ProxiesView> {
       final settings = await readYamlAsObject(settingsPath);
       final port = settings['port'];
       final url = settings['url'];
-      final timeout = settings['testtimeout'];
+      timeout = settings['testtimeout'];
 
       final uri = Uri.parse(
         'http://127.0.0.1:$port/group/$firstGroupName/delay?url=$url&timeout=$timeout',
@@ -67,9 +68,9 @@ class _ProxiesViewState extends State<ProxiesView> {
         return DelayItem(e.key, (e.value ?? 0) as int);
       }).toList();
 
-      // 统计可用率
       totalCount = list.length;
-      successCount = list.where((e) => e.delay > 0).length;
+      // 超时判断：延迟超过 timeout 算超时
+      successCount = list.where((e) => e.delay <= timeout).length;
 
       list.sort((a, b) => a.delay.compareTo(b.delay));
 
@@ -142,6 +143,7 @@ class _ProxiesViewState extends State<ProxiesView> {
             // 节点列表
             ...delayList.map((item) {
               final color = _getColor(context, item.delay);
+              final isAlive = item.delay <= timeout;
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -170,7 +172,7 @@ class _ProxiesViewState extends State<ProxiesView> {
                       Icon(
                         Icons.circle,
                         size: 10,
-                        color: color,
+                        color: isAlive ? color : colorScheme.error,
                       ),
                     ],
                   ),
