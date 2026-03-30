@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import '../service/sub.dart';
@@ -75,18 +76,16 @@ class _SubscriptionViewState extends State<SubscriptionView> {
 
       try {
         final settings = await readYamlAsObject(settingsPath);
-        final stopCmd = settings['kill'] ?? '';
-        final startCmd = settings['start'] ?? '';
-
-        // 先停止
-        if (stopCmd.isNotEmpty) {
-          await Process.run("sh", ["-c", stopCmd]);
-        }
-
-        // 再启动
-        if (startCmd.isNotEmpty) {
-          await Process.start("sh", ["-c", startCmd]);
-        }
+        final dio = Dio();
+        final params = {'force': 'true'};
+        final data = {"path": "", "payload": ""};
+        final port = settings['port'];
+        await dio.put(
+          'http://127.0.0.1:$port/configs',
+          queryParameters: params,
+          data: data,
+          options: Options(headers: {'Content-Type': 'application/json'}),
+        );
       } catch (_) {}
     } catch (e) {
       if (!mounted) return;
