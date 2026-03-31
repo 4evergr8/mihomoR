@@ -10,7 +10,9 @@ class ControlView extends StatefulWidget {
   State<ControlView> createState() => _ControlViewState();
 }
 
-class _ControlViewState extends State<ControlView> {
+class _ControlViewState extends State<ControlView>  with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => false; // 不保持状态
   final String settingsPath = '/data/adb/mihomo/settings.yaml';
 
   String startCmd = '';
@@ -147,6 +149,7 @@ class _ControlViewState extends State<ControlView> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(title: const Text('控制')),
       body: SingleChildScrollView(
