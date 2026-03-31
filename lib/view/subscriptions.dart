@@ -473,79 +473,35 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                         icon: Icon(
                                           Icons.more_vert,
                                           size: 20,
-                                          color:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.onSurface,
+                                          color: Theme.of(context).colorScheme.onSurface,
                                         ),
                                         onSelected: (value) async {
-                                          final settings =
-                                              await readYamlAsObject(
-                                                settingsPath,
-                                              );
+                                          final settings = await readYamlAsObject(settingsPath);
                                           final ua = settings['ua'];
                                           final timeout = settings['timeout'];
                                           switch (value) {
                                             case 1: // 刷新
-                                              final close =
-                                                  await showLoadingDialog(
-                                                    context,
-                                                    title: '刷新中...',
-                                                  );
+                                              final close = await showLoadingDialog(context, title: '刷新中...');
                                               try {
-                                                final downloadResult =
-                                                    await downloadYamlFile(
-                                                      sub.link,
-                                                      ua,
-                                                      sub.id,
-                                                      timeout,
-                                                    );
-                                                final updatedSub =
-                                                    SubscriptionInfo(
-                                                      id: downloadResult.id,
-                                                      link: downloadResult.link,
-                                                      label:
-                                                          downloadResult.label,
-                                                      upload:
-                                                          downloadResult.upload,
-                                                      download:
-                                                          downloadResult
-                                                              .download,
-                                                      total:
-                                                          downloadResult.total,
-                                                      expire:
-                                                          downloadResult.expire,
-                                                      update:
-                                                          downloadResult.update,
-                                                    );
-                                                final index = subscriptions
-                                                    .indexWhere(
-                                                      (s) => s.id == sub.id,
-                                                    );
-                                                if (index != -1) {
-                                                  subscriptions[index] =
-                                                      updatedSub;
-                                                }
-                                                final data = {
-                                                  'subscriptions':
-                                                      subscriptions
-                                                          .map((s) => s.toMap())
-                                                          .toList(),
-                                                };
-                                                await writeYamlFromObject(
-                                                  data,
-                                                  subscriptionsPath,
+                                                final downloadResult = await downloadYamlFile(sub.link, ua, sub.id, timeout);
+                                                final updatedSub = SubscriptionInfo(
+                                                  id: downloadResult.id,
+                                                  link: downloadResult.link,
+                                                  label: downloadResult.label,
+                                                  upload: downloadResult.upload,
+                                                  download: downloadResult.download,
+                                                  total: downloadResult.total,
+                                                  expire: downloadResult.expire,
+                                                  update: downloadResult.update,
                                                 );
+                                                final index = subscriptions.indexWhere((s) => s.id == sub.id);
+                                                if (index != -1) subscriptions[index] = updatedSub;
+                                                final data = {'subscriptions': subscriptions.map((s) => s.toMap()).toList()};
+                                                await writeYamlFromObject(data, subscriptionsPath);
                                                 setState(() {});
                                               } catch (e) {
                                                 if (!mounted) return;
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text('刷新失败: $e'),
-                                                  ),
-                                                );
+                                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('刷新失败: $e')));
                                               } finally {
                                                 if (mounted) close();
                                               }
@@ -553,46 +509,48 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                             case 2: // 删除
                                               _deleteSubscription(context, sub);
                                               break;
+                                            case 3: // 复制链接
+                                              await Clipboard.setData(ClipboardData(text: sub.link));
+                                              if (!mounted) return;
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(content: Text('链接已复制')),
+                                              );
+                                              break;
                                           }
                                         },
-                                        itemBuilder:
-                                            (_) => [
-                                              PopupMenuItem(
-                                                value: 1,
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.refresh,
-                                                      size: 18,
-                                                      color:
-                                                          Theme.of(
-                                                            context,
-                                                          ).colorScheme.primary,
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    const Text('刷新'),
-                                                  ],
-                                                ),
-                                              ),
-                                              PopupMenuItem(
-                                                value: 2,
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.delete_outline,
-                                                      size: 18,
-                                                      color:
-                                                          Theme.of(
-                                                            context,
-                                                          ).colorScheme.error,
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    const Text('删除'),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                      ),
+                                        itemBuilder: (_) => [
+                                          PopupMenuItem(
+                                            value: 1,
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.refresh, size: 18, color: Theme.of(context).colorScheme.primary),
+                                                const SizedBox(width: 8),
+                                                const Text('刷新'),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 2,
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.delete_outline, size: 18, color: Theme.of(context).colorScheme.error),
+                                                const SizedBox(width: 8),
+                                                const Text('删除'),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 3,
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.copy, size: 18, color: Theme.of(context).colorScheme.onSurface),
+                                                const SizedBox(width: 8),
+                                                const Text('复制链接'),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      )
                                     ],
                                   ),
                                 ],
