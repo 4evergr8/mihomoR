@@ -1,40 +1,17 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:mihomoR/service/core.dart';
 import 'package:quick_settings_with_flutter_plugins/quick_settings.dart';
-import '../theme/theme.dart';
-import '../theme/util.dart';
-import '../widget.dart';
-import '../service/yaml.dart';
+import 'package:mihomoR/theme/theme.dart';
+import 'package:mihomoR/theme/util.dart';
+import 'package:mihomoR/widget.dart';
+import 'package:mihomoR/service/yaml.dart';
 
-const String settingsPath = '/data/adb/mihomo/settings.yaml';
 
-bool _mihomoRunning = false;
 
-Future<void> _stopMihomo() async {
-  final settings = await readYamlAsObject(settingsPath);
-  final stopCmd = settings['kill'] ?? '';
-  if (stopCmd.isNotEmpty) {
-    await Process.run("sh", ["-c", stopCmd]);
-  }
-}
 
-Future<void> _startMihomo() async {
-  try {
-    final settings = await readYamlAsObject(settingsPath);
-    final stopCmd = settings['kill'] ?? '';
-    final startCmd = settings['start'] ?? '';
 
-    // 先停止
-    if (stopCmd.isNotEmpty) {
-      await Process.run("sh", ["-c", stopCmd]);
-    }
 
-    // 再启动
-    if (startCmd.isNotEmpty) {
-      await Process.start("sh", ["-c", startCmd]);
-    }
-  } catch (_) {}
-}
 
 /// Tile 点击回调
 @pragma('vm:entry-point')
@@ -47,14 +24,14 @@ Tile onTileClicked(Tile tile) {
     tile.tileStatus = TileStatus.inactive;
     tile.drawableName = "quick_settings_base_icon";
     tile.contentDescription = "mihomo 已停止";
-    _stopMihomo();
+    stopMihomo();
   } else {
     // 启动/重启 mihomo
     tile.label = "mihomo";
     tile.tileStatus = TileStatus.active;
     tile.drawableName = "quick_settings_base_icon";
     tile.contentDescription = "mihomo 已启动";
-    _stopMihomo().then((_) => _startMihomo());
+    startMihomo();
   }
 
   return tile;
