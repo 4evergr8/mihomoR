@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../service/yaml.dart';
-import '../widget.dart';
+import 'package:mihomoR/service/path.dart';
+import 'package:mihomoR/service/yaml.dart';
+import 'package:mihomoR/widget.dart';
 
 class ProxiesView extends StatefulWidget {
   const ProxiesView({super.key});
@@ -28,8 +29,7 @@ class _ProxiesViewState extends State<ProxiesView>   with AutomaticKeepAliveClie
   int timeout = 0;
   String? message;
 
-  final String settingsPath = '/data/adb/mihomo/settings.yaml';
-  final String configPath = '/data/adb/mihomo/config.yaml';
+
 
   @override
   void initState() {
