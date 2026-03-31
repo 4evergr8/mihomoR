@@ -18,10 +18,7 @@ class DelayItem {
   DelayItem(this.name, this.delay);
 }
 
-class _ProxiesViewState extends State<ProxiesView>
-    with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true; // 保持状态
+class _ProxiesViewState extends State<ProxiesView> {
   List<DelayItem> delayList = [];
   bool isTesting = false;
 
@@ -51,7 +48,7 @@ class _ProxiesViewState extends State<ProxiesView>
       final config = await readYamlAsObject(configPath);
       final groups = config['proxy-groups'] as List? ?? [];
       final firstGroupName =
-          groups.isNotEmpty ? groups.first['name'] as String? : null;
+      groups.isNotEmpty ? groups.first['name'] as String? : null;
 
       final settings = await readYamlAsObject(settingsPath);
       final port = settings['port'];
@@ -76,10 +73,9 @@ class _ProxiesViewState extends State<ProxiesView>
         successCount = 0;
       } else {
         message = null;
-        final list =
-            data.entries.map((e) {
-              return DelayItem(e.key, (e.value ?? 0) as int);
-            }).toList();
+        final list = data.entries.map((e) {
+          return DelayItem(e.key, (e.value ?? 0) as int);
+        }).toList();
 
         totalCount = list.length;
         successCount = list.where((e) => e.delay <= timeout).length;
@@ -115,100 +111,97 @@ class _ProxiesViewState extends State<ProxiesView>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: const Text('节点')),
-      body:
-          isTesting && delayList.isEmpty && message == null
-              ? const Center(child: CircularProgressIndicator())
-              : RefreshIndicator(
-                onRefresh: _testDelay,
-                child: ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    if (message != null)
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text(
-                            message!,
-                            style: TextStyle(
-                              color: colorScheme.error,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      )
-                    else ...[
-                      // 可用率
-                      Card(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: ListTile(
-                          title: const Text('节点可用率'),
-                          subtitle:
-                              totalCount == 0
-                                  ? const Text('暂无可用节点')
-                                  : Text('$successCount / $totalCount'),
-                          trailing: Text(
-                            totalCount == 0
-                                ? '--'
-                                : '${(successCount * 100 ~/ totalCount)}%',
-                            style: TextStyle(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // 节点列表
-                      ...delayList.map((item) {
-                        final color = _getColor(context, item.delay);
-                        final isAlive = item.delay <= timeout;
-
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          color: colorScheme.surface,
-                          child: ListTile(
-                            title: Text(
-                              item.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            subtitle: Text(_formatDelay(item.delay)),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  _formatDelay(item.delay),
-                                  style: TextStyle(
-                                    color: color,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Icon(
-                                  Icons.circle,
-                                  size: 10,
-                                  color: isAlive ? color : colorScheme.error,
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ],
-                  ],
+      body: isTesting && delayList.isEmpty && message == null
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+        onRefresh: _testDelay,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            if (message != null)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    message!,
+                    style: TextStyle(
+                      color: colorScheme.error,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              )
+            else ...[
+              // 可用率
+              Card(
+                margin: const EdgeInsets.only(bottom: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: ListTile(
+                  title: const Text('节点可用率'),
+                  subtitle: totalCount == 0
+                      ? const Text('暂无可用节点')
+                      : Text('$successCount / $totalCount'),
+                  trailing: Text(
+                    totalCount == 0
+                        ? '--'
+                        : '${(successCount * 100 ~/ totalCount)}%',
+                    style: TextStyle(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
+
+              // 节点列表
+              ...delayList.map((item) {
+                final color = _getColor(context, item.delay);
+                final isAlive = item.delay <= timeout;
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  color: colorScheme.surface,
+                  child: ListTile(
+                    title: Text(
+                      item.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(_formatDelay(item.delay)),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _formatDelay(item.delay),
+                          style: TextStyle(
+                            color: color,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.circle,
+                          size: 10,
+                          color: isAlive ? color : colorScheme.error,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ],
+          ],
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: isTesting ? null : _testDelay,
         child: const Icon(Icons.speed),
