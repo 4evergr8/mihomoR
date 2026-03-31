@@ -1,10 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mihomoR/view/proxies.dart';
 import 'view/subscriptions.dart';
 import 'view/control.dart';
-
-
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
@@ -15,33 +12,48 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
+  late final PageController _pageController;
 
   static final List<Widget> _widgetOptions = <Widget>[
     SubscriptionView(),
     ProxiesView(),
     ControlView(),
-
-
-
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _selectedIndex);
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _pageController.jumpToPage(index);
     });
   }
 
-
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // 获取当前主题
-
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(), // 禁止手势滑动
+        children: _widgetOptions,
+        onPageChanged: (index) {
+          setState(() => _selectedIndex = index);
+        },
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.add_circle),
             label: '订阅',
@@ -56,15 +68,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Theme.of(context).colorScheme.secondary, // 使用主题中的颜色
-        unselectedItemColor: Theme.of(context).colorScheme.onSurface, // 使用主题中的未选中颜色
-        backgroundColor: Theme.of(context).colorScheme.surface, // 使用主题中的背景颜色
+        selectedItemColor: colorScheme.secondary,
+        unselectedItemColor: colorScheme.onSurface,
+        backgroundColor: colorScheme.surface,
         onTap: _onItemTapped,
       ),
     );
   }
 }
-
 
 Future<void> showErrorDialog(BuildContext context, String title, Object error) async {
   await showDialog(
