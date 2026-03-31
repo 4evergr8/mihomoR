@@ -144,31 +144,28 @@ class _SubscriptionViewState extends State<SubscriptionView>
     try {
       final subData = await readYamlAsObject(subscriptionsPath);
       final list =
-          (subData['subscriptions'] is List)
-              ? (subData['subscriptions'] as List)
-              : [];
+      (subData['subscriptions'] is List) ? (subData['subscriptions'] as List) : [];
 
-      final Map<String, Map<String, dynamic>> allProxies = {}; // 名称 -> 代理配置
-      final Set<String> proxyNames = {}; // 检查重复名称
+      final List<Map<String, dynamic>> allProxies = []; // 保存所有代理
+      final Set<String> proxyNames = {}; // 用于检查重复
 
       for (final subMap in list) {
         final sub = SubscriptionInfo.fromMap(Map<String, dynamic>.from(subMap));
-        final subYaml = await readYamlAsObject(
-          "/data/adb/mihomo/${sub.id}.yaml",
-        );
-        if (subYaml['proxies'] is Map) {
-          final proxies = Map<String, dynamic>.from(subYaml['proxies']);
-          for (final entry in proxies.entries) {
-            var name = entry.key;
-            var value = Map<String, dynamic>.from(entry.value);
-            var count = 1;
+        final subYaml = await readYamlAsObject("/data/adb/mihomo/${sub.id}.yaml");
+
+        if (subYaml['proxies'] is List) {
+          final proxies = List<Map<String, dynamic>>.from(subYaml['proxies']);
+          for (var proxy in proxies) {
+            var name = proxy['name'] as String? ?? '未知';
             var newName = name;
+            var count = 1;
             while (proxyNames.contains(newName)) {
               newName = "$name#$count";
               count++;
             }
             proxyNames.add(newName);
-            allProxies[newName] = value;
+            proxy['name'] = newName;
+            allProxies.add(proxy);
           }
         }
       }
@@ -176,6 +173,20 @@ class _SubscriptionViewState extends State<SubscriptionView>
       final mergeYaml = await readYamlAsObject(mergePath);
       mergeYaml['proxies'] = allProxies;
       await writeYamlFromObject(mergeYaml, configPath);
+      try {
+        final settings = await readYamlAsObject(settingsPath);
+        final dio = Dio();
+        final params = {'force': 'true'};
+        final data = {"path": "", "payload": ""};
+        final port = settings['port'];
+        await dio.put(
+          'http://127.0.0.1:$port/configs',
+          queryParameters: params,
+          data: data,
+          options: Options(headers: {'Content-Type': 'application/json'}),
+        );
+      } catch (_) {}
+
     } catch (e) {
       if (mounted) await showErrorDialog(context, '生成配置失败', e);
     }
