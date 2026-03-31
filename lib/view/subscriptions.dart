@@ -518,9 +518,10 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                                     .indexWhere(
                                                       (s) => s.id == sub.id,
                                                     );
-                                                if (index != -1)
+                                                if (index != -1) {
                                                   subscriptions[index] =
                                                       updatedSub;
+                                                }
                                                 final data = {
                                                   'subscriptions':
                                                       subscriptions
