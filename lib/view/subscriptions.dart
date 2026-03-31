@@ -17,7 +17,6 @@ class _SubscriptionViewState extends State<SubscriptionView> {
   List<SubscriptionInfo> subscriptions = [];
   bool isLoading = true;
   String? selectedId;
-  final Map<String, GlobalKey> itemKeys = {};
 
   final String subscriptionsPath = '/data/adb/mihomo/subscriptions.yaml';
   final String settingsPath = '/data/adb/mihomo/settings.yaml';
@@ -65,17 +64,6 @@ class _SubscriptionViewState extends State<SubscriptionView> {
   void initState() {
     super.initState();
     _loadSubscriptions();
-  }
-
-  void _scrollToSelected() {
-    final key = itemKeys[selectedId];
-    if (key?.currentContext != null) {
-      Scrollable.ensureVisible(
-        key!.currentContext!,
-        duration: const Duration(milliseconds: 300),
-        alignment: 0.5,
-      );
-    }
   }
 
   Future<void> _onSubscriptionTap(String id) async {
@@ -176,12 +164,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
       if (!mounted) return;
       await showErrorDialog(context, '加载错误', e);
     } finally {
-      if (mounted) {
-        setState(() => isLoading = false);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _scrollToSelected();
-        });
-      }
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -260,7 +243,9 @@ class _SubscriptionViewState extends State<SubscriptionView> {
               onPressed: () async {
                 final data = await Clipboard.getData('text/plain');
                 final text = data?.text;
-                if (text != null) controller.text = text;
+                if (text != null) {
+                  controller.text = text;
+                }
               },
               icon: const Icon(Icons.paste),
               label: const Text('粘贴'),
@@ -350,282 +335,264 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                   itemCount: subscriptions.length,
                   itemBuilder: (context, index) {
                     final sub = subscriptions[index];
-                    final key = itemKeys.putIfAbsent(sub.id, () => GlobalKey());
+                    final totalValue = sub.total;
+
                     int scale(int value) {
-                      if (sub.total == 0) return 0;
-                      final v = value * 100 ~/ sub.total;
+                      if (totalValue == 0) return 0;
+                      final v = value * 100 ~/ totalValue;
                       return v.clamp(0, 100);
                     }
 
                     final isSelected = sub.id == selectedId;
 
-                    return Container(
-                      key: key,
-                      child: Card(
-                        color:
-                            isSelected
-                                ? Theme.of(context).colorScheme.primaryContainer
-                                : Theme.of(context).colorScheme.surface,
-                        margin: const EdgeInsets.only(bottom: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          onTap: () async {
-                            setState(() => selectedId = sub.id);
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              _scrollToSelected();
-                            });
-                            final settings = await readYamlAsObject(
-                              settingsPath,
-                            );
-                            settings['selected'] = sub.id;
-                            await writeYamlFromObject(settings, settingsPath);
-                            await _onSubscriptionTap(sub.id);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  sub.label,
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium,
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              6,
-                                            ),
-                                            child: Container(
-                                              height: 12,
-                                              color:
-                                                  Theme.of(context)
-                                                      .colorScheme
-                                                      .surfaceContainerHighest,
-                                              child: Row(
-                                                children: [
-                                                  if (sub.upload > 0)
-                                                    Expanded(
-                                                      flex: scale(sub.upload),
-                                                      child: Container(
-                                                        color:
-                                                            Theme.of(context)
-                                                                .colorScheme
-                                                                .primary,
-                                                      ),
-                                                    ),
-                                                  if (sub.download > 0)
-                                                    Expanded(
-                                                      flex: scale(sub.download),
-                                                      child: Container(
-                                                        color:
-                                                            Theme.of(context)
-                                                                .colorScheme
-                                                                .secondary,
-                                                      ),
-                                                    ),
+                    return Card(
+                      color:
+                          isSelected
+                              ? Theme.of(context).colorScheme.primaryContainer
+                              : Theme.of(context).colorScheme.surface,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () async {
+                          setState(() => selectedId = sub.id);
+                          final settings = await readYamlAsObject(settingsPath);
+                          settings['selected'] = sub.id;
+                          await writeYamlFromObject(settings, settingsPath);
+                          await _onSubscriptionTap(sub.id);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                sub.label,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // 上传下载进度条和信息
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                          child: Container(
+                                            height: 12,
+                                            color:
+                                                Theme.of(context)
+                                                    .colorScheme
+                                                    .surfaceContainerHighest,
+                                            child: Row(
+                                              children: [
+                                                if (sub.upload > 0)
                                                   Expanded(
-                                                    flex: (100 -
-                                                            scale(sub.upload) -
-                                                            scale(sub.download))
-                                                        .clamp(0, 100),
+                                                    flex: scale(sub.upload),
                                                     child: Container(
                                                       color:
                                                           Theme.of(
                                                             context,
-                                                          ).colorScheme.surface,
+                                                          ).colorScheme.primary,
                                                     ),
                                                   ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 6),
-                                          Text(
-                                            sub.total == 0
-                                                ? '上传: ∞  下载: ∞  总量: ∞'
-                                                : '上传: ${formatGB(sub.upload)}GB  下载: ${formatGB(sub.download)}GB  总量: ${formatGB(sub.total)}GB',
-                                            style:
-                                                Theme.of(
-                                                  context,
-                                                ).textTheme.bodySmall,
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            sub.expire == 0
-                                                ? '到期时间: ∞'
-                                                : '到期时间: ${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).year}-'
-                                                    '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).month}-'
-                                                    '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).day}',
-                                            style:
-                                                Theme.of(
-                                                  context,
-                                                ).textTheme.bodySmall,
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '上次更新: ${formatTimeAgo(sub.update)}',
-                                            style:
-                                                Theme.of(
-                                                  context,
-                                                ).textTheme.bodySmall,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Column(
-                                      children: [
-                                        PopupMenuButton<int>(
-                                          icon: Icon(
-                                            Icons.more_vert,
-                                            size: 20,
-                                            color:
-                                                Theme.of(
-                                                  context,
-                                                ).colorScheme.onSurface,
-                                          ),
-                                          onSelected: (value) async {
-                                            final settings =
-                                                await readYamlAsObject(
-                                                  settingsPath,
-                                                );
-                                            final ua = settings['ua'];
-                                            final timeout = settings['timeout'];
-                                            switch (value) {
-                                              case 1: // 刷新
-                                                final close =
-                                                    await showLoadingDialog(
-                                                      context,
-                                                      title: '刷新中...',
-                                                    );
-                                                try {
-                                                  final downloadResult =
-                                                      await downloadYamlFile(
-                                                        sub.link,
-                                                        ua,
-                                                        sub.id,
-                                                        timeout,
-                                                      );
-                                                  final updatedSub =
-                                                      SubscriptionInfo(
-                                                        id: downloadResult.id,
-                                                        link:
-                                                            downloadResult.link,
-                                                        label:
-                                                            downloadResult
-                                                                .label,
-                                                        upload:
-                                                            downloadResult
-                                                                .upload,
-                                                        download:
-                                                            downloadResult
-                                                                .download,
-                                                        total:
-                                                            downloadResult
-                                                                .total,
-                                                        expire:
-                                                            downloadResult
-                                                                .expire,
-                                                        update:
-                                                            downloadResult
-                                                                .update,
-                                                      );
-                                                  final index = subscriptions
-                                                      .indexWhere(
-                                                        (s) => s.id == sub.id,
-                                                      );
-                                                  if (index != -1)
-                                                    subscriptions[index] =
-                                                        updatedSub;
-                                                  final data = {
-                                                    'subscriptions':
-                                                        subscriptions
-                                                            .map(
-                                                              (s) => s.toMap(),
-                                                            )
-                                                            .toList(),
-                                                  };
-                                                  await writeYamlFromObject(
-                                                    data,
-                                                    subscriptionsPath,
-                                                  );
-                                                  setState(() {});
-                                                } catch (e) {
-                                                  if (!mounted) return;
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text('刷新失败: $e'),
+                                                if (sub.download > 0)
+                                                  Expanded(
+                                                    flex: scale(sub.download),
+                                                    child: Container(
+                                                      color:
+                                                          Theme.of(context)
+                                                              .colorScheme
+                                                              .secondary,
                                                     ),
-                                                  );
-                                                } finally {
-                                                  if (mounted) close();
-                                                }
-                                                break;
-                                              case 2: // 删除
-                                                _deleteSubscription(
-                                                  context,
-                                                  sub,
-                                                );
-                                                break;
-                                            }
-                                          },
-                                          itemBuilder:
-                                              (_) => [
-                                                PopupMenuItem(
-                                                  value: 1,
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.refresh,
-                                                        size: 18,
-                                                        color:
-                                                            Theme.of(context)
-                                                                .colorScheme
-                                                                .primary,
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      const Text('刷新'),
-                                                    ],
                                                   ),
-                                                ),
-                                                PopupMenuItem(
-                                                  value: 2,
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.delete_outline,
-                                                        size: 18,
-                                                        color:
-                                                            Theme.of(
-                                                              context,
-                                                            ).colorScheme.error,
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      const Text('删除'),
-                                                    ],
+                                                Expanded(
+                                                  flex: (100 -
+                                                          scale(sub.upload) -
+                                                          scale(sub.download))
+                                                      .clamp(0, 100),
+                                                  child: Container(
+                                                    color:
+                                                        Theme.of(
+                                                          context,
+                                                        ).colorScheme.surface,
                                                   ),
                                                 ),
                                               ],
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          sub.total == 0
+                                              ? '上传: ∞  下载: ∞  总量: ∞'
+                                              : '上传: ${formatGB(sub.upload)}GB  下载: ${formatGB(sub.download)}GB  总量: ${formatGB(sub.total)}GB',
+                                          style:
+                                              Theme.of(
+                                                context,
+                                              ).textTheme.bodySmall,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          sub.expire == 0
+                                              ? '到期时间: ∞'
+                                              : '到期时间: ${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).year}-'
+                                                  '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).month}-'
+                                                  '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).day}',
+                                          style:
+                                              Theme.of(
+                                                context,
+                                              ).textTheme.bodySmall,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '上次更新: ${formatTimeAgo(sub.update)}',
+                                          style:
+                                              Theme.of(
+                                                context,
+                                              ).textTheme.bodySmall,
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                  ),
+                                  Column(
+                                    children: [
+                                      PopupMenuButton<int>(
+                                        icon: Icon(
+                                          Icons.more_vert,
+                                          size: 20,
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.onSurface,
+                                        ),
+                                        onSelected: (value) async {
+                                          final settings =
+                                              await readYamlAsObject(
+                                                settingsPath,
+                                              );
+                                          final ua = settings['ua'];
+                                          final timeout = settings['timeout'];
+                                          switch (value) {
+                                            case 1: // 刷新
+                                              final close =
+                                                  await showLoadingDialog(
+                                                    context,
+                                                    title: '刷新中...',
+                                                  );
+                                              try {
+                                                final downloadResult =
+                                                    await downloadYamlFile(
+                                                      sub.link,
+                                                      ua,
+                                                      sub.id,
+                                                      timeout,
+                                                    );
+                                                final updatedSub =
+                                                    SubscriptionInfo(
+                                                      id: downloadResult.id,
+                                                      link: downloadResult.link,
+                                                      label:
+                                                          downloadResult.label,
+                                                      upload:
+                                                          downloadResult.upload,
+                                                      download:
+                                                          downloadResult
+                                                              .download,
+                                                      total:
+                                                          downloadResult.total,
+                                                      expire:
+                                                          downloadResult.expire,
+                                                      update:
+                                                          downloadResult.update,
+                                                    );
+                                                final index = subscriptions
+                                                    .indexWhere(
+                                                      (s) => s.id == sub.id,
+                                                    );
+                                                if (index != -1)
+                                                  subscriptions[index] =
+                                                      updatedSub;
+                                                final data = {
+                                                  'subscriptions':
+                                                      subscriptions
+                                                          .map((s) => s.toMap())
+                                                          .toList(),
+                                                };
+                                                await writeYamlFromObject(
+                                                  data,
+                                                  subscriptionsPath,
+                                                );
+                                                setState(() {});
+                                              } catch (e) {
+                                                if (!mounted) return;
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text('刷新失败: $e'),
+                                                  ),
+                                                );
+                                              } finally {
+                                                if (mounted) close();
+                                              }
+                                              break;
+                                            case 2: // 删除
+                                              _deleteSubscription(context, sub);
+                                              break;
+                                          }
+                                        },
+                                        itemBuilder:
+                                            (_) => [
+                                              PopupMenuItem(
+                                                value: 1,
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.refresh,
+                                                      size: 18,
+                                                      color:
+                                                          Theme.of(
+                                                            context,
+                                                          ).colorScheme.primary,
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    const Text('刷新'),
+                                                  ],
+                                                ),
+                                              ),
+                                              PopupMenuItem(
+                                                value: 2,
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.delete_outline,
+                                                      size: 18,
+                                                      color:
+                                                          Theme.of(
+                                                            context,
+                                                          ).colorScheme.error,
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    const Text('删除'),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
