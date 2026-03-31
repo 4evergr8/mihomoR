@@ -403,10 +403,8 @@ class _SubscriptionViewState extends State<SubscriptionView>
                         child: InkWell(
                           onTap: () async {
                             await _mergeProxies();
-                            if (!mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('已生成 config.yaml')),
-                            );
+
+
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(16),
