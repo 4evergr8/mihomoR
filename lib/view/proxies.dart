@@ -18,10 +18,11 @@ class DelayItem {
   DelayItem(this.name, this.delay);
 }
 
-class _ProxiesViewState extends State<ProxiesView> {
+class _ProxiesViewState extends State<ProxiesView>   with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => false; // 不保持状态
   List<DelayItem> delayList = [];
   bool isTesting = false;
-
   int successCount = 0;
   int totalCount = 0;
   int timeout = 0;
@@ -111,6 +112,7 @@ class _ProxiesViewState extends State<ProxiesView> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
