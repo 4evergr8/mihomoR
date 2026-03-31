@@ -612,7 +612,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                                               .onSurface,
                                                     ),
                                                     const SizedBox(width: 8),
-                                                    const Text('复制链接'),
+                                                    const Text('复制'),
                                                   ],
                                                 ),
                                               ),
