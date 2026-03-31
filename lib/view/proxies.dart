@@ -42,7 +42,7 @@ class _ProxiesViewState extends State<ProxiesView>   with AutomaticKeepAliveClie
   Future<void> _testDelay() async {
     if (!mounted) return;
 
-    final close = await showLoadingDialog(context, title: '加载中...');
+    final close = await showLoadingDialog(context);
     setState(() => isTesting = true);
 
     try {
