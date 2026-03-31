@@ -698,8 +698,10 @@ class _SubscriptionViewState extends State<SubscriptionView>
               onPressed: () async {
                 setState(() => selectedId = 'merge');
                 await _mergeProxies();
-      
-
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('已开启订阅融合')),
+                );
               },
               backgroundColor: selectedId == 'merge'
                   ? Theme.of(context).colorScheme.primaryContainer
