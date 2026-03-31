@@ -82,22 +82,26 @@ Future<void> showErrorDialog(BuildContext context, String title, Object error) a
   );
 }
 Future<VoidCallback> showLoadingDialog(BuildContext context, {String title = '加载中...'}) async {
-  final dialog = showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => AlertDialog(
-      content: Row(
-        children: [
-          const CircularProgressIndicator(),
-          const SizedBox(width: 16),
-          Text(title),
-        ],
+  final overlay = Overlay.of(context);
+  final overlayEntry = OverlayEntry(
+    builder: (_) => Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Material(
+        color: Colors.transparent,
+        child: LinearProgressIndicator(
+          minHeight: 4,
+          backgroundColor: Colors.black.withOpacity(0.1),
+        ),
       ),
     ),
   );
 
+  overlay.insert(overlayEntry);
+
   // 返回关闭函数
   return () {
-    if (Navigator.canPop(context)) Navigator.pop(context);
+    overlayEntry.remove();
   };
 }
