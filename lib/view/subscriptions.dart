@@ -2,9 +2,10 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import '../service/sub.dart';
-import '../service/yaml.dart';
-import '../widget.dart';
+import 'package:mihomoR/service/sub.dart';
+import 'package:mihomoR/service/yaml.dart';
+import 'package:mihomoR/widget.dart';
+import 'package:mihomoR/service/path.dart';
 
 class SubscriptionView extends StatefulWidget {
   const SubscriptionView({super.key});
@@ -21,10 +22,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
   bool isLoading = true;
   String? selectedId;
 
-  final String subscriptionsPath = '/data/adb/mihomo/subscriptions.yaml';
-  final String settingsPath = '/data/adb/mihomo/settings.yaml';
-  final String rewritePath = '/data/adb/mihomo/rewrite.yaml';
-  final String configPath = '/data/adb/mihomo/config.yaml';
+
 
   String formatGB(int bytes) => (bytes / 1024 / 1024 / 1024).toStringAsFixed(1);
 
