@@ -23,6 +23,9 @@ class _SubscriptionViewState extends State<SubscriptionView> {
   final String rewritePath = '/data/adb/mihomo/rewrite.yaml';
   final String configPath = '/data/adb/mihomo/config.yaml';
 
+  final ScrollController _scrollController = ScrollController();
+  final Map<String, GlobalKey> _itemKeys = {};
+
   String formatGB(int bytes) => (bytes / 1024 / 1024 / 1024).toStringAsFixed(1);
 
   String formatTimeAgo(String timestampMsStr) {
@@ -159,6 +162,21 @@ class _SubscriptionViewState extends State<SubscriptionView> {
 
       final settings = await readYamlAsObject(settingsPath);
       selectedId = settings['selected'] as String?;
+
+      // 延迟滚动到选中项
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (selectedId != null && _itemKeys[selectedId!] != null) {
+          final context = _itemKeys[selectedId!]!.currentContext;
+          if (context != null) {
+            Scrollable.ensureVisible(
+              context,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              alignment: 0.5,
+            );
+          }
+        }
+      });
     } catch (e) {
       subscriptions = [];
       if (!mounted) return;
@@ -331,6 +349,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
               : RefreshIndicator(
                 onRefresh: _refreshSubscriptions,
                 child: ListView.builder(
+                  controller: _scrollController,
                   padding: const EdgeInsets.all(16),
                   itemCount: subscriptions.length,
                   itemBuilder: (context, index) {
@@ -345,7 +364,12 @@ class _SubscriptionViewState extends State<SubscriptionView> {
 
                     final isSelected = sub.id == selectedId;
 
+                    // 每个Card分配GlobalKey
+                    final subKey = _itemKeys[sub.id] ?? GlobalKey();
+                    _itemKeys[sub.id] = subKey;
+
                     return Card(
+                      key: subKey,
                       color:
                           isSelected
                               ? Theme.of(context).colorScheme.primaryContainer
@@ -381,7 +405,6 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        // 上传下载进度条和信息
                                         ClipRRect(
                                           borderRadius: BorderRadius.circular(
                                             6,
@@ -482,7 +505,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                           final ua = settings['ua'];
                                           final timeout = settings['timeout'];
                                           switch (value) {
-                                            case 1: // 刷新
+                                            case 1:
                                               final close =
                                                   await showLoadingDialog(
                                                     context,
@@ -545,7 +568,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                                 if (mounted) close();
                                               }
                                               break;
-                                            case 2: // 删除
+                                            case 2:
                                               _deleteSubscription(context, sub);
                                               break;
                                           }
