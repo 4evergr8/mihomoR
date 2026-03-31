@@ -92,7 +92,7 @@ Future<void> showErrorDialog(BuildContext context, String title, Object error) a
     ),
   );
 }
-Future<VoidCallback> showLoadingDialog(BuildContext context, {String title = '加载中...'}) async {
+Future<VoidCallback> showLoadingDialog(BuildContext context) async {
   final overlay = Overlay.of(context);
   final overlayEntry = OverlayEntry(
     builder: (_) => Positioned(
