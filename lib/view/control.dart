@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:mihomoR/service/core.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../service/yaml.dart';
+import 'package:mihomoR/service/yaml.dart';
+import 'package:mihomoR/service/path.dart';
 
 class ControlView extends StatefulWidget {
   const ControlView({super.key});
@@ -13,7 +15,7 @@ class ControlView extends StatefulWidget {
 class _ControlViewState extends State<ControlView>  with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => false; // 不保持状态
-  final String settingsPath = '/data/adb/mihomo/settings.yaml';
+
 
   String startCmd = '';
   String stopCmd = '';
@@ -38,16 +40,6 @@ class _ControlViewState extends State<ControlView>  with AutomaticKeepAliveClien
     _runCheck();
   }
 
-  Future<void> start() async {
-    if (startCmd.isEmpty) return;
-    await Process.run("sh", ["-c", stopCmd]);
-    await Process.start("sh", ["-c", startCmd]);
-  }
-
-  Future<void> stop() async {
-    if (stopCmd.isEmpty) return;
-    await Process.run("sh", ["-c", stopCmd]);
-  }
 
   Future<void> openWeb() async {
     if (webuiUrl.isEmpty) return;
@@ -159,7 +151,7 @@ class _ControlViewState extends State<ControlView>  with AutomaticKeepAliveClien
             _buildButtonRow(
               label: '启动',
               icon: Icons.play_arrow,
-              onPressed: start,
+              onPressed: startMihomo(),
               value: startCmd,
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -167,7 +159,7 @@ class _ControlViewState extends State<ControlView>  with AutomaticKeepAliveClien
             _buildButtonRow(
               label: '停止',
               icon: Icons.stop,
-              onPressed: stop,
+              onPressed: stopMihomo(),
               value: stopCmd,
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
