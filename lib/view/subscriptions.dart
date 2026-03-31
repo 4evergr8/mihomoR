@@ -179,6 +179,11 @@ class _SubscriptionViewState extends State<SubscriptionView>
         final params = {'force': 'true'};
         final data = {"path": "", "payload": ""};
         final port = settings['port'];
+        final mergeYaml = await readYamlAsObject(mergePath);
+        mergeYaml['proxies'] = allProxies;
+        await writeYamlFromObject(mergeYaml, configPath);
+        settings['selected'] = 'merge';
+        await writeYamlFromObject(settings, settingsPath);
         await dio.put(
           'http://127.0.0.1:$port/configs',
           queryParameters: params,
