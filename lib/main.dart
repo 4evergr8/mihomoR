@@ -5,13 +5,6 @@ import 'package:quick_settings_with_flutter_plugins/quick_settings.dart';
 import 'package:mihomoR/theme/theme.dart';
 import 'package:mihomoR/theme/util.dart';
 import 'package:mihomoR/widget.dart';
-import 'package:mihomoR/service/yaml.dart';
-
-
-
-
-
-
 
 /// Tile 点击回调
 @pragma('vm:entry-point')
@@ -19,21 +12,10 @@ Tile onTileClicked(Tile tile) {
   final oldStatus = tile.tileStatus;
 
   if (oldStatus == TileStatus.active) {
-    // 关闭 mihomo
-    tile.label = "mihomo";
-    tile.tileStatus = TileStatus.inactive;
-    tile.drawableName = "quick_settings_base_icon";
-    tile.contentDescription = "mihomo 已停止";
     stopMihomo();
   } else {
-    // 启动/重启 mihomo
-    tile.label = "mihomo";
-    tile.tileStatus = TileStatus.active;
-    tile.drawableName = "quick_settings_base_icon";
-    tile.contentDescription = "mihomo 已启动";
     startMihomo();
   }
-
   return tile;
 }
 
@@ -87,8 +69,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
-
   @override
   Widget build(BuildContext context) {
     return BottomNavBar();
