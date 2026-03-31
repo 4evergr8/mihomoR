@@ -2,6 +2,22 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:yaml_codec/yaml_codec.dart';
+import 'package:yaml/yaml.dart';
+
+// 递归将 YamlMap/YamlList 转为普通 Map/List
+dynamic _convertYaml(dynamic input) {
+  if (input is YamlMap) {
+    return Map<String, dynamic>.fromEntries(
+      input.entries.map(
+            (e) => MapEntry(e.key.toString(), _convertYaml(e.value)),
+      ),
+    );
+  } else if (input is YamlList) {
+    return input.map((e) => _convertYaml(e)).toList();
+  } else {
+    return input;
+  }
+}
 
 Future<Map<String, dynamic>> readYamlAsObject(String sourcePath) async {
   try {
@@ -20,7 +36,7 @@ Future<Map<String, dynamic>> readYamlAsObject(String sourcePath) async {
     final text = await File(localPath).readAsString();
     final obj = yamlDecode(text);
 
-    return Map<String, dynamic>.from(obj);
+    return _convertYaml(obj) as Map<String, dynamic>;
   } catch (e) {
     rethrow;
   }
