@@ -23,6 +23,8 @@ class _SubscriptionViewState extends State<SubscriptionView> {
   final String rewritePath = '/data/adb/mihomo/rewrite.yaml';
   final String configPath = '/data/adb/mihomo/config.yaml';
 
+  final Map<String, GlobalKey> _itemKeys = {};
+
   String formatGB(int bytes) => (bytes / 1024 / 1024 / 1024).toStringAsFixed(1);
 
   String formatTimeAgo(String timestampMsStr) {
@@ -139,6 +141,20 @@ class _SubscriptionViewState extends State<SubscriptionView> {
 
     if (!mounted) return;
     setState(() => subscriptions = updatedSubs);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (selectedId != null && _itemKeys[selectedId!] != null) {
+        final context = _itemKeys[selectedId!]!.currentContext;
+        if (context != null) {
+          Scrollable.ensureVisible(
+            context,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            alignment: 0.5,
+          );
+        }
+      }
+    });
   }
 
   Future<void> _loadSubscriptions() async {
@@ -344,8 +360,11 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                     }
 
                     final isSelected = sub.id == selectedId;
+                    final subKey = _itemKeys[sub.id] ?? GlobalKey();
+                    _itemKeys[sub.id] = subKey;
 
                     return Card(
+                      key: subKey,
                       color:
                           isSelected
                               ? Theme.of(context).colorScheme.primaryContainer
@@ -362,6 +381,17 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                           settings['selected'] = sub.id;
                           await writeYamlFromObject(settings, settingsPath);
                           await _onSubscriptionTap(sub.id);
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            final context = _itemKeys[sub.id]!.currentContext;
+                            if (context != null) {
+                              Scrollable.ensureVisible(
+                                context,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                                alignment: 0.5,
+                              );
+                            }
+                          });
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(16),
@@ -381,7 +411,6 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        // 上传下载进度条和信息
                                         ClipRRect(
                                           borderRadius: BorderRadius.circular(
                                             6,
@@ -482,7 +511,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                           final ua = settings['ua'];
                                           final timeout = settings['timeout'];
                                           switch (value) {
-                                            case 1: // 刷新
+                                            case 1:
                                               final close =
                                                   await showLoadingDialog(
                                                     context,
@@ -514,12 +543,12 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                                       update:
                                                           downloadResult.update,
                                                     );
-                                                final index = subscriptions
+                                                final idx = subscriptions
                                                     .indexWhere(
                                                       (s) => s.id == sub.id,
                                                     );
-                                                if (index != -1)
-                                                  subscriptions[index] =
+                                                if (idx != -1)
+                                                  subscriptions[idx] =
                                                       updatedSub;
                                                 final data = {
                                                   'subscriptions':
@@ -545,7 +574,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                                 if (mounted) close();
                                               }
                                               break;
-                                            case 2: // 删除
+                                            case 2:
                                               _deleteSubscription(context, sub);
                                               break;
                                           }
