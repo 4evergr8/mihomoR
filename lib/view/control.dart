@@ -12,10 +12,10 @@ class ControlView extends StatefulWidget {
   State<ControlView> createState() => _ControlViewState();
 }
 
-class _ControlViewState extends State<ControlView>  with AutomaticKeepAliveClientMixin {
+class _ControlViewState extends State<ControlView>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => false; // 不保持状态
-
 
   String startCmd = '';
   String stopCmd = '';
@@ -39,7 +39,6 @@ class _ControlViewState extends State<ControlView>  with AutomaticKeepAliveClien
     });
     _runCheck();
   }
-
 
   Future<void> openWeb() async {
     if (webuiUrl.isEmpty) return;
@@ -151,7 +150,7 @@ class _ControlViewState extends State<ControlView>  with AutomaticKeepAliveClien
             _buildButtonRow(
               label: '启动',
               icon: Icons.play_arrow,
-              onPressed: startMihomo(),
+              onPressed: startMihomo,
               value: startCmd,
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -159,7 +158,7 @@ class _ControlViewState extends State<ControlView>  with AutomaticKeepAliveClien
             _buildButtonRow(
               label: '停止',
               icon: Icons.stop,
-              onPressed: stopMihomo(),
+              onPressed: stopMihomo,
               value: stopCmd,
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
