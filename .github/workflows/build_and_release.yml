@@ -27,9 +27,8 @@ jobs:
       - name: 构建 APK (按 ABI 分割)
         run: flutter build apk --release --split-per-abi --no-tree-shake-icons
 
-      - name: 上传所有 APK
-        uses: actions/upload-artifact@v3
+      - name: 上传 arm64 APK
+        uses: actions/upload-artifact@v4
         with:
-          name: flutter-apks
-          path: build/app/outputs/flutter-apk/*.apk
-          compression: 'none'
+          name: flutter-arm64-apk
+          path: build/app/outputs/flutter-apk/app-arm64-v8a.apk
