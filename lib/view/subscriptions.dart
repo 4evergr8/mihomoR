@@ -66,7 +66,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
   }
 
   Future<void> _onSubscriptionTap(String id) async {
-    final close = await showLoadingDialog(context, title: '加载中...');
+    final close = await showLoadingDialog(context);
     try {
       final base = await readYamlAsObject("/data/adb/mihomo/$id.yaml");
       final patch = await readYamlAsObject(rewritePath);
@@ -193,7 +193,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
     if (confirm != true) return;
     if (!mounted) return;
 
-    final close = await showLoadingDialog(context, title: '删除中...');
+    final close = await showLoadingDialog(context);
     try {
       subscriptions.removeWhere((s) => s.id == sub.id);
       final data = {
@@ -262,7 +262,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
     if (result == null || result.trim().isEmpty) return;
     if (!mounted) return;
 
-    final close = await showLoadingDialog(context, title: '加载中...');
+    final close = await showLoadingDialog(context);
     try {
       final settings = await readYamlAsObject(settingsPath);
       final ua = settings['ua'];
@@ -485,8 +485,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                             case 1: // 刷新
                                               final close =
                                                   await showLoadingDialog(
-                                                    context,
-                                                    title: '刷新中...',
+                                                    context
                                                   );
                                               try {
                                                 final downloadResult =
