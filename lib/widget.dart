@@ -6,12 +6,6 @@ import 'view/control.dart';
 
 
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:mihomoR/view/proxies.dart';
-import 'view/subscriptions.dart';
-import 'view/control.dart';
-
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
 
@@ -26,6 +20,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
     SubscriptionView(),
     ProxiesView(),
     ControlView(),
+
+
+
   ];
 
   void _onItemTapped(int index) {
@@ -34,13 +31,15 @@ class _BottomNavBarState extends State<BottomNavBar> {
     });
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+    // 获取当前主题
+
+
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _widgetOptions,
-      ),
+      body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -57,9 +56,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Theme.of(context).colorScheme.secondary,
-        unselectedItemColor: Theme.of(context).colorScheme.onSurface,
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        selectedItemColor: Theme.of(context).colorScheme.secondary, // 使用主题中的颜色
+        unselectedItemColor: Theme.of(context).colorScheme.onSurface, // 使用主题中的未选中颜色
+        backgroundColor: Theme.of(context).colorScheme.surface, // 使用主题中的背景颜色
         onTap: _onItemTapped,
       ),
     );
