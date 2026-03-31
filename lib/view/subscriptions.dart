@@ -391,33 +391,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
                   padding: const EdgeInsets.all(16),
                   itemCount: subscriptions.length,
                   itemBuilder: (context, index) {
-                    if (index == 0) {
-                      // 融合配置控件
-                      return Card(
-                        color: Theme.of(context).colorScheme.surfaceVariant,
-                        margin: const EdgeInsets.only(bottom: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          onTap: () async {
-                            await _mergeProxies();
-
-
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(
-                              '融合配置',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    final sub = subscriptions[index - 1];
+                    final sub = subscriptions[index];
                     final totalValue = sub.total;
 
                     int scale(int value) {
@@ -713,9 +687,37 @@ class _SubscriptionViewState extends State<SubscriptionView>
                   },
                 ),
               ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addSubscription,
-        child: const Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: FloatingActionButton(
+              heroTag: 'merge',
+              onPressed: () async {
+                setState(() => selectedId = 'merge');
+                await _mergeProxies();
+      
+
+              },
+              backgroundColor: selectedId == 'merge'
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : Theme.of(context).colorScheme.secondaryContainer,
+              child: Icon(
+                selectedId == 'merge'
+                    ? Icons.check
+                    : Icons.merge_type,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
+            ),
+          ),
+          FloatingActionButton(
+            heroTag: 'add',
+            onPressed: _addSubscription,
+            child: const Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }
