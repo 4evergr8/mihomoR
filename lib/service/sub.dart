@@ -27,11 +27,15 @@ class DownloadResult {
 }
 
 /// 下载 YAML 文件并保存到 /data/adb/mihomo
-Future<DownloadResult> downloadYamlFile(String url, String ua, String id, int timeout) async {
+Future<DownloadResult> downloadYamlFile(
+  String url,
+  String ua,
+  String id,
+  int timeout,
+) async {
   final dio = Dio();
   final dir = await getApplicationDocumentsDirectory();
   final filePath = '${dir.path}/$id.yaml';
-
   try {
     final response = await dio.download(
       url,
@@ -39,10 +43,8 @@ Future<DownloadResult> downloadYamlFile(String url, String ua, String id, int ti
       options: Options(
         responseType: ResponseType.bytes,
         followRedirects: true,
-        headers: {
-          'User-Agent': ua,
-        },
-        validateStatus: (s) => s == 200,
+        headers: {'User-Agent': ua},
+        connectTimeout: Duration(seconds: timeout),
         sendTimeout: Duration(seconds: timeout),
         receiveTimeout: Duration(seconds: timeout),
       ),
@@ -53,7 +55,9 @@ Future<DownloadResult> downloadYamlFile(String url, String ua, String id, int ti
 
     final cd = headers['content-disposition']?.first;
     if (cd != null) {
-      final fileNameStar = RegExp(r"filename\*\s*=\s*([^;]+)").firstMatch(cd)?.group(1);
+      final fileNameStar = RegExp(
+        r"filename\*\s*=\s*([^;]+)",
+      ).firstMatch(cd)?.group(1);
       if (fileNameStar != null) {
         final parts = fileNameStar.split("''");
         if (parts.length == 2) {
@@ -107,13 +111,10 @@ Future<DownloadResult> downloadYamlFile(String url, String ua, String id, int ti
       throw Exception('YAML 解析失败: $e');
     }
 
-    final result = await Process.run(
-      'su',
-      [
-        '-c',
-        'mkdir -p /data/adb/mihomo && cp $filePath /data/adb/mihomo/$id.yaml && chmod 777 /data/adb/mihomo/$id.yaml'
-      ],
-    );
+    final result = await Process.run('su', [
+      '-c',
+      'mkdir -p /data/adb/mihomo && cp $filePath /data/adb/mihomo/$id.yaml && chmod 777 /data/adb/mihomo/$id.yaml',
+    ]);
 
     if (result.exitCode != 0) {
       throw Exception('root 拷贝失败: ${result.stderr}');
@@ -140,9 +141,9 @@ Future<DownloadResult> downloadYamlFile(String url, String ua, String id, int ti
 
 /// 合并 YAML 对象
 Map<String, dynamic> overwriteYamlObject(
-    Map<String, dynamic> base,
-    Map<String, dynamic> patch,
-    ) {
+  Map<String, dynamic> base,
+  Map<String, dynamic> patch,
+) {
   final result = Map<String, dynamic>.from(base);
 
   for (final key in patch.keys) {
@@ -177,7 +178,8 @@ class SubscriptionInfo {
   factory SubscriptionInfo.fromMap(Map<String, dynamic> map) {
     return SubscriptionInfo(
       id: map['id'].toString(),
-      link: map['link'] as String? ??
+      link:
+          map['link'] as String? ??
           'https://raw.githubusercontent.com/4evergr8/MihomoRoot/refs/heads/main/mihomo/example.yaml',
       label: map['label'] as String? ?? '订阅',
       upload: map['upload'] as int? ?? 0,
