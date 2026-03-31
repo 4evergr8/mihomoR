@@ -135,9 +135,50 @@ class _SubscriptionViewState extends State<SubscriptionView>
       'subscriptions': updatedSubs.map((s) => s.toMap()).toList(),
     };
     await writeYamlFromObject(newData, subscriptionsPath);
-
+    updatedSubs.sort((a, b) => a.label.compareTo(b.label));
     if (!mounted) return;
     setState(() => subscriptions = updatedSubs);
+  }
+
+  Future<void> _mergeProxies() async {
+    try {
+      final subData = await readYamlAsObject(subscriptionsPath);
+      final list =
+          (subData['subscriptions'] is List)
+              ? (subData['subscriptions'] as List)
+              : [];
+
+      final Map<String, Map<String, dynamic>> allProxies = {}; // 名称 -> 代理配置
+      final Set<String> proxyNames = {}; // 检查重复名称
+
+      for (final subMap in list) {
+        final sub = SubscriptionInfo.fromMap(Map<String, dynamic>.from(subMap));
+        final subYaml = await readYamlAsObject(
+          "/data/adb/mihomo/${sub.id}.yaml",
+        );
+        if (subYaml['proxies'] is Map) {
+          final proxies = Map<String, dynamic>.from(subYaml['proxies']);
+          for (final entry in proxies.entries) {
+            var name = entry.key;
+            var value = Map<String, dynamic>.from(entry.value);
+            var count = 1;
+            var newName = name;
+            while (proxyNames.contains(newName)) {
+              newName = "$name#$count";
+              count++;
+            }
+            proxyNames.add(newName);
+            allProxies[newName] = value;
+          }
+        }
+      }
+
+      final mergeYaml = await readYamlAsObject(mergePath);
+      mergeYaml['proxies'] = allProxies;
+      await writeYamlFromObject(mergeYaml, configPath);
+    } catch (e) {
+      if (mounted) await showErrorDialog(context, '生成配置失败', e);
+    }
   }
 
   Future<void> _loadSubscriptions() async {
@@ -334,7 +375,35 @@ class _SubscriptionViewState extends State<SubscriptionView>
                   padding: const EdgeInsets.all(16),
                   itemCount: subscriptions.length,
                   itemBuilder: (context, index) {
-                    final sub = subscriptions[index];
+                    if (index == 0) {
+                      // 融合配置控件
+                      return Card(
+                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () async {
+                            await _mergeProxies();
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('已生成 config.yaml')),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(
+                              '融合配置',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    final sub = subscriptions[index - 1];
                     final totalValue = sub.total;
 
                     int scale(int value) {
@@ -485,7 +554,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                             case 1: // 刷新
                                               final close =
                                                   await showLoadingDialog(
-                                                    context
+                                                    context,
                                                   );
                                               try {
                                                 final downloadResult =
