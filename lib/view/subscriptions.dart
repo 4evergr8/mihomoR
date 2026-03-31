@@ -13,7 +13,10 @@ class SubscriptionView extends StatefulWidget {
   State<SubscriptionView> createState() => _SubscriptionViewState();
 }
 
-class _SubscriptionViewState extends State<SubscriptionView> {
+class _SubscriptionViewState extends State<SubscriptionView>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true; // 保持状态
   List<SubscriptionInfo> subscriptions = [];
   bool isLoading = true;
   String? selectedId;
@@ -321,6 +324,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(title: const Text('订阅')),
       body:
