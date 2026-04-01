@@ -2,12 +2,10 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:mihomoR/service/sub.dart';
+import 'package:mihomoR/service/subscriptions.dart';
 import 'package:mihomoR/service/yaml.dart';
 import 'package:mihomoR/service/path.dart';
-
 import '../widget.dart';
-
 
 class SubscriptionView extends StatefulWidget {
   const SubscriptionView({super.key});
@@ -19,8 +17,8 @@ class SubscriptionView extends StatefulWidget {
 class _SubscriptionViewState extends State<SubscriptionView>
     with AutomaticKeepAliveClientMixin {
   @override
-  bool get wantKeepAlive => true; // 保持状态
-  List<SubscriptionInfo> subscriptions = [];
+  bool get wantKeepAlive => true;
+  List<Map<String, dynamic>> subscriptions = [];
   bool isLoading = true;
   String? selectedId;
 
@@ -66,14 +64,13 @@ class _SubscriptionViewState extends State<SubscriptionView>
     super.initState();
     _loadSubscriptions();
   }
-
   Future<void> _onSubscriptionTap(String id) async {
     final close = await showLoadingDialogGlobal();
     try {
+      final settings = await readYamlAsObject(settingsPath);
       final base = await readYamlAsObject("/data/adb/mihomo/$id.yaml");
       final yaml = await runUserDartFromFile(base, overridePath);
       await writeYamlFromObject(yaml, configPath);
-      final settings = await readYamlAsObject(settingsPath);
       final port = settings['port'];
       final dio = Dio();
       final params = {'force': 'true'};
@@ -92,45 +89,33 @@ class _SubscriptionViewState extends State<SubscriptionView>
       close();
     }
   }
-
   Future<void> _refreshSubscriptions() async {
     try {
       final data = await readYamlAsObject(subscriptionsPath);
       final settings = await readYamlAsObject(settingsPath);
       final list =
-          (data['subscriptions'] is List)
-              ? (data['subscriptions'] as List)
-              : [];
+          (data['subscriptions'] is List) ? data['subscriptions'] as List : [];
       final ua = settings['ua'];
       final timeout = settings['timeout'];
+
       final futures =
           list.map((e) async {
-            final sub = SubscriptionInfo.fromMap(Map<String, dynamic>.from(e));
-
+            final sub = Map<String, dynamic>.from(e);
             final downloadResult = await downloadYamlFile(
-              sub.link,
+              sub['link'],
               ua,
-              sub.id,
+              sub['id'],
               timeout,
             );
-            return SubscriptionInfo(
-              id: downloadResult.id,
-              link: downloadResult.link,
-              label: downloadResult.label,
-              upload: downloadResult.upload,
-              download: downloadResult.download,
-              total: downloadResult.total,
-              expire: downloadResult.expire,
-              update: downloadResult.update,
-            );
+            return downloadResult;
           }).toList();
 
       final updatedSubs = await Future.wait(futures);
-      final newData = {
-        'subscriptions': updatedSubs.map((s) => s.toMap()).toList(),
-      };
+      final newData = {'subscriptions': updatedSubs};
       await writeYamlFromObject(newData, subscriptionsPath);
-      updatedSubs.sort((a, b) => a.label.compareTo(b.label));
+      updatedSubs.sort(
+        (a, b) => (a['label'] as String).compareTo(b['label'] as String),
+      );
       if (!mounted) return;
       setState(() => subscriptions = updatedSubs);
     } catch (e) {
@@ -143,16 +128,15 @@ class _SubscriptionViewState extends State<SubscriptionView>
       final subData = await readYamlAsObject(subscriptionsPath);
       final list =
           (subData['subscriptions'] is List)
-              ? (subData['subscriptions'] as List)
+              ? subData['subscriptions'] as List
               : [];
-
-      final List<Map<String, dynamic>> allProxies = []; // 保存所有代理
-      final Set<String> proxyNames = {}; // 用于检查重复
+      final List<Map<String, dynamic>> allProxies = [];
+      final Set<String> proxyNames = {};
 
       for (final subMap in list) {
-        final sub = SubscriptionInfo.fromMap(Map<String, dynamic>.from(subMap));
+        final sub = Map<String, dynamic>.from(subMap);
         final subYaml = await readYamlAsObject(
-          "/data/adb/mihomo/${sub.id}.yaml",
+          "/data/adb/mihomo/${sub['id']}.yaml",
         );
 
         if (subYaml['proxies'] is List) {
@@ -200,17 +184,11 @@ class _SubscriptionViewState extends State<SubscriptionView>
     try {
       final data = await readYamlAsObject(subscriptionsPath);
       final list =
-          (data['subscriptions'] is List)
-              ? (data['subscriptions'] as List)
-              : [];
-
-      subscriptions =
-          list
-              .map(
-                (e) => SubscriptionInfo.fromMap(Map<String, dynamic>.from(e)),
-              )
-              .toList();
-      subscriptions.sort((a, b) => a.label.compareTo(b.label));
+          (data['subscriptions'] is List) ? data['subscriptions'] as List : [];
+      subscriptions = list.map((e) => Map<String, dynamic>.from(e)).toList();
+      subscriptions.sort(
+        (a, b) => (a['label'] as String).compareTo(b['label'] as String),
+      );
 
       final settings = await readYamlAsObject(settingsPath);
       selectedId = settings['selected'] as String?;
@@ -224,14 +202,14 @@ class _SubscriptionViewState extends State<SubscriptionView>
 
   Future<void> _deleteSubscription(
     BuildContext context,
-    SubscriptionInfo sub,
+    Map<String, dynamic> sub,
   ) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder:
           (_) => AlertDialog(
             title: const Text('确认删除'),
-            content: Text('确定删除订阅 "${sub.label}" 吗？'),
+            content: Text('确定删除订阅 "${sub['label']}" 吗？'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -249,14 +227,15 @@ class _SubscriptionViewState extends State<SubscriptionView>
 
     final close = await showLoadingDialogGlobal();
     try {
-      subscriptions.removeWhere((s) => s.id == sub.id);
-      final data = {
-        'subscriptions': subscriptions.map((s) => s.toMap()).toList(),
-      };
+      subscriptions.removeWhere((s) => s['id'] == sub['id']);
+      final data = {'subscriptions': subscriptions};
       await writeYamlFromObject(data, subscriptionsPath);
-      await Process.run('su', ['-c', 'rm -f /data/adb/mihomo/${sub.id}.yaml']);
+      await Process.run('su', [
+        '-c',
+        'rm -f /data/adb/mihomo/${sub['id']}.yaml',
+      ]);
 
-      if (selectedId == sub.id) {
+      if (selectedId == sub['id']) {
         selectedId = null;
         final settings = await readYamlAsObject(settingsPath);
         settings['selected'] = null;
@@ -295,9 +274,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
               onPressed: () async {
                 final data = await Clipboard.getData('text/plain');
                 final text = data?.text;
-                if (text != null) {
-                  controller.text = text;
-                }
+                if (text != null) controller.text = text;
               },
               icon: const Icon(Icons.paste),
               label: const Text('粘贴'),
@@ -320,7 +297,6 @@ class _SubscriptionViewState extends State<SubscriptionView>
       final settings = await readYamlAsObject(settingsPath);
       final ua = settings['ua'];
       final timeout = settings['timeout'];
-
       final links =
           result
               .split('\n')
@@ -329,8 +305,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
               .toList();
 
       for (final link in links) {
-        if (subscriptions.any((s) => s.link == link)) {
-
+        if (subscriptions.any((s) => s['link'] == link)) {
           showErrorSnackBarGlobal('订阅已存在: $link');
           continue;
         }
@@ -338,26 +313,13 @@ class _SubscriptionViewState extends State<SubscriptionView>
         try {
           final id = DateTime.now().millisecondsSinceEpoch.toString();
           final downloadResult = await downloadYamlFile(link, ua, id, timeout);
-          subscriptions.add(
-            SubscriptionInfo(
-              id: downloadResult.id,
-              link: downloadResult.link,
-              label: downloadResult.label,
-              upload: downloadResult.upload,
-              download: downloadResult.download,
-              total: downloadResult.total,
-              expire: downloadResult.expire,
-              update: downloadResult.update,
-            ),
-          );
+          subscriptions.add(downloadResult);
         } catch (e) {
-          showErrorSnackBarGlobal('下载失败: $link,错误: $e');
+          showErrorSnackBarGlobal('下载失败: $link, 错误: $e');
         }
       }
 
-      final data = {
-        'subscriptions': subscriptions.map((s) => s.toMap()).toList(),
-      };
+      final data = {'subscriptions': subscriptions};
       await writeYamlFromObject(data, subscriptionsPath);
       setState(() {});
     } catch (e) {
@@ -384,7 +346,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
                   itemCount: subscriptions.length,
                   itemBuilder: (context, index) {
                     final sub = subscriptions[index];
-                    final totalValue = sub.total;
+                    final totalValue = sub['total'] as int;
 
                     int scale(int value) {
                       if (totalValue == 0) return 0;
@@ -392,7 +354,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
                       return v.clamp(0, 100);
                     }
 
-                    final isSelected = sub.id == selectedId;
+                    final isSelected = sub['id'] == selectedId;
 
                     return Card(
                       color:
@@ -406,11 +368,11 @@ class _SubscriptionViewState extends State<SubscriptionView>
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
                         onTap: () async {
-                          setState(() => selectedId = sub.id);
+                          setState(() => selectedId = sub['id']);
                           final settings = await readYamlAsObject(settingsPath);
-                          settings['selected'] = sub.id;
+                          settings['selected'] = sub['id'];
                           await writeYamlFromObject(settings, settingsPath);
-                          await _onSubscriptionTap(sub.id);
+                          await _onSubscriptionTap(sub['id']);
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(16),
@@ -418,7 +380,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                sub.label,
+                                sub['label'],
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const SizedBox(height: 12),
@@ -430,7 +392,6 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        // 上传下载进度条和信息
                                         ClipRRect(
                                           borderRadius: BorderRadius.circular(
                                             6,
@@ -443,9 +404,11 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                                     .surfaceContainerHighest,
                                             child: Row(
                                               children: [
-                                                if (sub.upload > 0)
+                                                if ((sub['upload'] as int) > 0)
                                                   Expanded(
-                                                    flex: scale(sub.upload),
+                                                    flex: scale(
+                                                      sub['upload'] as int,
+                                                    ),
                                                     child: Container(
                                                       color:
                                                           Theme.of(
@@ -453,9 +416,12 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                                           ).colorScheme.primary,
                                                     ),
                                                   ),
-                                                if (sub.download > 0)
+                                                if ((sub['download'] as int) >
+                                                    0)
                                                   Expanded(
-                                                    flex: scale(sub.download),
+                                                    flex: scale(
+                                                      sub['download'] as int,
+                                                    ),
                                                     child: Container(
                                                       color:
                                                           Theme.of(context)
@@ -465,8 +431,14 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                                   ),
                                                 Expanded(
                                                   flex: (100 -
-                                                          scale(sub.upload) -
-                                                          scale(sub.download))
+                                                          scale(
+                                                            sub['upload']
+                                                                as int,
+                                                          ) -
+                                                          scale(
+                                                            sub['download']
+                                                                as int,
+                                                          ))
                                                       .clamp(0, 100),
                                                   child: Container(
                                                     color:
@@ -481,9 +453,9 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                         ),
                                         const SizedBox(height: 6),
                                         Text(
-                                          sub.total == 0
+                                          totalValue == 0
                                               ? '上传: ∞  下载: ∞  总量: ∞'
-                                              : '上传: ${formatGB(sub.upload)}GB  下载: ${formatGB(sub.download)}GB  总量: ${formatGB(sub.total)}GB',
+                                              : '上传: ${formatGB(sub['upload'] as int)}GB  下载: ${formatGB(sub['download'] as int)}GB  总量: ${formatGB(totalValue)}GB',
                                           style:
                                               Theme.of(
                                                 context,
@@ -491,11 +463,11 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          sub.expire == 0
+                                          (sub['expire'] as int) == 0
                                               ? '到期时间: ∞'
-                                              : '到期时间: ${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).year}-'
-                                                  '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).month}-'
-                                                  '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).day}',
+                                              : '到期时间: ${DateTime.fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000).year}-'
+                                                  '${DateTime.fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000).month}-'
+                                                  '${DateTime.fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000).day}',
                                           style:
                                               Theme.of(
                                                 context,
@@ -503,7 +475,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          '上次更新: ${formatTimeAgo(sub.update)}',
+                                          '上次更新: ${formatTimeAgo(sub['update'] as String)}',
                                           style:
                                               Theme.of(
                                                 context,
@@ -537,42 +509,23 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                               try {
                                                 final downloadResult =
                                                     await downloadYamlFile(
-                                                      sub.link,
+                                                      sub['link'],
                                                       ua,
-                                                      sub.id,
+                                                      sub['id'],
                                                       timeout,
-                                                    );
-                                                final updatedSub =
-                                                    SubscriptionInfo(
-                                                      id: downloadResult.id,
-                                                      link: downloadResult.link,
-                                                      label:
-                                                          downloadResult.label,
-                                                      upload:
-                                                          downloadResult.upload,
-                                                      download:
-                                                          downloadResult
-                                                              .download,
-                                                      total:
-                                                          downloadResult.total,
-                                                      expire:
-                                                          downloadResult.expire,
-                                                      update:
-                                                          downloadResult.update,
                                                     );
                                                 final index = subscriptions
                                                     .indexWhere(
-                                                      (s) => s.id == sub.id,
+                                                      (s) =>
+                                                          s['id'] == sub['id'],
                                                     );
                                                 if (index != -1) {
                                                   subscriptions[index] =
-                                                      updatedSub;
+                                                      downloadResult;
                                                 }
                                                 final data = {
                                                   'subscriptions':
-                                                      subscriptions
-                                                          .map((s) => s.toMap())
-                                                          .toList(),
+                                                      subscriptions,
                                                 };
                                                 await writeYamlFromObject(
                                                   data,
@@ -581,8 +534,9 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                                 setState(() {});
                                               } catch (e) {
                                                 if (!mounted) return;
-                                                showErrorSnackBarGlobal('刷新失败: $e');
-
+                                                showErrorSnackBarGlobal(
+                                                  '刷新失败: $e',
+                                                );
                                               } finally {
                                                 if (mounted) close();
                                               }
@@ -592,7 +546,9 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                               break;
                                             case 3: // 复制链接
                                               await Clipboard.setData(
-                                                ClipboardData(text: sub.link),
+                                                ClipboardData(
+                                                  text: sub['link'],
+                                                ),
                                               );
                                               showErrorSnackBarGlobal('链接已复制');
                                               break;
