@@ -69,7 +69,7 @@ Future<Map<String, dynamic>> runUserDartFromFile(
   // 执行用户 Dart，用户代码必须定义 main(config) 返回修改后的 Map
   final modified = eval(
     userCode,
-    function: 'main',
+    function: 'override',
     args: [config],
   );
 
