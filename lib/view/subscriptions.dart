@@ -69,10 +69,8 @@ class _SubscriptionViewState extends State<SubscriptionView>
     final close = await showLoadingDialog(context);
     try {
       final base = await readYamlAsObject("/data/adb/mihomo/$id.yaml");
-      final patch = await readYamlAsObject(rewritePath);
-      final yaml = overwriteYamlObject(base, patch);
+      final yaml = await  runUserDartFromFile(base, overridePath);
       await writeYamlFromObject(yaml, configPath);
-
       try {
         final settings = await readYamlAsObject(settingsPath);
         final dio = Dio();
@@ -170,18 +168,14 @@ class _SubscriptionViewState extends State<SubscriptionView>
         }
       }
 
-      final mergeYaml = await readYamlAsObject(mergePath);
-      mergeYaml['proxies'] = allProxies;
+      final mergeYaml = await runUserDartFromFile({'proxies': allProxies}, mergePath);
       await writeYamlFromObject(mergeYaml, configPath);
       try {
         final settings = await readYamlAsObject(settingsPath);
+        final port = settings['port'];
         final dio = Dio();
         final params = {'force': 'true'};
         final data = {"path": "", "payload": ""};
-        final port = settings['port'];
-        final mergeYaml = await readYamlAsObject(mergePath);
-        mergeYaml['proxies'] = allProxies;
-        await writeYamlFromObject(mergeYaml, configPath);
         settings['selected'] = 'merge';
         await writeYamlFromObject(settings, settingsPath);
         await dio.put(
@@ -700,7 +694,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
                 await _mergeProxies();
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('已开启订阅融合')),
+                  const SnackBar(content: Text('已开启订阅合并')),
                 );
               },
               backgroundColor: selectedId == 'merge'
