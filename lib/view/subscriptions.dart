@@ -69,7 +69,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
     final close = await showLoadingDialog(context);
     try {
       final base = await readYamlAsObject("/data/adb/mihomo/$id.yaml");
-      final yaml = await  runUserDartFromFile(base, overridePath);
+      final yaml = await runUserDartFromFile(base, overridePath);
       await writeYamlFromObject(yaml, configPath);
       try {
         final settings = await readYamlAsObject(settingsPath);
@@ -142,14 +142,18 @@ class _SubscriptionViewState extends State<SubscriptionView>
     try {
       final subData = await readYamlAsObject(subscriptionsPath);
       final list =
-      (subData['subscriptions'] is List) ? (subData['subscriptions'] as List) : [];
+          (subData['subscriptions'] is List)
+              ? (subData['subscriptions'] as List)
+              : [];
 
       final List<Map<String, dynamic>> allProxies = []; // 保存所有代理
       final Set<String> proxyNames = {}; // 用于检查重复
 
       for (final subMap in list) {
         final sub = SubscriptionInfo.fromMap(Map<String, dynamic>.from(subMap));
-        final subYaml = await readYamlAsObject("/data/adb/mihomo/${sub.id}.yaml");
+        final subYaml = await readYamlAsObject(
+          "/data/adb/mihomo/${sub.id}.yaml",
+        );
 
         if (subYaml['proxies'] is List) {
           final proxies = List<Map<String, dynamic>>.from(subYaml['proxies']);
@@ -168,7 +172,9 @@ class _SubscriptionViewState extends State<SubscriptionView>
         }
       }
 
-      final mergeYaml = await runUserDartFromFile({'proxies': allProxies}, mergePath);
+      final mergeYaml = await runUserDartFromFile({
+        'proxies': allProxies,
+      }, mergePath);
       await writeYamlFromObject(mergeYaml, configPath);
       try {
         final settings = await readYamlAsObject(settingsPath);
@@ -185,7 +191,6 @@ class _SubscriptionViewState extends State<SubscriptionView>
           options: Options(headers: {'Content-Type': 'application/json'}),
         );
       } catch (_) {}
-
     } catch (e) {
       if (mounted) await showErrorDialog(context, '生成配置失败', e);
     }
@@ -693,17 +698,16 @@ class _SubscriptionViewState extends State<SubscriptionView>
                 setState(() => selectedId = 'merge');
                 await _mergeProxies();
                 if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('已开启订阅合并')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('已开启订阅合并')));
               },
-              backgroundColor: selectedId == 'merge'
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : Theme.of(context).colorScheme.secondaryContainer,
+              backgroundColor:
+                  selectedId == 'merge'
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : Theme.of(context).colorScheme.secondaryContainer,
               child: Icon(
-                selectedId == 'merge'
-                    ? Icons.check
-                    : Icons.merge_type,
+                selectedId == 'merge' ? Icons.check : Icons.merge_type,
                 color: Theme.of(context).colorScheme.onPrimaryContainer,
               ),
             ),
