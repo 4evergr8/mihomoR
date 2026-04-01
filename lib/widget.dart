@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mihomoR/view/proxies.dart';
+import 'main.dart';
 import 'view/subscriptions.dart';
 import 'view/control.dart';
 
@@ -77,24 +79,15 @@ class _BottomNavBarState extends State<BottomNavBar> {
   }
 }
 
-Future<void> showErrorDialog(BuildContext context, String title, Object error) async {
-  await showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: Text(title),
-      content: SingleChildScrollView(child: Text(error.toString())),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('关闭'),
-        ),
-      ],
-    ),
-  );
-}
-Future<VoidCallback> showLoadingDialog(BuildContext context) async {
-  final overlay = Overlay.of(context);
-  final overlayEntry = OverlayEntry(
+
+
+
+Future<VoidCallback> showLoadingDialogGlobal() async {
+  final overlay = navigatorKey.currentState?.overlay;
+  if (overlay == null) return () {};
+
+  late OverlayEntry overlayEntry;
+  overlayEntry = OverlayEntry(
     builder: (_) => Positioned(
       top: 0,
       left: 0,
@@ -103,16 +96,35 @@ Future<VoidCallback> showLoadingDialog(BuildContext context) async {
         color: Colors.transparent,
         child: LinearProgressIndicator(
           minHeight: 4,
-          backgroundColor: Colors.black.withOpacity(0.1),
+          backgroundColor: Theme.of(navigatorKey.currentContext!).colorScheme.primaryContainer,
         ),
       ),
     ),
   );
 
   overlay.insert(overlayEntry);
+  return () => overlayEntry.remove();
+}
+void showErrorSnackBarGlobal(String message) {
+  final ctx = navigatorKey.currentContext;
+  if (ctx == null) return;
 
-  // 返回关闭函数
-  return () {
-    overlayEntry.remove();
-  };
+  final colorScheme = Theme.of(ctx).colorScheme;
+
+  ScaffoldMessenger.of(ctx).showSnackBar(
+    SnackBar(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: colorScheme.surface, // 主题背景色
+      content: GestureDetector(
+        onTap: () {
+          Clipboard.setData(ClipboardData(text: message));
+        },
+        child: Text(
+          message,
+          style: TextStyle(color: colorScheme.onSurface), // 主题文本色
+        ),
+      ),
+      duration: const Duration(seconds: 3),
+    ),
+  );
 }
