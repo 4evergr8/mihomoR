@@ -103,13 +103,6 @@ rules:
 
   - GEOSITE,CATEGORY-AI-!CN,🧠人工智能🧠
 
-  - DOMAIN-SUFFIX,jp,🇯🇵日本网站🇯🇵
-  - GEOSITE,DLSITE,🇯🇵日本网站🇯🇵
-  - GEOSITE,DMM,🇯🇵日本网站🇯🇵
-  - DOMAIN,rss.4evergr8.workers.dev,🇯🇵日本网站🇯🇵
-
-  - GEOSITE,category-cryptocurrency,🪙加密货币🪙
-
   - GEOSITE,youtube,🌍国外媒体🌍
 
   - MATCH,⚡自动选择⚡
@@ -148,30 +141,6 @@ proxy-groups:
     exclude-filter: 直连|订阅|到期|官网|剩余|RU|俄罗斯|🇷🇺|KR|韩国|🇰🇷|VN|越南|🇻🇳|MY|马来西亚|🇲🇾|🇷🇺|HK|香港|🇭🇰
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/YouTube_Music.png
     interval: 631
-    lazy: true
-    include-all: true
-    timeout: 2000
-    max-failed-times: 2
-    proxies: []
-
-  - name: 🇯🇵日本网站🇯🇵
-    type: fallback
-    url: https://special.dmm.com
-    filter: JP|日本|🇯🇵
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Japan.png
-    interval: 647
-    lazy: true
-    include-all: true
-    timeout: 2000
-    max-failed-times: 2
-    proxies: []
-
-  - name: 🪙加密货币🪙
-    type: url-test
-    url: https://api.binance.com/api/v3/ping
-    exclude-filter: 直连|订阅|到期|官网|剩余|RU|俄罗斯|🇷🇺|HK|香港|🇭🇰|US|美国|🇺🇸|CA|加拿大|🇨🇦
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Available_Alt.png
-    interval: 659
     lazy: true
     include-all: true
     timeout: 2000
