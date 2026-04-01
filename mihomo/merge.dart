@@ -1,9 +1,8 @@
-Map<String, dynamic> override(Map<String, dynamic> input) {
-  final List<Map<String, dynamic>> proxies =
-  (input["proxies"] as List? ?? []).cast<Map<String, dynamic>>();
+dynamic override(dynamic input) {
+  final List<dynamic> proxies = (input["proxies"] as List? ?? []);
 
   // 内置完整 YAML 模板
-  final Map<String, dynamic> out = {
+  final dynamic out = {
     "mode": "rule",
     "external-controller": "127.0.0.1:9090",
     "external-ui": "./metacubexd",
@@ -191,8 +190,7 @@ Map<String, dynamic> override(Map<String, dynamic> input) {
   final proxyNames = proxies.map((e) => e['name'].toString()).toList();
 
   // 填充自动选择组
-  final autoGroup =
-  (out["proxy-groups"] as List).firstWhere((g) => g["name"] == "⚡自动选择⚡");
+  final autoGroup = (out["proxy-groups"] as List).firstWhere((g) => g["name"] == "⚡自动选择⚡");
   autoGroup["proxies"] = proxyNames;
 
   // 填充其他分组
