@@ -139,19 +139,7 @@ Future<DownloadResult> downloadYamlFile(
   }
 }
 
-/// 合并 YAML 对象
-Map<String, dynamic> overwriteYamlObject(
-  Map<String, dynamic> base,
-  Map<String, dynamic> patch,
-) {
-  final result = Map<String, dynamic>.from(base);
 
-  for (final key in patch.keys) {
-    result[key] = patch[key];
-  }
-
-  return result;
-}
 
 /// 订阅数据类
 class SubscriptionInfo {
