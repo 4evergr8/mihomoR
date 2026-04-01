@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mihomoR/view/proxies.dart';
-import 'main.dart';
-import 'view/subscriptions.dart';
-import 'view/control.dart';
+import 'package:mihomoR/main.dart';
+import 'package:mihomoR/view/subscriptions.dart';
+import 'package:mihomoR/view/control.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
@@ -109,20 +109,13 @@ void showErrorSnackBarGlobal(String message) {
   final ctx = navigatorKey.currentContext;
   if (ctx == null) return;
 
-  final colorScheme = Theme.of(ctx).colorScheme;
-
   ScaffoldMessenger.of(ctx).showSnackBar(
     SnackBar(
-      behavior: SnackBarBehavior.floating,
-      backgroundColor: colorScheme.surface, // 主题背景色
       content: GestureDetector(
         onTap: () {
           Clipboard.setData(ClipboardData(text: message));
         },
-        child: Text(
-          message,
-          style: TextStyle(color: colorScheme.onSurface), // 主题文本色
-        ),
+        child: Text(message),
       ),
     ),
   );
