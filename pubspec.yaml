@@ -16,7 +16,6 @@ dependencies:
   yaml_codec: any
   fluttertoast: any
   quick_settings_with_flutter_plugins: any
-  dart_eval: any
   yaml: any
   dio: any
   flutter:
