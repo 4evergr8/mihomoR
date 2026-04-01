@@ -30,7 +30,7 @@ class _ControlViewState extends State<ControlView>
   }
 
   Future<void> _loadSettings() async {
-    final settings = await readYamlAsObject(settingsPath);
+    final settings = await readYamlAsMap(settingsPath);
     setState(() {
       startCmd = settings['start'] ?? '';
       stopCmd = settings['kill'] ?? '';
