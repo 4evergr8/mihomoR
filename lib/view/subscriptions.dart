@@ -97,15 +97,24 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
 
       // 读取已有订阅列表
       final existingData = await readYamlAsMap(subscriptionsPath);
-      final existingList = (existingData['subscriptions'] is List) ? List<Map<String, dynamic>>.from(existingData['subscriptions']) : <Map<String, dynamic>>[];
+      final existingList = (existingData['subscriptions'] is List)
+          ? List<Map<String, dynamic>>.from(existingData['subscriptions'])
+          : <Map<String, dynamic>>[];
 
       for (final sub in list) {
         try {
           final subMap = Map<String, dynamic>.from(sub);
           final downloadResult = await downloadYamlFile(subMap['link'], ua, subMap['id'], timeout);
 
-          // 更新列表并写入
-          existingList.add(downloadResult);
+          // 查找是否已有同 ID 的订阅
+          final index = existingList.indexWhere((e) => e['id'] == subMap['id']);
+          if (index >= 0) {
+            existingList[index] = downloadResult; // 替换旧订阅
+          } else {
+            existingList.add(downloadResult); // 新增订阅
+          }
+
+          // 写入当前订阅列表
           final singleData = {'subscriptions': existingList};
           await writeYamlFromMap(singleData, subscriptionsPath);
 
