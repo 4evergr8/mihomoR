@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mihomoR/service/subscriptions.dart';
 import 'package:mihomoR/service/yaml.dart';
 import 'package:mihomoR/service/path.dart';
-import '../widget.dart';
+import 'package:mihomoR/widget.dart';
 
 class SubscriptionView extends StatefulWidget {
   const SubscriptionView({super.key});
