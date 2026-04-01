@@ -124,7 +124,6 @@ void showErrorSnackBarGlobal(String message) {
           style: TextStyle(color: colorScheme.onSurface), // 主题文本色
         ),
       ),
-      duration: const Duration(seconds: 3),
     ),
   );
 }
