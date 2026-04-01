@@ -33,43 +33,6 @@ dynamic override(dynamic input) {
       "auto-route": true,
       "auto-detect-interface": true,
       "strict-route": true,
-      "exclude-package": [
-        "com.byyoung.setting",
-        "com.tencent.mm",
-        "com.xunmeng.pinduoduo",
-        "com.zhihu.android",
-        "com.autonavi.minimap",
-        "com.taobao.taobao",
-        "com.android.bluetooth",
-        "com.eg.android.AlipayGphone",
-        "org.localsend.localsend_app",
-        "com.coolapk.market",
-        "com.coloros.accessibilityassistant",
-        "com.oplus.blacklistapp",
-        "com.coloros.directui",
-        "com.coloros.ocrscanner",
-        "com.quark.browser",
-        "tv.danmaku.bili",
-        "com.xunlei.downloadprovider",
-        "com.tmall.wireless",
-        "com.oplus.cast",
-        "com.ss.android.ugc.aweme",
-        "com.bilibili.app.in",
-        "com.heytap.cloud",
-        "com.mfcloudcalculate.networkdisk",
-        "com.tencent.androidqqmail",
-        "com.oplus.account",
-        "com.hpbr.bosszhipin",
-        "com.MobileTicket",
-        "com.baidu.netdisk",
-        "com.bilibili.studio",
-        "com.tencent.tim",
-        "com.coloros.translate",
-        "com.taobao.litetao",
-        "com.oplus.vdc",
-        "com.heytap.speechassist",
-        "com.oplus.aimemory"
-      ]
     },
     "dns": {
       "enable": true,
@@ -103,11 +66,6 @@ dynamic override(dynamic input) {
       "GEOIP,cn,DIRECT,no-resolve",
       "GEOIP,private,DIRECT,no-resolve",
       "GEOSITE,CATEGORY-AI-!CN,🧠人工智能🧠",
-      "DOMAIN-SUFFIX,jp,🇯🇵日本网站🇯🇵",
-      "GEOSITE,DLSITE,🇯🇵日本网站🇯🇵",
-      "GEOSITE,DMM,🇯🇵日本网站🇯🇵",
-      "DOMAIN,rss.4evergr8.workers.dev,🇯🇵日本网站🇯🇵",
-      "GEOSITE,category-cryptocurrency,🪙加密货币🪙",
       "GEOSITE,youtube,🌍国外媒体🌍",
       "MATCH,⚡自动选择⚡"
     ],
@@ -122,6 +80,7 @@ dynamic override(dynamic input) {
         "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Speedtest.png",
         "interval": 600,
         "lazy": false,
+        "include-all": true,
         "timeout": 2000,
         "max-failed-times": 2,
         "tolerance": 50,
@@ -137,6 +96,7 @@ dynamic override(dynamic input) {
         "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Bot.png",
         "interval": 617,
         "lazy": true,
+        "include-all": true,
         "timeout": 2000,
         "max-failed-times": 2,
         "tolerance": 50,
@@ -152,33 +112,7 @@ dynamic override(dynamic input) {
         "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/YouTube_Music.png",
         "interval": 631,
         "lazy": true,
-        "timeout": 2000,
-        "max-failed-times": 2,
-        "proxies": <String>[]
-      },
-      {
-        "name": "🇯🇵日本网站🇯🇵",
-        "type": "fallback",
-        "url": "https://special.dmm.com",
-        "filter": "JP|日本|🇯🇵",
-        "icon":
-        "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Japan.png",
-        "interval": 647,
-        "lazy": true,
-        "timeout": 2000,
-        "max-failed-times": 2,
-        "proxies": <String>[]
-      },
-      {
-        "name": "🪙加密货币🪙",
-        "type": "url-test",
-        "url": "https://api.binance.com/api/v3/ping",
-        "exclude-filter":
-        "直连|订阅|到期|官网|剩余|RU|俄罗斯|🇷🇺|HK|香港|🇭🇰|US|美国|🇺🇸|CA|加拿大|🇨🇦",
-        "icon":
-        "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Dark/Available_Alt.png",
-        "interval": 659,
-        "lazy": true,
+        "include-all": true,
         "timeout": 2000,
         "max-failed-times": 2,
         "proxies": <String>[]
@@ -187,31 +121,6 @@ dynamic override(dynamic input) {
     "proxies": proxies
   };
 
-  final proxyNames = proxies.map((e) => e['name'].toString()).toList();
-
-  // 填充自动选择组
-  final autoGroup = (out["proxy-groups"] as List).firstWhere((g) => g["name"] == "⚡自动选择⚡");
-  autoGroup["proxies"] = proxyNames;
-
-  // 填充其他分组
-  for (final group in out["proxy-groups"]) {
-    final String name = group["name"];
-    if (name == "⚡自动选择⚡") continue;
-
-    List<String> matched = [];
-
-    if (group.containsKey("filter")) {
-      final reg = RegExp(group["filter"]);
-      matched = proxyNames.where((n) => reg.hasMatch(n)).toList();
-      if (matched.isNotEmpty) matched.add("⚡自动选择⚡");
-    } else if (group.containsKey("exclude-filter")) {
-      final reg = RegExp(group["exclude-filter"]);
-      matched = proxyNames.where((n) => !reg.hasMatch(n)).toList();
-      if (matched.isEmpty) matched.add("⚡自动选择⚡");
-    }
-
-    group["proxies"] = matched;
-  }
 
   return out;
 }
