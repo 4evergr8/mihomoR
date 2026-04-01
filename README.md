@@ -24,23 +24,22 @@
 Flutter的SDK真占内存,16G内存,开个IDEA,开个GitHub Desktop,再开两个Chrome标签页,回头一看,啊,IDEA崩了😅
 
 ## 主要功能
-
-### 订阅页面
-
+* 磁贴控制核心启停
 * 批量添加Clash订阅
 * 删除订阅
 * 切换订阅
 * 批量更新订阅
+* 将所有订阅合并为一个文件
+* 订阅覆写
 * 从返回头自动获取配置名称和流量信息
-
-### 控制页面
-
+* 对配置中的第一个代理组的所有节点进行测速
+* 可自定义超时和测速链接
 * 启动核心
 * 停止核心
 * 打开WebUI
 * 查看核心状态
 
-## 软件截图
+## Screenshots
 
 <div align="center">
   <img src="./assets/1.jpg" width="30%" style="margin-right: 5%;">
@@ -320,4 +319,4 @@ proxy-groups:
 * 本项目采用GithubAction进行编译
 * 软件界面参考[chen08209/FlClash](https://github.com/chen08209/FlClash)
 * WebUI来自[MetaCubeX/metacubexd](https://github.com/MetaCubeX/metacubexd)
-* 规则集合来自[MetaCubeX/v2ray-rules-dat](https://github.com/loyalsoldier/v2ray-rules-dat)
+* 规则集合来自[Loyalsoldier/v2ray-rules-dat](https://github.com/loyalsoldier/v2ray-rules-dat)
