@@ -1,28 +1,15 @@
 import 'dart:io';
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:yaml_codec/yaml_codec.dart';
-import 'package:yaml/yaml.dart';
+import 'package:dart_eval/dart_eval.dart';
 
-// 递归将 YamlMap/YamlList 转为普通 Map/List
-dynamic _convertYaml(dynamic input) {
-  if (input is YamlMap) {
-    return Map<String, dynamic>.fromEntries(
-      input.entries.map(
-            (e) => MapEntry(e.key.toString(), _convertYaml(e.value)),
-      ),
-    );
-  } else if (input is YamlList) {
-    return input.map((e) => _convertYaml(e)).toList();
-  } else {
-    return input;
-  }
-}
 
+// 读取 YAML 文件为普通 Map
 Future<Map<String, dynamic>> readYamlAsObject(String sourcePath) async {
   try {
     final dir = await getApplicationDocumentsDirectory();
-    final localPath = p.join(dir.path, p.basename(sourcePath));
+    final localPath = join(dir.path, basename(sourcePath));
 
     final result = await Process.run(
       'su',
@@ -34,26 +21,22 @@ Future<Map<String, dynamic>> readYamlAsObject(String sourcePath) async {
     }
 
     final text = await File(localPath).readAsString();
-    final obj = yamlDecode(text);
+    final obj = YamlCodec().decode(text);
 
-    return _convertYaml(obj) as Map<String, dynamic>;
+    return obj as Map<String, dynamic>;
   } catch (e) {
     rethrow;
   }
 }
 
-Future<void> writeYamlFromObject(
-    Map<String, dynamic> data,
-    String targetPath,
-    ) async {
+// 将 Map 写回 YAML 文件
+Future<void> writeYamlFromObject(Map<String, dynamic> data, String targetPath) async {
   try {
     final dir = await getApplicationDocumentsDirectory();
-    final localPath = p.join(dir.path, p.basename(targetPath));
+    final localPath = join(dir.path, basename(targetPath));
 
-    final yamlText = yamlEncode(data);
-
-    final file = File(localPath);
-    await file.writeAsString(yamlText);
+    final yamlText = YamlCodec().encode(data);
+    await File(localPath).writeAsString(yamlText);
 
     final result = await Process.run(
       'su',
@@ -66,4 +49,29 @@ Future<void> writeYamlFromObject(
   } catch (e) {
     rethrow;
   }
+}
+
+Future<Map<String, dynamic>> runUserDartFromFile(
+    Map<String, dynamic> config, String sourcePath) async {
+  final dir = await getApplicationDocumentsDirectory();
+  final localPath = join(dir.path, basename(sourcePath));
+
+  // 拷贝文件到可读写目录
+  final result = await Process.run(
+    'su',
+    ['-c', 'cp $sourcePath $localPath && chmod 777 $localPath'],
+  );
+  if (result.exitCode != 0) throw Exception(result.stderr);
+
+  // 读取 Dart 文件内容
+  final userCode = await File(localPath).readAsString();
+
+  // 执行用户 Dart，用户代码必须定义 main(config) 返回修改后的 Map
+  final modified = eval(
+    userCode,
+    function: 'main',
+    args: [config],
+  );
+
+  return modified as Map<String, dynamic>;
 }
