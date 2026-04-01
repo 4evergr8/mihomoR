@@ -1,6 +1,4 @@
-Map<String, dynamic> override(Map<String, dynamic> input) {
-
-
+dynamic override(dynamic input) {
   final Map<String, dynamic> template = {
     "tun": {
       "enable": true,
@@ -74,9 +72,9 @@ Map<String, dynamic> override(Map<String, dynamic> input) {
   };
 
   // 输出对象，拷贝输入
-  final Map<String, dynamic> out = Map<String, dynamic>.from(input);
+  final dynamic out = Map.from(input);
 
-  // 删除原有 dns 和 tun 完全替换
+  // 替换 dns 和 tun
   out["dns"] = template["dns"];
   out["tun"] = template["tun"];
 
