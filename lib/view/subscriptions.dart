@@ -14,8 +14,7 @@ class SubscriptionView extends StatefulWidget {
   State<SubscriptionView> createState() => _SubscriptionViewState();
 }
 
-class _SubscriptionViewState extends State<SubscriptionView>
-    with AutomaticKeepAliveClientMixin {
+class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
   List<Map<String, dynamic>> subscriptions = [];
@@ -64,24 +63,21 @@ class _SubscriptionViewState extends State<SubscriptionView>
     super.initState();
     _loadSubscriptions();
   }
+
   Future<void> _onSubscriptionTap(String id) async {
     final close = await showLoadingDialogGlobal();
     try {
-      final settings = await readYamlAsObject(settingsPath);
-      final base = await readYamlAsObject("/data/adb/mihomo/$id.yaml");
-      final yaml = await runUserDartFromFile(base, overridePath);
-      await writeYamlFromObject(yaml, configPath);
+      final settings = await readYamlAsMap(settingsPath);
       final port = settings['port'];
+      final base = await readYamlAsMap("/data/adb/mihomo/$id.yaml");
+      final override = await readYamlAsMap(overridePath);
+      final yaml = await overrideMap(base, override);
+      await writeYamlFromMap(yaml, configPath);
       final dio = Dio();
       final params = {'force': 'true'};
       final data = {"path": "", "payload": ""};
       try {
-        await dio.put(
-          'http://127.0.0.1:$port/configs',
-          queryParameters: params,
-          data: data,
-          options: Options(headers: {'Content-Type': 'application/json'}),
-        );
+        await dio.put('http://127.0.0.1:$port/configs', queryParameters: params, data: data, options: Options(headers: {'Content-Type': 'application/json'}));
       } catch (_) {}
     } catch (e) {
       showErrorSnackBarGlobal('$e');
@@ -89,139 +85,119 @@ class _SubscriptionViewState extends State<SubscriptionView>
       close();
     }
   }
+
   Future<void> _refreshSubscriptions() async {
+    final close = await showLoadingDialogGlobal();
     try {
-      final data = await readYamlAsObject(subscriptionsPath);
-      final settings = await readYamlAsObject(settingsPath);
-      final list =
-          (data['subscriptions'] is List) ? data['subscriptions'] as List : [];
+      final data = await readYamlAsMap(subscriptionsPath);
+      final settings = await readYamlAsMap(settingsPath);
+      final list = (data['subscriptions'] is List) ? data['subscriptions'] as List : [];
       final ua = settings['ua'];
       final timeout = settings['timeout'];
 
-      final futures =
-          list.map((e) async {
-            final sub = Map<String, dynamic>.from(e);
-            final downloadResult = await downloadYamlFile(
-              sub['link'],
-              ua,
-              sub['id'],
-              timeout,
-            );
-            return downloadResult;
-          }).toList();
+      // 读取已有订阅列表
+      final existingData = await readYamlAsMap(subscriptionsPath);
+      final existingList = (existingData['subscriptions'] is List) ? List<Map<String, dynamic>>.from(existingData['subscriptions']) : <Map<String, dynamic>>[];
 
-      final updatedSubs = await Future.wait(futures);
-      final newData = {'subscriptions': updatedSubs};
-      await writeYamlFromObject(newData, subscriptionsPath);
-      updatedSubs.sort(
-        (a, b) => (a['label'] as String).compareTo(b['label'] as String),
-      );
+      for (final sub in list) {
+        try {
+          final subMap = Map<String, dynamic>.from(sub);
+          final downloadResult = await downloadYamlFile(subMap['link'], ua, subMap['id'], timeout);
+          existingList.add(downloadResult);
+
+          // 写入当前订阅
+          final singleData = {'subscriptions': existingList};
+          await writeYamlFromMap(singleData, subscriptionsPath);
+        } catch (e) {
+          showErrorSnackBarGlobal('订阅 ${sub['label'] ?? sub['id']} 下载失败: $e');
+        }
+      }
+
+      // 排序并更新界面
+      existingList.sort((a, b) => (a['label'] as String).compareTo(b['label'] as String));
       if (!mounted) return;
-      setState(() => subscriptions = updatedSubs);
+      setState(() => subscriptions = existingList);
     } catch (e) {
-      showErrorSnackBarGlobal('$e');
+      showErrorSnackBarGlobal('刷新订阅失败: $e');
+    } finally {
+      close();
     }
   }
 
   Future<void> _mergeProxies() async {
+    final close = await showLoadingDialogGlobal();
     try {
-      final subData = await readYamlAsObject(subscriptionsPath);
-      final list =
-          (subData['subscriptions'] is List)
-              ? subData['subscriptions'] as List
-              : [];
+      final subData = await readYamlAsMap(subscriptionsPath);
+      final list = (subData['subscriptions'] is List) ? subData['subscriptions'] as List : [];
       final List<Map<String, dynamic>> allProxies = [];
       final Set<String> proxyNames = {};
 
       for (final subMap in list) {
-        final sub = Map<String, dynamic>.from(subMap);
-        final subYaml = await readYamlAsObject(
-          "/data/adb/mihomo/${sub['id']}.yaml",
-        );
-
-        if (subYaml['proxies'] is List) {
-          final proxies = List<Map<String, dynamic>>.from(subYaml['proxies']);
-          for (var proxy in proxies) {
-            var name = proxy['name'] as String? ?? '未知';
-            var newName = name;
-            var count = 1;
-            while (proxyNames.contains(newName)) {
-              newName = "$name#$count";
-              count++;
+        try {
+          final sub = Map<String, dynamic>.from(subMap);
+          final subYaml = await readYamlAsMap("/data/adb/mihomo/${sub['id']}.yaml");
+          if (subYaml['proxies'] is List) {
+            final proxies = List<Map<String, dynamic>>.from(subYaml['proxies']);
+            for (var proxy in proxies) {
+              var name = proxy['name'] as String? ?? '未知';
+              var newName = name;
+              var count = 1;
+              while (proxyNames.contains(newName)) {
+                newName = "$name#$count";
+                count++;
+              }
+              proxyNames.add(newName);
+              proxy['name'] = newName;
+              allProxies.add(proxy);
             }
-            proxyNames.add(newName);
-            proxy['name'] = newName;
-            allProxies.add(proxy);
           }
+        } catch (e) {
+          showErrorSnackBarGlobal('订阅 ${subMap['label'] ?? subMap['id']} 读取失败: $e');
         }
       }
 
-      final mergeYaml = await runUserDartFromFile({
-        'proxies': allProxies,
-      }, mergePath);
-      await writeYamlFromObject(mergeYaml, configPath);
+      final merge = await readYamlAsMap(mergePath);
+      final yaml = overrideMap({'proxies': allProxies}, merge);
+      await writeYamlFromMap(yaml, configPath);
+      final settings = await readYamlAsMap(settingsPath);
+      final port = settings['port'];
+      final dio = Dio();
+      final params = {'force': 'true'};
+      final data = {"path": "", "payload": ""};
+      settings['selected'] = 'merge';
+      await writeYamlFromMap(settings, settingsPath);
       try {
-        final settings = await readYamlAsObject(settingsPath);
-        final port = settings['port'];
-        final dio = Dio();
-        final params = {'force': 'true'};
-        final data = {"path": "", "payload": ""};
-        settings['selected'] = 'merge';
-        await writeYamlFromObject(settings, settingsPath);
-        await dio.put(
-          'http://127.0.0.1:$port/configs',
-          queryParameters: params,
-          data: data,
-          options: Options(headers: {'Content-Type': 'application/json'}),
-        );
+        await dio.put('http://127.0.0.1:$port/configs', queryParameters: params, data: data, options: Options(headers: {'Content-Type': 'application/json'}));
       } catch (_) {}
     } catch (e) {
-      showErrorSnackBarGlobal('$e');
+      showErrorSnackBarGlobal('合并代理失败: $e');
+    } finally {
+      close();
     }
   }
 
   Future<void> _loadSubscriptions() async {
-    try {
-      final data = await readYamlAsObject(subscriptionsPath);
-      final list =
-          (data['subscriptions'] is List) ? data['subscriptions'] as List : [];
-      subscriptions = list.map((e) => Map<String, dynamic>.from(e)).toList();
-      subscriptions.sort(
-        (a, b) => (a['label'] as String).compareTo(b['label'] as String),
-      );
+    final close = await showLoadingDialogGlobal();
 
-      final settings = await readYamlAsObject(settingsPath);
+    try {
+      final data = await readYamlAsMap(subscriptionsPath);
+      final list = (data['subscriptions'] is List) ? data['subscriptions'] as List : [];
+      subscriptions = list.map((e) => Map<String, dynamic>.from(e)).toList();
+      subscriptions.sort((a, b) => (a['label'] as String).compareTo(b['label'] as String));
+
+      final settings = await readYamlAsMap(settingsPath);
       selectedId = settings['selected'] as String?;
     } catch (e) {
       subscriptions = [];
       showErrorSnackBarGlobal('$e');
     } finally {
+      close();
       if (mounted) setState(() => isLoading = false);
     }
   }
 
-  Future<void> _deleteSubscription(
-    BuildContext context,
-    Map<String, dynamic> sub,
-  ) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (_) => AlertDialog(
-            title: const Text('确认删除'),
-            content: Text('确定删除订阅 "${sub['label']}" 吗？'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('确认'),
-              ),
-            ],
-          ),
-    );
+  Future<void> _deleteSubscription(BuildContext context, Map<String, dynamic> sub) async {
+    final confirm = await showDialog<bool>(context: context, builder: (_) => AlertDialog(title: const Text('确认删除'), content: Text('确定删除订阅 "${sub['label']}" 吗？'), actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')), ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('确认'))]));
 
     if (confirm != true) return;
 
@@ -229,17 +205,14 @@ class _SubscriptionViewState extends State<SubscriptionView>
     try {
       subscriptions.removeWhere((s) => s['id'] == sub['id']);
       final data = {'subscriptions': subscriptions};
-      await writeYamlFromObject(data, subscriptionsPath);
-      await Process.run('su', [
-        '-c',
-        'rm -f /data/adb/mihomo/${sub['id']}.yaml',
-      ]);
+      await writeYamlFromMap(data, subscriptionsPath);
+      await Process.run('su', ['-c', 'rm -f /data/adb/mihomo/${sub['id']}.yaml']);
 
       if (selectedId == sub['id']) {
         selectedId = null;
-        final settings = await readYamlAsObject(settingsPath);
+        final settings = await readYamlAsMap(settingsPath);
         settings['selected'] = null;
-        await writeYamlFromObject(settings, settingsPath);
+        await writeYamlFromMap(settings, settingsPath);
       }
 
       setState(() {});
@@ -257,18 +230,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
       builder: (context) {
         return AlertDialog(
           title: const Text('添加订阅'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: TextField(
-              controller: controller,
-              minLines: 5,
-              maxLines: 10,
-              decoration: const InputDecoration(
-                hintText: '每行一个订阅地址',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ),
+          content: SizedBox(width: double.maxFinite, child: TextField(controller: controller, minLines: 5, maxLines: 10, decoration: const InputDecoration(hintText: '每行一个订阅地址', border: OutlineInputBorder()))),
           actions: [
             ElevatedButton.icon(
               onPressed: () async {
@@ -279,11 +241,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
               icon: const Icon(Icons.paste),
               label: const Text('粘贴'),
             ),
-            ElevatedButton.icon(
-              onPressed: () => Navigator.pop(context, controller.text),
-              icon: const Icon(Icons.check),
-              label: const Text('确认'),
-            ),
+            ElevatedButton.icon(onPressed: () => Navigator.pop(context, controller.text), icon: const Icon(Icons.check), label: const Text('确认')),
           ],
         );
       },
@@ -294,38 +252,28 @@ class _SubscriptionViewState extends State<SubscriptionView>
 
     final close = await showLoadingDialogGlobal();
     try {
-      final settings = await readYamlAsObject(settingsPath);
+      final settings = await readYamlAsMap(settingsPath);
       final ua = settings['ua'];
       final timeout = settings['timeout'];
-      final links =
-          result
-              .split('\n')
-              .map((e) => e.trim())
-              .where((e) => e.isNotEmpty)
-              .toList();
+      final links = result.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
 
       for (final link in links) {
         if (subscriptions.any((s) => s['link'] == link)) {
           showErrorSnackBarGlobal('订阅已存在: $link');
           continue;
         }
-
-        try {
-          final id = DateTime.now().millisecondsSinceEpoch.toString();
-          final downloadResult = await downloadYamlFile(link, ua, id, timeout);
-          subscriptions.add(downloadResult);
-        } catch (e) {
-          showErrorSnackBarGlobal('下载失败: $link, 错误: $e');
-        }
+        final id = DateTime.now().millisecondsSinceEpoch.toString();
+        final downloadResult = await downloadYamlFile(link, ua, id, timeout);
+        subscriptions.add(downloadResult);
       }
 
       final data = {'subscriptions': subscriptions};
-      await writeYamlFromObject(data, subscriptionsPath);
+      await writeYamlFromMap(data, subscriptionsPath);
       setState(() {});
     } catch (e) {
       showErrorSnackBarGlobal('$e');
     } finally {
-      if (mounted) close();
+      close();
     }
   }
 
@@ -357,21 +305,16 @@ class _SubscriptionViewState extends State<SubscriptionView>
                     final isSelected = sub['id'] == selectedId;
 
                     return Card(
-                      color:
-                          isSelected
-                              ? Theme.of(context).colorScheme.primaryContainer
-                              : Theme.of(context).colorScheme.surface,
+                      color: isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surface,
                       margin: const EdgeInsets.only(bottom: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
                         onTap: () async {
                           setState(() => selectedId = sub['id']);
-                          final settings = await readYamlAsObject(settingsPath);
+                          final settings = await readYamlAsMap(settingsPath);
                           settings['selected'] = sub['id'];
-                          await writeYamlFromObject(settings, settingsPath);
+                          await writeYamlFromMap(settings, settingsPath);
                           await _onSubscriptionTap(sub['id']);
                         },
                         child: Padding(
@@ -379,88 +322,18 @@ class _SubscriptionViewState extends State<SubscriptionView>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                sub['label'],
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
+                              Text(sub['label'], style: Theme.of(context).textTheme.titleMedium),
                               const SizedBox(height: 12),
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                          child: Container(
-                                            height: 12,
-                                            color:
-                                                Theme.of(context)
-                                                    .colorScheme
-                                                    .surfaceContainerHighest,
-                                            child: Row(
-                                              children: [
-                                                if ((sub['upload'] as int) > 0)
-                                                  Expanded(
-                                                    flex: scale(
-                                                      sub['upload'] as int,
-                                                    ),
-                                                    child: Container(
-                                                      color:
-                                                          Theme.of(
-                                                            context,
-                                                          ).colorScheme.primary,
-                                                    ),
-                                                  ),
-                                                if ((sub['download'] as int) >
-                                                    0)
-                                                  Expanded(
-                                                    flex: scale(
-                                                      sub['download'] as int,
-                                                    ),
-                                                    child: Container(
-                                                      color:
-                                                          Theme.of(context)
-                                                              .colorScheme
-                                                              .secondary,
-                                                    ),
-                                                  ),
-                                                Expanded(
-                                                  flex: (100 -
-                                                          scale(
-                                                            sub['upload']
-                                                                as int,
-                                                          ) -
-                                                          scale(
-                                                            sub['download']
-                                                                as int,
-                                                          ))
-                                                      .clamp(0, 100),
-                                                  child: Container(
-                                                    color:
-                                                        Theme.of(
-                                                          context,
-                                                        ).colorScheme.surface,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
+                                        ClipRRect(borderRadius: BorderRadius.circular(6), child: Container(height: 12, color: Theme.of(context).colorScheme.surfaceContainerHighest, child: Row(children: [if ((sub['upload'] as int) > 0) Expanded(flex: scale(sub['upload'] as int), child: Container(color: Theme.of(context).colorScheme.primary)), if ((sub['download'] as int) > 0) Expanded(flex: scale(sub['download'] as int), child: Container(color: Theme.of(context).colorScheme.secondary)), Expanded(flex: (100 - scale(sub['upload'] as int) - scale(sub['download'] as int)).clamp(0, 100), child: Container(color: Theme.of(context).colorScheme.surface))]))),
                                         const SizedBox(height: 6),
-                                        Text(
-                                          totalValue == 0
-                                              ? '上传: ∞  下载: ∞  总量: ∞'
-                                              : '上传: ${formatGB(sub['upload'] as int)}GB  下载: ${formatGB(sub['download'] as int)}GB  总量: ${formatGB(totalValue)}GB',
-                                          style:
-                                              Theme.of(
-                                                context,
-                                              ).textTheme.bodySmall,
-                                        ),
+                                        Text(totalValue == 0 ? '上传: ∞  下载: ∞  总量: ∞' : '上传: ${formatGB(sub['upload'] as int)}GB  下载: ${formatGB(sub['download'] as int)}GB  总量: ${formatGB(totalValue)}GB', style: Theme.of(context).textTheme.bodySmall),
                                         const SizedBox(height: 4),
                                         Text(
                                           (sub['expire'] as int) == 0
@@ -468,75 +341,36 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                               : '到期时间: ${DateTime.fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000).year}-'
                                                   '${DateTime.fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000).month}-'
                                                   '${DateTime.fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000).day}',
-                                          style:
-                                              Theme.of(
-                                                context,
-                                              ).textTheme.bodySmall,
+                                          style: Theme.of(context).textTheme.bodySmall,
                                         ),
                                         const SizedBox(height: 4),
-                                        Text(
-                                          '上次更新: ${formatTimeAgo(sub['update'] as String)}',
-                                          style:
-                                              Theme.of(
-                                                context,
-                                              ).textTheme.bodySmall,
-                                        ),
+                                        Text('上次更新: ${formatTimeAgo(sub['update'] as String)}', style: Theme.of(context).textTheme.bodySmall),
                                       ],
                                     ),
                                   ),
                                   Column(
                                     children: [
                                       PopupMenuButton<int>(
-                                        icon: Icon(
-                                          Icons.more_vert,
-                                          size: 20,
-                                          color:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.onSurface,
-                                        ),
+                                        icon: Icon(Icons.more_vert, size: 20, color: Theme.of(context).colorScheme.onSurface),
                                         onSelected: (value) async {
-                                          final settings =
-                                              await readYamlAsObject(
-                                                settingsPath,
-                                              );
+                                          final settings = await readYamlAsMap(settingsPath);
                                           final ua = settings['ua'];
                                           final timeout = settings['timeout'];
                                           switch (value) {
                                             case 1: // 刷新
-                                              final close =
-                                                  await showLoadingDialogGlobal();
+                                              final close = await showLoadingDialogGlobal();
                                               try {
-                                                final downloadResult =
-                                                    await downloadYamlFile(
-                                                      sub['link'],
-                                                      ua,
-                                                      sub['id'],
-                                                      timeout,
-                                                    );
-                                                final index = subscriptions
-                                                    .indexWhere(
-                                                      (s) =>
-                                                          s['id'] == sub['id'],
-                                                    );
+                                                final downloadResult = await downloadYamlFile(sub['link'], ua, sub['id'], timeout);
+                                                final index = subscriptions.indexWhere((s) => s['id'] == sub['id']);
                                                 if (index != -1) {
-                                                  subscriptions[index] =
-                                                      downloadResult;
+                                                  subscriptions[index] = downloadResult;
                                                 }
-                                                final data = {
-                                                  'subscriptions':
-                                                      subscriptions,
-                                                };
-                                                await writeYamlFromObject(
-                                                  data,
-                                                  subscriptionsPath,
-                                                );
+                                                final data = {'subscriptions': subscriptions};
+                                                await writeYamlFromMap(data, subscriptionsPath);
                                                 setState(() {});
                                               } catch (e) {
                                                 if (!mounted) return;
-                                                showErrorSnackBarGlobal(
-                                                  '刷新失败: $e',
-                                                );
+                                                showErrorSnackBarGlobal('刷新失败: $e');
                                               } finally {
                                                 if (mounted) close();
                                               }
@@ -545,68 +379,16 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                               _deleteSubscription(context, sub);
                                               break;
                                             case 3: // 复制链接
-                                              await Clipboard.setData(
-                                                ClipboardData(
-                                                  text: sub['link'],
-                                                ),
-                                              );
+                                              await Clipboard.setData(ClipboardData(text: sub['link']));
                                               showErrorSnackBarGlobal('链接已复制');
                                               break;
                                           }
                                         },
                                         itemBuilder:
                                             (_) => [
-                                              PopupMenuItem(
-                                                value: 1,
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.refresh,
-                                                      size: 18,
-                                                      color:
-                                                          Theme.of(
-                                                            context,
-                                                          ).colorScheme.primary,
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    const Text('刷新'),
-                                                  ],
-                                                ),
-                                              ),
-                                              PopupMenuItem(
-                                                value: 2,
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.delete_outline,
-                                                      size: 18,
-                                                      color:
-                                                          Theme.of(
-                                                            context,
-                                                          ).colorScheme.error,
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    const Text('删除'),
-                                                  ],
-                                                ),
-                                              ),
-                                              PopupMenuItem(
-                                                value: 3,
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.copy,
-                                                      size: 18,
-                                                      color:
-                                                          Theme.of(context)
-                                                              .colorScheme
-                                                              .onSurface,
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    const Text('复制'),
-                                                  ],
-                                                ),
-                                              ),
+                                              PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.refresh, size: 18, color: Theme.of(context).colorScheme.primary), const SizedBox(width: 8), const Text('刷新')])),
+                                              PopupMenuItem(value: 2, child: Row(children: [Icon(Icons.delete_outline, size: 18, color: Theme.of(context).colorScheme.error), const SizedBox(width: 8), const Text('删除')])),
+                                              PopupMenuItem(value: 3, child: Row(children: [Icon(Icons.copy, size: 18, color: Theme.of(context).colorScheme.onSurface), const SizedBox(width: 8), const Text('复制')])),
                                             ],
                                       ),
                                     ],
@@ -634,21 +416,11 @@ class _SubscriptionViewState extends State<SubscriptionView>
                 await _mergeProxies();
                 showErrorSnackBarGlobal('订阅合并成功');
               },
-              backgroundColor:
-                  selectedId == 'merge'
-                      ? Theme.of(context).colorScheme.primaryContainer
-                      : Theme.of(context).colorScheme.secondaryContainer,
-              child: Icon(
-                selectedId == 'merge' ? Icons.check : Icons.merge_type,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
+              backgroundColor: selectedId == 'merge' ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.secondaryContainer,
+              child: Icon(selectedId == 'merge' ? Icons.check : Icons.merge_type, color: Theme.of(context).colorScheme.onPrimaryContainer),
             ),
           ),
-          FloatingActionButton(
-            heroTag: 'add',
-            onPressed: _addSubscription,
-            child: const Icon(Icons.add),
-          ),
+          FloatingActionButton(heroTag: 'add', onPressed: _addSubscription, child: const Icon(Icons.add)),
         ],
       ),
     );
