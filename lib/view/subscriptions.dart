@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:mihomoR/service/subscriptions.dart';
-import 'package:mihomoR/service/yaml.dart';
 import 'package:mihomoR/service/path.dart';
 import 'package:mihomoR/widget.dart';
 
