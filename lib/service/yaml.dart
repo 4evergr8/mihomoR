@@ -3,9 +3,8 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:yaml_codec/yaml_codec.dart';
 import 'package:yaml/yaml.dart';
-import 'package:dart_eval/dart_eval.dart';
 
-/// 递归转换 YAML → Dart 原生结构
+
 dynamic _convertYaml(dynamic node) {
   if (node is YamlMap) {
     return Map<String, dynamic>.fromEntries(
@@ -18,9 +17,8 @@ dynamic _convertYaml(dynamic node) {
   }
   return node;
 }
-
-/// 读取 YAML 文件为动态对象（已转标准结构）
-Future<dynamic> readYamlAsObject(String sourcePath) async {
+/// 读取 YAML 文件为 Map，顶层必须是 Map，否则报错
+Future<Map<String, dynamic>> readYamlAsMap(String sourcePath) async {
   final dir = await getApplicationDocumentsDirectory();
   final localPath = join(dir.path, basename(sourcePath));
 
@@ -28,18 +26,20 @@ Future<dynamic> readYamlAsObject(String sourcePath) async {
     'su',
     ['-c', 'cp $sourcePath $localPath && chmod 777 $localPath'],
   );
-
-  if (result.exitCode != 0) {
-    throw Exception(result.stderr);
-  }
+  if (result.exitCode != 0) throw Exception(result.stderr);
 
   final text = await File(localPath).readAsString();
   final obj = YamlCodec().decode(text);
-  return _convertYaml(obj); // ✅ 关键
+
+  final converted = _convertYaml(obj);
+  if (converted is! Map<String, dynamic>) {
+    throw Exception('YAML 顶层不是 Map，无法处理: $sourcePath');
+  }
+  return converted;
 }
 
-/// 将动态对象写回 YAML 文件
-Future<void> writeYamlFromObject(dynamic data, String targetPath) async {
+/// 写 Map 回 YAML 文件
+Future<void> writeYamlFromMap(Map<String, dynamic> data, String targetPath) async {
   final dir = await getApplicationDocumentsDirectory();
   final localPath = join(dir.path, basename(targetPath));
 
@@ -50,29 +50,14 @@ Future<void> writeYamlFromObject(dynamic data, String targetPath) async {
     'su',
     ['-c', 'cp $localPath $targetPath && chmod 777 $targetPath'],
   );
-
-  if (result.exitCode != 0) {
-    throw Exception(result.stderr);
-  }
+  if (result.exitCode != 0) throw Exception(result.stderr);
 }
 
-/// 执行用户 Dart 文件（已保证输入输出稳定）
-Future<dynamic> runUserDartFromFile(dynamic config, String sourcePath) async {
-  final dir = await getApplicationDocumentsDirectory();
-  final localPath = join(dir.path, basename(sourcePath));
-
-  final result = await Process.run(
-    'su',
-    ['-c', 'cp $sourcePath $localPath && chmod 777 $localPath'],
-  );
-  if (result.exitCode != 0) throw Exception(result.stderr);
-
-  final userCode = await File(localPath).readAsString();
-
-  final modified = eval(
-    userCode,
-    function: 'override',
-    args: [config],
-  );
-  return modified;
+/// 顶层覆盖 Map：patch 的值覆盖 base 的同名 key
+Map<String, dynamic> overrideMap(Map<String, dynamic> base, Map<String, dynamic> override) {
+  final result = Map<String, dynamic>.from(base); // 拷贝一份 base
+  override.forEach((key, value) {
+    result[key] = value; // 顶层覆盖
+  });
+  return result;
 }
