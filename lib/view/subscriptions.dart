@@ -103,20 +103,19 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
         try {
           final subMap = Map<String, dynamic>.from(sub);
           final downloadResult = await downloadYamlFile(subMap['link'], ua, subMap['id'], timeout);
-          existingList.add(downloadResult);
 
-          // 写入当前订阅
+          // 更新列表并写入
+          existingList.add(downloadResult);
           final singleData = {'subscriptions': existingList};
           await writeYamlFromMap(singleData, subscriptionsPath);
+
+          // 立即更新界面
+          existingList.sort((a, b) => (a['label'] as String).compareTo(b['label'] as String));
+          if (mounted) setState(() => subscriptions = List.from(existingList));
         } catch (e) {
           showErrorSnackBarGlobal('订阅 ${sub['label'] ?? sub['id']} 下载失败: $e');
         }
       }
-
-      // 排序并更新界面
-      existingList.sort((a, b) => (a['label'] as String).compareTo(b['label'] as String));
-      if (!mounted) return;
-      setState(() => subscriptions = existingList);
     } catch (e) {
       showErrorSnackBarGlobal('刷新订阅失败: $e');
     } finally {
