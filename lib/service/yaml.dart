@@ -35,7 +35,6 @@ Future<dynamic> readYamlAsObject(String sourcePath) async {
 
   final text = await File(localPath).readAsString();
   final obj = YamlCodec().decode(text);
-
   return _convertYaml(obj); // ✅ 关键
 }
 
