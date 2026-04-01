@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mihomoR/service/path.dart';
-import 'package:mihomoR/service/yaml.dart';
+  import 'package:mihomoR/service/subscriptions.dart';
 import 'package:mihomoR/widget.dart';
 
 class ProxiesView extends StatefulWidget {
