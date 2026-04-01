@@ -4,8 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:mihomoR/service/sub.dart';
 import 'package:mihomoR/service/yaml.dart';
-import 'package:mihomoR/widget.dart';
 import 'package:mihomoR/service/path.dart';
+
+import '../widget.dart';
+
 
 class SubscriptionView extends StatefulWidget {
   const SubscriptionView({super.key});
@@ -66,17 +68,17 @@ class _SubscriptionViewState extends State<SubscriptionView>
   }
 
   Future<void> _onSubscriptionTap(String id) async {
-    final close = await showLoadingDialog(context);
+    final close = await showLoadingDialogGlobal();
     try {
       final base = await readYamlAsObject("/data/adb/mihomo/$id.yaml");
       final yaml = await runUserDartFromFile(base, overridePath);
       await writeYamlFromObject(yaml, configPath);
+      final settings = await readYamlAsObject(settingsPath);
+      final port = settings['port'];
+      final dio = Dio();
+      final params = {'force': 'true'};
+      final data = {"path": "", "payload": ""};
       try {
-        final settings = await readYamlAsObject(settingsPath);
-        final dio = Dio();
-        final params = {'force': 'true'};
-        final data = {"path": "", "payload": ""};
-        final port = settings['port'];
         await dio.put(
           'http://127.0.0.1:$port/configs',
           queryParameters: params,
@@ -85,28 +87,26 @@ class _SubscriptionViewState extends State<SubscriptionView>
         );
       } catch (_) {}
     } catch (e) {
-      if (!mounted) return;
-      await showErrorDialog(context, '加载错误', e);
+      showErrorSnackBarGlobal('$e');
     } finally {
       close();
     }
   }
 
   Future<void> _refreshSubscriptions() async {
-    if (!mounted) return;
+    try {
+      final data = await readYamlAsObject(subscriptionsPath);
+      final settings = await readYamlAsObject(settingsPath);
+      final list =
+          (data['subscriptions'] is List)
+              ? (data['subscriptions'] as List)
+              : [];
+      final ua = settings['ua'];
+      final timeout = settings['timeout'];
+      final futures =
+          list.map((e) async {
+            final sub = SubscriptionInfo.fromMap(Map<String, dynamic>.from(e));
 
-    final data = await readYamlAsObject(subscriptionsPath);
-    final list =
-        (data['subscriptions'] is List) ? (data['subscriptions'] as List) : [];
-
-    final settings = await readYamlAsObject(settingsPath);
-    final ua = settings['ua'];
-    final timeout = settings['timeout'];
-
-    final futures =
-        list.map((e) async {
-          final sub = SubscriptionInfo.fromMap(Map<String, dynamic>.from(e));
-          try {
             final downloadResult = await downloadYamlFile(
               sub.link,
               ua,
@@ -123,19 +123,19 @@ class _SubscriptionViewState extends State<SubscriptionView>
               expire: downloadResult.expire,
               update: downloadResult.update,
             );
-          } catch (_) {
-            return sub;
-          }
-        }).toList();
+          }).toList();
 
-    final updatedSubs = await Future.wait(futures);
-    final newData = {
-      'subscriptions': updatedSubs.map((s) => s.toMap()).toList(),
-    };
-    await writeYamlFromObject(newData, subscriptionsPath);
-    updatedSubs.sort((a, b) => a.label.compareTo(b.label));
-    if (!mounted) return;
-    setState(() => subscriptions = updatedSubs);
+      final updatedSubs = await Future.wait(futures);
+      final newData = {
+        'subscriptions': updatedSubs.map((s) => s.toMap()).toList(),
+      };
+      await writeYamlFromObject(newData, subscriptionsPath);
+      updatedSubs.sort((a, b) => a.label.compareTo(b.label));
+      if (!mounted) return;
+      setState(() => subscriptions = updatedSubs);
+    } catch (e) {
+      showErrorSnackBarGlobal('$e');
+    }
   }
 
   Future<void> _mergeProxies() async {
@@ -192,7 +192,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
         );
       } catch (_) {}
     } catch (e) {
-      if (mounted) await showErrorDialog(context, '生成配置失败', e);
+      showErrorSnackBarGlobal('$e');
     }
   }
 
@@ -216,8 +216,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
       selectedId = settings['selected'] as String?;
     } catch (e) {
       subscriptions = [];
-      if (!mounted) return;
-      await showErrorDialog(context, '加载错误', e);
+      showErrorSnackBarGlobal('$e');
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
@@ -247,9 +246,8 @@ class _SubscriptionViewState extends State<SubscriptionView>
     );
 
     if (confirm != true) return;
-    if (!mounted) return;
 
-    final close = await showLoadingDialog(context);
+    final close = await showLoadingDialogGlobal();
     try {
       subscriptions.removeWhere((s) => s.id == sub.id);
       final data = {
@@ -267,10 +265,9 @@ class _SubscriptionViewState extends State<SubscriptionView>
 
       setState(() {});
     } catch (e) {
-      if (!mounted) return;
-      await showErrorDialog(context, '删除失败', e);
+      showErrorSnackBarGlobal('$e');
     } finally {
-      if (mounted) close();
+      close();
     }
   }
 
@@ -318,7 +315,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
     if (result == null || result.trim().isEmpty) return;
     if (!mounted) return;
 
-    final close = await showLoadingDialog(context);
+    final close = await showLoadingDialogGlobal();
     try {
       final settings = await readYamlAsObject(settingsPath);
       final ua = settings['ua'];
@@ -333,9 +330,8 @@ class _SubscriptionViewState extends State<SubscriptionView>
 
       for (final link in links) {
         if (subscriptions.any((s) => s.link == link)) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('订阅已存在: $link')));
+
+          showErrorSnackBarGlobal('订阅已存在: $link');
           continue;
         }
 
@@ -355,9 +351,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
             ),
           );
         } catch (e) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('下载失败: $link,错误: $e')));
+          showErrorSnackBarGlobal('下载失败: $link,错误: $e');
         }
       }
 
@@ -367,8 +361,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
       await writeYamlFromObject(data, subscriptionsPath);
       setState(() {});
     } catch (e) {
-      if (!mounted) return;
-      await showErrorDialog(context, '加载错误', e);
+      showErrorSnackBarGlobal('$e');
     } finally {
       if (mounted) close();
     }
@@ -540,9 +533,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                           switch (value) {
                                             case 1: // 刷新
                                               final close =
-                                                  await showLoadingDialog(
-                                                    context,
-                                                  );
+                                                  await showLoadingDialogGlobal();
                                               try {
                                                 final downloadResult =
                                                     await downloadYamlFile(
@@ -590,13 +581,8 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                                 setState(() {});
                                               } catch (e) {
                                                 if (!mounted) return;
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text('刷新失败: $e'),
-                                                  ),
-                                                );
+                                                showErrorSnackBarGlobal('刷新失败: $e');
+
                                               } finally {
                                                 if (mounted) close();
                                               }
@@ -608,14 +594,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
                                               await Clipboard.setData(
                                                 ClipboardData(text: sub.link),
                                               );
-                                              if (!mounted) return;
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text('链接已复制'),
-                                                ),
-                                              );
+                                              showErrorSnackBarGlobal('链接已复制');
                                               break;
                                           }
                                         },
@@ -697,10 +676,7 @@ class _SubscriptionViewState extends State<SubscriptionView>
               onPressed: () async {
                 setState(() => selectedId = 'merge');
                 await _mergeProxies();
-                if (!mounted) return;
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('已开启订阅合并')));
+                showErrorSnackBarGlobal('订阅合并成功');
               },
               backgroundColor:
                   selectedId == 'merge'
