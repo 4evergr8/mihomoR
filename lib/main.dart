@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mihomoR/service/core.dart';
 import 'package:quick_settings_with_flutter_plugins/quick_settings.dart';
@@ -32,6 +31,9 @@ Tile? onTileAdded(Tile tile) {
 @pragma('vm:entry-point')
 void onTileRemoved() {}
 
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -54,6 +56,7 @@ class MyApp extends StatelessWidget {
     MaterialTheme theme = MaterialTheme(textTheme);
 
     return MaterialApp(
+      navigatorKey: navigatorKey, // 绑定全局 key
       title: 'mihomoR',
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       home: const HomeScreen(),
