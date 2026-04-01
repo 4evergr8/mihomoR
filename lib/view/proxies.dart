@@ -42,11 +42,11 @@ class _ProxiesViewState extends State<ProxiesView>
     final close = await showLoadingDialogGlobal();
     setState(() => isTesting = true);
     try {
-      final config = await readYamlAsObject(configPath);
+      final config = await readYamlAsMap(configPath);
       final groups = config['proxy-groups'] as List? ?? [];
       final firstGroupName =
           groups.isNotEmpty ? groups.first['name'] as String? : null;
-      final settings = await readYamlAsObject(settingsPath);
+      final settings = await readYamlAsMap(settingsPath);
       final port = settings['port'];
       final url = settings['url'];
       timeout = settings['testtimeout'];
