@@ -121,7 +121,7 @@ Future<Map<String, dynamic>> downloadYamlFile(String url, String ua, String id, 
       throw Exception('YAML 解析失败: $e');
     }
 
-    final result = await Process.run('su', ['-c', 'mkdir -p /data/adb/mihomo && cp $filePath /data/adb/mihomo/$id.yaml && chmod 777 /data/adb/mihomo/$id.yaml']);
+    final result = await Process.run('su', ['-c', 'cp $filePath /data/adb/mihomo/config/$id.yaml && chmod 777 /data/adb/mihomo/config/$id.yaml']);
 
     if (result.exitCode != 0) {
       throw Exception('root 拷贝失败: ${result.stderr}');
