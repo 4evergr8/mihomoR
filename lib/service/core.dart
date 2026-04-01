@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:mihomoR/service/path.dart';
-import 'package:mihomoR/service/yaml.dart';
+import 'package:mihomoR/service/subscriptions.dart';
 import 'package:quick_settings_with_flutter_plugins/quick_settings.dart';
 
 Future<void> stopMihomo() async {
