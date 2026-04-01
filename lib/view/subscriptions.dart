@@ -69,7 +69,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
     try {
       final settings = await readYamlAsMap(settingsPath);
       final port = settings['port'];
-      final base = await readYamlAsMap("/data/adb/mihomo/$id.yaml");
+      final base = await readYamlAsMap("/data/adb/mihomo/config/$id.yaml");
       final override = await readYamlAsMap(overridePath);
       final yaml = await overrideMap(base, override);
       await writeYamlFromMap(yaml, configPath);
@@ -135,7 +135,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
       for (final subMap in list) {
         try {
           final sub = Map<String, dynamic>.from(subMap);
-          final subYaml = await readYamlAsMap("/data/adb/mihomo/${sub['id']}.yaml");
+          final subYaml = await readYamlAsMap("/data/adb/mihomo/config/${sub['id']}.yaml");
           if (subYaml['proxies'] is List) {
             final proxies = List<Map<String, dynamic>>.from(subYaml['proxies']);
             for (var proxy in proxies) {
@@ -206,7 +206,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
       subscriptions.removeWhere((s) => s['id'] == sub['id']);
       final data = {'subscriptions': subscriptions};
       await writeYamlFromMap(data, subscriptionsPath);
-      await Process.run('su', ['-c', 'rm -f /data/adb/mihomo/${sub['id']}.yaml']);
+      await Process.run('su', ['-c', 'rm -f /data/adb/mihomo/config/${sub['id']}.yaml']);
 
       if (selectedId == sub['id']) {
         selectedId = null;
