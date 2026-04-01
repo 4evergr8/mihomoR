@@ -4,7 +4,7 @@ import 'package:mihomoR/service/yaml.dart';
 import 'package:quick_settings_with_flutter_plugins/quick_settings.dart';
 
 Future<void> stopMihomo() async {
-  final settings = await readYamlAsObject(settingsPath);
+  final settings = await readYamlAsMap(settingsPath);
   final stopCmd = settings['kill'] ?? '';
   if (stopCmd.isNotEmpty) {
     await Process.run("sh", ["-c", stopCmd]);
@@ -20,7 +20,7 @@ Future<void> stopMihomo() async {
 }
 
 Future<void> startMihomo() async {
-  final settings = await readYamlAsObject(settingsPath);
+  final settings = await readYamlAsMap(settingsPath);
   final stopCmd = settings['kill'] ?? '';
   final startCmd = settings['start'] ?? '';
 
