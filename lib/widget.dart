@@ -70,7 +70,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
             label: '分流',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings_power),
+            icon: Icon(Icons.power_settings_new),
             label: '控制',
           ),
         ],
