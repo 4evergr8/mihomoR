@@ -12,7 +12,7 @@ class SplitView extends StatefulWidget {
 
 class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixin {
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => false;
 
   List<AppInfo> apps = [];
   List<AppInfo> filteredApps = [];
