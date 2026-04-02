@@ -40,6 +40,7 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
     final appList = await FlutterDeviceApps.listApps(
       includeSystem: true,
       includeIcons: true,
+        onlyLaunchable: false
     );
     final validApps = appList.where((a) => a.packageName != null && a.appName != null).toList();
 
@@ -89,7 +90,7 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('分应用')),
+      appBar: AppBar(title: const Text('分流')),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
