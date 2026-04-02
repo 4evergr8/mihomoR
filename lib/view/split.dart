@@ -14,11 +14,10 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
   @override
   bool get wantKeepAlive => true;
 
-  List<Application> apps = [];
-  List<Application> filteredApps = [];
+  List<AppInfo> apps = [];
+  List<AppInfo> filteredApps = [];
   bool isLoading = true;
   String searchQuery = '';
-  bool switchValue = false;
 
   @override
   void initState() {
@@ -28,11 +27,14 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
 
   Future<void> _loadApps() async {
     try {
-      final appList = await FlutterDeviceApps.getInstalledApps(
-        includeSystemApps: true,
-        includeAppIcons: true,
+      final appList = await FlutterDeviceApps.listApps(
+        includeSystem: true,
+        includeIcons: true,
       );
-      appList.sort((a, b) => a.appName.compareTo(b.appName));
+
+      appList.sort((a, b) =>
+          (a.appName ?? '').toLowerCase().compareTo((b.appName ?? '').toLowerCase()));
+
       setState(() {
         apps = appList;
         _filterApps();
@@ -45,10 +47,14 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
   }
 
   void _filterApps() {
-    filteredApps = apps.where((app) =>
-    app.appName.toLowerCase().contains(searchQuery.toLowerCase()) ||
-        app.packageName.toLowerCase().contains(searchQuery.toLowerCase())
-    ).toList();
+    final query = searchQuery.toLowerCase();
+    filteredApps = apps
+        .where((app) =>
+    app.appName != null &&
+        app.packageName != null &&
+        (app.appName!.toLowerCase().contains(query) ||
+            app.packageName!.toLowerCase().contains(query)))
+        .toList();
   }
 
   @override
@@ -62,30 +68,17 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      hintText: '搜索应用',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        searchQuery = value;
-                        _filterApps();
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Switch(
-                  value: switchValue,
-                  onChanged: (value) {
-                    setState(() => switchValue = value);
-                  },
-                ),
-              ],
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: '搜索应用',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                  _filterApps();
+                });
+              },
             ),
           ),
           Expanded(
@@ -96,21 +89,17 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
               itemCount: filteredApps.length,
               itemBuilder: (context, index) {
                 final app = filteredApps[index];
-                Uint8List? iconBytes;
-                if (app is ApplicationWithIcon) {
-                  iconBytes = app.icon;
-                }
+                Uint8List? iconBytes = app.iconBytes;
                 return Card(
                   margin: const EdgeInsets.only(bottom: 8),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                      borderRadius: BorderRadius.circular(12)),
                   child: ListTile(
                     leading: iconBytes != null
                         ? Image.memory(iconBytes, width: 40, height: 40)
                         : const Icon(Icons.android, size: 40),
-                    title: Text(app.appName),
-                    subtitle: Text(app.packageName),
+                    title: Text(app.appName ?? ''),
+                    subtitle: Text(app.packageName ?? ''),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
                       // TODO: handle tap
@@ -122,28 +111,12 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
           ),
         ],
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: FloatingActionButton(
-              heroTag: 'button1',
-              onPressed: () {
-                // TODO: button 1 action
-              },
-              child: const Icon(Icons.add),
-            ),
-          ),
-          FloatingActionButton(
-            heroTag: 'button2',
-            onPressed: () {
-              // TODO: button 2 action
-            },
-            child: const Icon(Icons.settings),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'button1',
+        onPressed: () {
+          // TODO: button action
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
