@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:mihomoR/service/core.dart';
+import 'package:mihomoR/service/control.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mihomoR/service/subscriptions.dart';
 import 'package:mihomoR/service/path.dart';
