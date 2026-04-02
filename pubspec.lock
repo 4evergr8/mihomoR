@@ -121,14 +121,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.12"
-  device_apps:
-    dependency: "direct main"
-    description:
-      name: device_apps
-      sha256: e84dc74d55749993fd671148cc0bd53096e1be0c268fc364285511b1d8a4c19b
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.0"
   dio:
     dependency: "direct main"
     description:
@@ -182,6 +174,30 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_device_apps:
+    dependency: "direct main"
+    description:
+      name: flutter_device_apps
+      sha256: "1a1852c834d90dc5684d86adc8c1c828a2597644257ac63050a0ede164d7eb96"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
+  flutter_device_apps_android:
+    dependency: transitive
+    description:
+      name: flutter_device_apps_android
+      sha256: "23ee222ec24221cb997996d12b6a4e6c925c1dd6b69be36605d25186a9ec24dc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
+  flutter_device_apps_platform_interface:
+    dependency: transitive
+    description:
+      name: flutter_device_apps_platform_interface
+      sha256: "7d56bba5952186dee83665f080b547b975b39cde1a49f0d0d344f96de5d9ac84"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
   flutter_launcher_icons:
     dependency: "direct main"
     description:
