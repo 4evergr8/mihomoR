@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_device_apps/flutter_device_apps.dart';
@@ -89,7 +88,7 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
               ? const Center(child: CircularProgressIndicator())
               : Column(
                 children: [
-                  Padding(padding: const EdgeInsets.all(16), child: TextField(decoration: const InputDecoration(hintText: '搜索应用', border: OutlineInputBorder()), onChanged: _filterApps)),
+                  Padding(padding: const EdgeInsets.all(16), child: TextField(decoration: const InputDecoration(hintText: '筛选应用', border: OutlineInputBorder()), onChanged: _filterApps)),
                   Expanded(
                     child: ListView.builder(
                       itemCount: filteredApps.length,
