@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_device_apps/flutter_device_apps.dart';
 import 'package:mihomoR/service/path.dart';
 import 'package:mihomoR/service/subscriptions.dart';
-
 
 class SplitView extends StatefulWidget {
   const SplitView({super.key});
@@ -37,11 +37,7 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
     yamlPackages = includePackages.toSet();
     selectedPackages = includePackages.toSet();
 
-    final appList = await FlutterDeviceApps.listApps(
-      includeSystem: true,
-      includeIcons: true,
-        onlyLaunchable: false
-    );
+    final appList = await FlutterDeviceApps.listApps(includeSystem: true, includeIcons: true, onlyLaunchable: false);
     final validApps = appList.where((a) => a.packageName != null && a.appName != null).toList();
 
     // 将 YAML 中存在但未安装的包名生成虚拟 AppInfo（不显示图标）
@@ -71,10 +67,7 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
     final q = query.toLowerCase();
     setState(() {
       searchQuery = query;
-      filteredApps = apps.where((app) =>
-      (app.appName ?? '').toLowerCase().contains(q) ||
-          (app.packageName ?? '').toLowerCase().contains(q)
-      ).toList();
+      filteredApps = apps.where((app) => (app.appName ?? '').toLowerCase().contains(q) || (app.packageName ?? '').toLowerCase().contains(q)).toList();
     });
   }
 
@@ -83,7 +76,7 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
     final newInclude = {...checkedPackages, ...yamlPackages.difference(apps.map((e) => e.packageName!).toSet())};
     final override = await readYamlAsMap(overridePath);
     override['tun']['include-package'] = newInclude.toList();
-    await writeYamlFromMap(override,overridePath);
+    await writeYamlFromMap(override, overridePath);
   }
 
   @override
@@ -91,52 +84,49 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
     super.build(context);
     return Scaffold(
       appBar: AppBar(title: const Text('分流')),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              decoration: const InputDecoration(
-                hintText: '搜索应用',
-                border: OutlineInputBorder(),
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                children: [
+                  Padding(padding: const EdgeInsets.all(16), child: TextField(decoration: const InputDecoration(hintText: '搜索应用', border: OutlineInputBorder()), onChanged: _filterApps)),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filteredApps.length,
+                      itemBuilder: (context, index) {
+                        final app = filteredApps[index];
+                        final isChecked = selectedPackages.contains(app.packageName);
+                        Uint8List? iconBytes = app.iconBytes;
+                        final displayName = app.appName ?? app.packageName ?? '';
+
+                        return GestureDetector(
+                          onLongPress: () {
+                            if (app.packageName != null) {
+                              Clipboard.setData(ClipboardData(text: app.packageName!));
+                            }
+                          },
+                          child: CheckboxListTile(
+                            value: isChecked,
+                            onChanged: (v) {
+                              setState(() {
+                                if (v == true) {
+                                  selectedPackages.add(app.packageName!);
+                                } else {
+                                  selectedPackages.remove(app.packageName);
+                                }
+                              });
+                            },
+                            title: Text(displayName),
+                            subtitle: Text(app.packageName ?? ''),
+                            secondary: iconBytes != null ? Image.memory(iconBytes, width: 40, height: 40) : const Icon(Icons.android, size: 40),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-              onChanged: _filterApps,
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: filteredApps.length,
-              itemBuilder: (context, index) {
-                final app = filteredApps[index];
-                final isChecked = selectedPackages.contains(app.packageName);
-                Uint8List? iconBytes = app.iconBytes;
-                return CheckboxListTile(
-                  value: isChecked,
-                  onChanged: (v) {
-                    setState(() {
-                      if (v == true) {
-                        selectedPackages.add(app.packageName!);
-                      } else {
-                        selectedPackages.remove(app.packageName);
-                      }
-                    });
-                  },
-                  title: Text(app.appName ?? app.packageName ?? ''),
-                  secondary: iconBytes != null
-                      ? Image.memory(iconBytes, width: 40, height: 40)
-                      : const Icon(Icons.android, size: 40),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _saveSelection,
-        child: const Icon(Icons.save),
-      ),
+      floatingActionButton: FloatingActionButton(onPressed: _saveSelection, child: const Icon(Icons.save)),
     );
   }
 }
