@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mihomoR/view/proxies.dart';
 import 'package:mihomoR/main.dart';
+import 'package:mihomoR/view/split.dart';
 import 'package:mihomoR/view/subscriptions.dart';
 import 'package:mihomoR/view/control.dart';
 
@@ -19,6 +20,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   static final List<Widget> _widgetOptions = <Widget>[
     SubscriptionView(),
     ProxiesView(),
+    SplitView(),
     ControlView(),
   ];
 
@@ -63,9 +65,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
           BottomNavigationBarItem(
             icon: Icon(Icons.link),
             label: '节点',
+          ),BottomNavigationBarItem(
+            icon: Icon(Icons.call_split),
+            label: '分流',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.control_camera),
+            icon: Icon(Icons.settings_power),
             label: '控制',
           ),
         ],
