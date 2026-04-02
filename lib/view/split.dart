@@ -72,10 +72,19 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
 
   Future<void> _saveSelection() async {
     final checkedPackages = apps.where((a) => selectedPackages.contains(a.packageName)).map((a) => a.packageName!).toSet();
+
+    // YAML 中原本存在但不在 apps 列表中的包名也保留
     final newInclude = {...checkedPackages, ...yamlPackages.difference(apps.map((e) => e.packageName!).toSet())};
+
+    // 更新 overridePath
     final override = await readYamlAsMap(overridePath);
     override['tun']['include-package'] = newInclude.toList();
     await writeYamlFromMap(override, overridePath);
+
+    // 更新 mergePath，完全替换 include-package
+    final merge = await readYamlAsMap(mergePath);
+    merge['tun']['include-package'] = newInclude.toList();
+    await writeYamlFromMap(merge, mergePath);
   }
 
   @override
