@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mihomoR/service/core.dart';
+import 'package:mihomoR/service/control.dart';
 import 'package:quick_settings_with_flutter_plugins/quick_settings.dart';
 import 'package:mihomoR/theme/theme.dart';
 import 'package:mihomoR/theme/util.dart';
