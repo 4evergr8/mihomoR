@@ -16,9 +16,9 @@ public final class GeneratedPluginRegistrant {
   private static final String TAG = "GeneratedPluginRegistrant";
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
     try {
-      flutterEngine.getPlugins().add(new fr.g123k.deviceapps.DeviceAppsPlugin());
+      flutterEngine.getPlugins().add(new com.okmsbun.flutter_device_apps_android.FlutterDeviceAppsAndroidPlugin());
     } catch (Exception e) {
-      Log.e(TAG, "Error registering plugin device_apps, fr.g123k.deviceapps.DeviceAppsPlugin", e);
+      Log.e(TAG, "Error registering plugin flutter_device_apps_android, com.okmsbun.flutter_device_apps_android.FlutterDeviceAppsAndroidPlugin", e);
     }
     try {
       flutterEngine.getPlugins().add(new net.jonhanson.flutter_native_splash.FlutterNativeSplashPlugin());
