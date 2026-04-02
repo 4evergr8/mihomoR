@@ -8,7 +8,7 @@ flutter_native_splash:
   image: assets/aaa.png
   android: true
   ios: false
-version: 1.0.2+2
+version: 2.0.0+3
 environment:
   sdk: ^3.7.2
 
@@ -31,6 +31,7 @@ dependencies:
   path: any
   open_file: any
   flutter_native_splash: any
+
 
 flutter:
   uses-material-design: true
