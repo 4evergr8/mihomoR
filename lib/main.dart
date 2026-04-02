@@ -8,13 +8,26 @@ import 'package:mihomoR/widget.dart';
 /// Tile 点击回调
 @pragma('vm:entry-point')
 Tile onTileClicked(Tile tile) {
-  final oldStatus = tile.tileStatus;
+  final isActive = tile.tileStatus == TileStatus.active;
 
-  if (oldStatus == TileStatus.active) {
+  if (isActive) {
     stopMihomo();
+
+    tile
+      ..tileStatus = TileStatus.inactive
+      ..label = "mihomo"
+      ..drawableName = "quick_settings_base_icon"
+      ..contentDescription = "mihomo 已停止";
   } else {
     startMihomo();
+
+    tile
+      ..tileStatus = TileStatus.active
+      ..label = "mihomo"
+      ..drawableName = "quick_settings_base_icon"
+      ..contentDescription = "mihomo 已启动";
   }
+
   return tile;
 }
 
