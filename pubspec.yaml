@@ -31,7 +31,7 @@ dependencies:
   path: any
   open_file: any
   flutter_native_splash: any
-
+  device_apps: any
 
 flutter:
   uses-material-design: true
