@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mihomoR/service/control.dart';
+import 'package:quick_settings_with_flutter_plugins/quick_settings.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mihomoR/service/subscriptions.dart';
 import 'package:mihomoR/service/path.dart';
@@ -150,7 +151,18 @@ class _ControlViewState extends State<ControlView>
             _buildButtonRow(
               label: '启动',
               icon: Icons.play_arrow,
-              onPressed: startMihomo,
+              onPressed:  () async {
+                await stopMihomo();
+
+                await QuickSettings.syncTile(
+                  Tile(
+                    label: "mihomo",
+                    tileStatus: TileStatus.active,
+                    drawableName: 'quick_settings_base_icon',
+                    contentDescription: "mihomo 已启动",
+                  ),
+                );
+              },
               value: startCmd,
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -158,7 +170,18 @@ class _ControlViewState extends State<ControlView>
             _buildButtonRow(
               label: '停止',
               icon: Icons.stop,
-              onPressed: stopMihomo,
+              onPressed: () async {
+                await stopMihomo();
+
+                QuickSettings.syncTile(
+                  Tile(
+                    label: "mihomo",
+                    tileStatus: TileStatus.inactive,
+                    drawableName: 'quick_settings_base_icon',
+                    contentDescription: "mihomo 已停止",
+                  ),
+                );
+              },
               value: stopCmd,
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
