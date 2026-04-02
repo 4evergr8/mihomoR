@@ -135,13 +135,47 @@ geox-url:
   geoip: "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat"
   geosite: "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat"
 
+
 tun:
   enable: true
-  stack: system
-  device: tun0
+  stack: "gvisor"
+  device: "tun0"
   auto-route: true
   auto-detect-interface: true
   strict-route: true
+  include-package:
+    - "a.forevergreat.atoolbox"
+    - "com.google.android.apps.authenticator2"
+    - "com.radolyn.ayugram"
+    - "com.x8bit.bitwarden"
+    - "com.openai.chatgpt"
+    - "com.android.chrome"
+    - "com.follow.clash"
+    - "com.google.android.inputmethod.latin"
+    - "com.android.vending"
+    - "com.google.android.gms"
+    - "com.google.android.gsf"
+    - "ai.x.grok"
+    - "com.google.android.keep"
+    - "me.weishu.kernelsu"
+    - "a.forevergreat.mihomoroot"
+    - "com.mixplorer"
+    - "com.piyush.music"
+    - "com.microsoft.office.outlook"
+    - "com.github.pacalini.pica_comic"
+    - "com.pikcloud.pikpak"
+    - "me.ash.reader"
+    - "io.github.chsbuffer.revancedxposed"
+    - "ru.dahl.messenger"
+    - "com.termux"
+    - "org.telegram.group"
+    - "com.google.android.youtube"
+    - "com.google.android.apps.youtube.music"
+    - "com.binance.dev"
+    - "im.fdx.v2ex"
+    - "com.google.android.apps.photos"
+    - "org.adaway"
+
 
 dns:
   enable: true
@@ -194,13 +228,47 @@ geox-url:
   geoip: "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat"
   geosite: "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat"
 
+
 tun:
   enable: true
-  stack: system
-  device: tun0
+  stack: "gvisor"
+  device: "tun0"
   auto-route: true
   auto-detect-interface: true
   strict-route: true
+  include-package:
+    - "a.forevergreat.atoolbox"
+    - "com.google.android.apps.authenticator2"
+    - "com.radolyn.ayugram"
+    - "com.x8bit.bitwarden"
+    - "com.openai.chatgpt"
+    - "com.android.chrome"
+    - "com.follow.clash"
+    - "com.google.android.inputmethod.latin"
+    - "com.android.vending"
+    - "com.google.android.gms"
+    - "com.google.android.gsf"
+    - "ai.x.grok"
+    - "com.google.android.keep"
+    - "me.weishu.kernelsu"
+    - "a.forevergreat.mihomoroot"
+    - "com.mixplorer"
+    - "com.piyush.music"
+    - "com.microsoft.office.outlook"
+    - "com.github.pacalini.pica_comic"
+    - "com.pikcloud.pikpak"
+    - "me.ash.reader"
+    - "io.github.chsbuffer.revancedxposed"
+    - "ru.dahl.messenger"
+    - "com.termux"
+    - "org.telegram.group"
+    - "com.google.android.youtube"
+    - "com.google.android.apps.youtube.music"
+    - "com.binance.dev"
+    - "im.fdx.v2ex"
+    - "com.google.android.apps.photos"
+    - "org.adaway"
+
 
 dns:
   enable: true
@@ -243,6 +311,7 @@ rules:
 
   - MATCH,⚡自动选择⚡
 
+
 proxy-groups:
   - name: ⚡自动选择⚡
     type: url-test
@@ -281,6 +350,7 @@ proxy-groups:
     max-failed-times: 2
     include-all: true
     proxies: []
+
 ```
 
 ## 引用
