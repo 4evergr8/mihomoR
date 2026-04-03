@@ -152,8 +152,7 @@ class _ControlViewState extends State<ControlView>
               label: '启动',
               icon: Icons.play_arrow,
               onPressed:  () async {
-                await stopMihomo();
-
+                await startMihomo();
                 await QuickSettings.syncTile(
                   Tile(
                     label: "mihomo",
