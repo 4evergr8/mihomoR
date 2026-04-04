@@ -94,8 +94,8 @@ class _ControlViewState extends State<ControlView> with AutomaticKeepAliveClient
         child: Column(
           children: [
             _buildButtonRow(
-              label: '启动',
-              icon: Icons.play_arrow,
+              label: '重启',
+              icon: Icons.restart_alt_outlined,
               onPressed: () async {
                 await startMihomo();
                 await QuickSettings.syncTile(Tile(label: "mihomo", tileStatus: TileStatus.active, drawableName: 'quick_settings_base_icon', contentDescription: "mihomo 已启动"));
