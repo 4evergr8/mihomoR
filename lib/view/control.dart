@@ -16,14 +16,13 @@ class ControlView extends StatefulWidget {
 class _ControlViewState extends State<ControlView>
     with AutomaticKeepAliveClientMixin {
   @override
-  bool get wantKeepAlive => false;
+  bool get wantKeepAlive => false; // 不保持状态
 
   String startCmd = '';
   String stopCmd = '';
   String webuiUrl = '';
   String checkCmd = '';
-  String testCmd = '';
-  String currentLog = '--';
+  String checkResult = '--';
 
   @override
   void initState() {
@@ -38,7 +37,6 @@ class _ControlViewState extends State<ControlView>
       stopCmd = settings['kill'] ?? '';
       webuiUrl = 'http://127.0.0.1:${settings['port'] ?? 9090}/ui/#/proxies';
       checkCmd = settings['check'] ?? '';
-      testCmd = settings['test'] ?? '';
     });
     _runCheck();
   }
@@ -55,30 +53,12 @@ class _ControlViewState extends State<ControlView>
       final result = await Process.run("sh", ["-c", checkCmd]);
       if (!mounted) return;
       setState(() {
-        currentLog =
-            result.stdout.toString().trim() + result.stderr.toString();
+        checkResult = result.stdout.toString().trim();
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        currentLog = '错误: $e';
-      });
-    }
-  }
-
-  Future<void> _runTest() async {
-    if (testCmd.isEmpty) return;
-    try {
-      final result = await Process.run("sh", ["-c", testCmd]);
-      if (!mounted) return;
-      setState(() {
-        currentLog =
-            result.stdout.toString() + result.stderr.toString();
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        currentLog = '错误: $e';
+        checkResult = '错误: $e';
       });
     }
   }
@@ -133,7 +113,7 @@ class _ControlViewState extends State<ControlView>
       child: Stack(
         children: [
           TextField(
-            controller: TextEditingController(text: currentLog),
+            controller: TextEditingController(text: checkResult),
             readOnly: true,
             maxLines: null,
             style: TextStyle(
@@ -169,9 +149,9 @@ class _ControlViewState extends State<ControlView>
         child: Column(
           children: [
             _buildButtonRow(
-              label: '重启',
-              icon: Icons.restart_alt,
-              onPressed: () async {
+              label: '启动',
+              icon: Icons.play_arrow,
+              onPressed:  () async {
                 await startMihomo();
                 await QuickSettings.syncTile(
                   Tile(
@@ -191,6 +171,7 @@ class _ControlViewState extends State<ControlView>
               icon: Icons.stop,
               onPressed: () async {
                 await stopMihomo();
+
                 QuickSettings.syncTile(
                   Tile(
                     label: "mihomo",
@@ -203,14 +184,6 @@ class _ControlViewState extends State<ControlView>
               value: stopCmd,
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
-            ),
-            _buildButtonRow(
-              label: '测试',
-              icon: Icons.bug_report,
-              onPressed: _runTest,
-              value: testCmd,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
             ),
             _buildButtonRow(
               label: 'WEBUI',
