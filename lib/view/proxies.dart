@@ -75,7 +75,7 @@ class _ProxiesViewState extends State<ProxiesView>
       }
       setState(() {});
     } catch (e) {
-      showErrorSnackBarGlobal('测速失败');
+      showErrorSnackBarGlobal('$e');
     } finally {
       close();
       if (mounted) setState(() => isTesting = false);
