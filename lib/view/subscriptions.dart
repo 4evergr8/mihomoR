@@ -74,10 +74,8 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
       await writeYamlFromMap(yaml, configPath);
       final dio = Dio();
       final params = {'force': 'true'};
-      final data = {"path": "", "payload": ""};
-      try {
-        await dio.put('http://127.0.0.1:$port/configs', queryParameters: params, data: data, options: Options(headers: {'Content-Type': 'application/json'}));
-      } catch (_) {}
+      final data = {"path": configPath};
+      await dio.put('http://127.0.0.1:$port/configs', queryParameters: params, data: data, options: Options(headers: {'Content-Type': 'application/json'}));
     } catch (e) {
       showErrorSnackBarGlobal('$e');
     } finally {
@@ -170,14 +168,13 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
       final port = settings['port'];
       final dio = Dio();
       final params = {'force': 'true'};
-      final data = {"path": "", "payload": ""};
+      final data = {"path": configPath};
       settings['selected'] = 'merge';
       await writeYamlFromMap(settings, settingsPath);
-      try {
-        await dio.put('http://127.0.0.1:$port/configs', queryParameters: params, data: data, options: Options(headers: {'Content-Type': 'application/json'}));
-      } catch (_) {}
+      await dio.put('http://127.0.0.1:$port/configs', queryParameters: params, data: data, options: Options(headers: {'Content-Type': 'application/json'}));
+
     } catch (e) {
-      showErrorSnackBarGlobal('合并代理失败: $e');
+      showErrorSnackBarGlobal('$e');
     } finally {
       close();
     }
