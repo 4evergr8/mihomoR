@@ -13,8 +13,7 @@ class ControlView extends StatefulWidget {
   State<ControlView> createState() => _ControlViewState();
 }
 
-class _ControlViewState extends State<ControlView>
-    with AutomaticKeepAliveClientMixin {
+class _ControlViewState extends State<ControlView> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => false;
 
@@ -81,80 +80,8 @@ class _ControlViewState extends State<ControlView>
     }
   }
 
-  Widget _buildButtonRow({
-    required String label,
-    required IconData icon,
-    required VoidCallback onPressed,
-    required String value,
-    required Color backgroundColor,
-    required Color foregroundColor,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          ElevatedButton.icon(
-            onPressed: onPressed,
-            icon: Icon(icon),
-            label: Text(label),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: backgroundColor,
-              foregroundColor: foregroundColor,
-              minimumSize: const Size(120, 50),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Text(
-                  value,
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLogBox() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Stack(
-        children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: SelectableText(
-              currentLog,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSecondaryContainer,
-              ),
-            ),
-          ),
-          Positioned(
-            top: 0,
-            right: 0,
-            child: IconButton(
-              icon: const Icon(Icons.refresh),
-              color: Theme.of(context).colorScheme.primary,
-              onPressed: _runCheck,
-            ),
-          ),
-        ],
-      ),
-    );
+  Widget _buildButtonRow({required String label, required IconData icon, required VoidCallback onPressed, required String value, required Color backgroundColor, required Color foregroundColor}) {
+    return Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(children: [ElevatedButton.icon(onPressed: onPressed, icon: Icon(icon), label: Text(label), style: ElevatedButton.styleFrom(backgroundColor: backgroundColor, foregroundColor: foregroundColor, minimumSize: const Size(120, 50))), const SizedBox(width: 12), Expanded(child: Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(8)), child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: Text(value, style: TextStyle(color: Theme.of(context).colorScheme.onSurface)))))]));
   }
 
   @override
@@ -171,14 +98,7 @@ class _ControlViewState extends State<ControlView>
               icon: Icons.restart_alt,
               onPressed: () async {
                 await startMihomo();
-                await QuickSettings.syncTile(
-                  Tile(
-                    label: "mihomo",
-                    tileStatus: TileStatus.active,
-                    drawableName: 'quick_settings_base_icon',
-                    contentDescription: "mihomo 已启动",
-                  ),
-                );
+                await QuickSettings.syncTile(Tile(label: "mihomo", tileStatus: TileStatus.active, drawableName: 'quick_settings_base_icon', contentDescription: "mihomo 已启动"));
               },
               value: startCmd,
               backgroundColor: Theme.of(context).colorScheme.primary,
@@ -189,37 +109,16 @@ class _ControlViewState extends State<ControlView>
               icon: Icons.stop,
               onPressed: () async {
                 await stopMihomo();
-                QuickSettings.syncTile(
-                  Tile(
-                    label: "mihomo",
-                    tileStatus: TileStatus.inactive,
-                    drawableName: 'quick_settings_base_icon',
-                    contentDescription: "mihomo 已停止",
-                  ),
-                );
+                QuickSettings.syncTile(Tile(label: "mihomo", tileStatus: TileStatus.inactive, drawableName: 'quick_settings_base_icon', contentDescription: "mihomo 已停止"));
               },
               value: stopCmd,
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
-            _buildButtonRow(
-              label: '测试',
-              icon: Icons.bug_report,
-              onPressed: _runTest,
-              value: testCmd,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            ),
-            _buildButtonRow(
-              label: 'WEBUI',
-              icon: Icons.language,
-              onPressed: openWeb,
-              value: webuiUrl,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            ),
+            _buildButtonRow(label: '测试', icon: Icons.bug_report, onPressed: _runTest, value: testCmd, backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
+            _buildButtonRow(label: 'WEBUI', icon: Icons.language, onPressed: openWeb, value: webuiUrl, backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
             const SizedBox(height: 20),
-            _buildLogBox(),
+            Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Theme.of(context).colorScheme.secondaryContainer, borderRadius: BorderRadius.circular(12)), child: Stack(children: [SingleChildScrollView(scrollDirection: Axis.vertical, child: SelectableText(currentLog, style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer))), Positioned(top: 0, right: 0, child: IconButton(icon: const Icon(Icons.refresh), color: Theme.of(context).colorScheme.primary, onPressed: _runCheck))])),
           ],
         ),
       ),
