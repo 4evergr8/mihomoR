@@ -55,8 +55,7 @@ class _ControlViewState extends State<ControlView>
       final result = await Process.run("sh", ["-c", checkCmd]);
       if (!mounted) return;
       setState(() {
-        currentLog =
-            result.stdout.toString().trim() + result.stderr.toString();
+        currentLog = result.stdout.toString().trim() + result.stderr.toString();
       });
     } catch (e) {
       if (!mounted) return;
@@ -72,8 +71,7 @@ class _ControlViewState extends State<ControlView>
       final result = await Process.run("sh", ["-c", testCmd]);
       if (!mounted) return;
       setState(() {
-        currentLog =
-            result.stdout.toString() + result.stderr.toString();
+        currentLog = result.stdout.toString() + result.stderr.toString();
       });
     } catch (e) {
       if (!mounted) return;
@@ -107,13 +105,17 @@ class _ControlViewState extends State<ControlView>
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: TextField(
-              controller: TextEditingController(text: value),
-              readOnly: true,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Text(
+                  value,
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 ),
               ),
             ),
@@ -123,7 +125,7 @@ class _ControlViewState extends State<ControlView>
     );
   }
 
-  Widget _buildCheckBox() {
+  Widget _buildLogBox() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -132,17 +134,13 @@ class _ControlViewState extends State<ControlView>
       ),
       child: Stack(
         children: [
-          TextField(
-            controller: TextEditingController(text: currentLog),
-            readOnly: true,
-            maxLines: null,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSecondaryContainer,
-            ),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              isDense: true,
-              contentPadding: EdgeInsets.all(8),
+          SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: SelectableText(
+              currentLog,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
+              ),
             ),
           ),
           Positioned(
@@ -221,7 +219,7 @@ class _ControlViewState extends State<ControlView>
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
             ),
             const SizedBox(height: 20),
-            _buildCheckBox(),
+            _buildLogBox(),
           ],
         ),
       ),
