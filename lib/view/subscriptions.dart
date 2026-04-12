@@ -106,7 +106,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
               final downloadResult = await downloadYamlFile(sub['link'], ua, id, timeout);
               return {'id': id, 'data': downloadResult};
             } catch (e) {
-              showErrorSnackBarGlobal('订阅 ${sub['label'] ?? id} 下载失败: $e');
+              showErrorSnackBarGlobal('${sub['label'] ?? id} 失败: $e');
               return null;
             }
           }).toList();
@@ -302,7 +302,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
               final r = await downloadYamlFile(link, ua, id, timeout);
               return r;
             } catch (e) {
-              showErrorSnackBarGlobal('订阅添加失败: $link');
+              showErrorSnackBarGlobal('$link 添加失败: $e');
               return null;
             }
           }).toList();
