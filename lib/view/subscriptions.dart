@@ -344,8 +344,11 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                 onRefresh: _refreshSubscriptions,
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  itemCount: subscriptions.length,
+                  itemCount: subscriptions.length + 1, // 👈 多一个
                   itemBuilder: (context, index) {
+                    if (index == subscriptions.length) {
+                      return const SizedBox(height: 100); // 👈 底部空白
+                    }
                     final sub = subscriptions[index];
                     final totalValue = sub['total'] as int;
 
