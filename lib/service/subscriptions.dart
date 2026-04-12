@@ -123,7 +123,7 @@ Future<Map<String, dynamic>> downloadYamlFile(String url, String ua, String id, 
     final converted = _convertYaml(obj);
 
     if (converted is! Map<String, dynamic>) {
-      throw Exception('不是有效配置（顶层不是 Map）');
+      throw Exception('不是有效配置');
     }
 
     final result = await Process.run('su', ['-c', 'cp $filePath /data/adb/mihomo/config/$id.yaml && chmod 777 /data/adb/mihomo/config/$id.yaml']);
