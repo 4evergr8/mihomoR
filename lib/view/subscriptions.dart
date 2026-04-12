@@ -70,13 +70,13 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
       final port = settings['port'];
       final base = await readYamlAsMap("/data/adb/mihomo/config/$id.yaml");
       final override = await readYamlAsMap(overridePath);
-      final yaml = await overrideMap(base, override);
+      final yaml = overrideMap(base, override);
       await writeYamlFromMap(yaml, configPath);
       final dio = Dio();
       final params = {'force': 'true'};
       final data = {"path": configPath};
       await dio.put('http://127.0.0.1:$port/configs', queryParameters: params, data: data, options: Options(headers: {'Content-Type': 'application/json'}));
-      await dio.delete('http://127.0.0.1:$port/connections',  options: Options(headers: {'Content-Type': 'application/json'}));
+      await dio.delete('http://127.0.0.1:$port/connections', options: Options(headers: {'Content-Type': 'application/json'}));
     } catch (e) {
       showErrorSnackBarGlobal('$e');
     } finally {
@@ -89,39 +89,43 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
     try {
       final data = await readYamlAsMap(subscriptionsPath);
       final settings = await readYamlAsMap(settingsPath);
-      final list = (data['subscriptions'] is List) ? data['subscriptions'] as List : [];
+
+      final list = (data['subscriptions'] is List) ? List<Map<String, dynamic>>.from(data['subscriptions']) : <Map<String, dynamic>>[];
+
       final ua = settings['ua'];
       final timeout = settings['timeout'];
 
-      // 读取已有订阅列表
-      final existingData = await readYamlAsMap(subscriptionsPath);
-      final existingList = (existingData['subscriptions'] is List)
-          ? List<Map<String, dynamic>>.from(existingData['subscriptions'])
-          : <Map<String, dynamic>>[];
+      // 原数据 Map（按 id）
+      final Map<String, Map<String, dynamic>> resultMap = {for (var s in list) s['id']: Map<String, dynamic>.from(s)};
 
-      for (final sub in list) {
-        try {
-          final subMap = Map<String, dynamic>.from(sub);
-          final downloadResult = await downloadYamlFile(subMap['link'], ua, subMap['id'], timeout);
+      // 并行任务
+      final futures =
+          list.map((sub) async {
+            final id = sub['id'];
+            try {
+              final downloadResult = await downloadYamlFile(sub['link'], ua, id, timeout);
+              return {'id': id, 'data': downloadResult};
+            } catch (e) {
+              showErrorSnackBarGlobal('订阅 ${sub['label'] ?? id} 下载失败: $e');
+              return null;
+            }
+          }).toList();
 
-          // 查找是否已有同 ID 的订阅
-          final index = existingList.indexWhere((e) => e['id'] == subMap['id']);
-          if (index >= 0) {
-            existingList[index] = downloadResult; // 替换旧订阅
-          } else {
-            existingList.add(downloadResult); // 新增订阅
-          }
+      final results = await Future.wait(futures);
 
-          // 写入当前订阅列表
-          final singleData = {'subscriptions': existingList};
-          await writeYamlFromMap(singleData, subscriptionsPath);
-
-          // 立即更新界面
-          existingList.sort((a, b) => (a['label'] as String).compareTo(b['label'] as String));
-          if (mounted) setState(() => subscriptions = List.from(existingList));
-        } catch (e) {
-          showErrorSnackBarGlobal('订阅 ${sub['label'] ?? sub['id']} 下载失败: $e');
+      // 合并结果（成功才覆盖）
+      for (var r in results) {
+        if (r != null) {
+          resultMap[r['id']] = r['data'];
         }
+      }
+
+      final newList = resultMap.values.toList()..sort((a, b) => (a['label'] as String).compareTo(b['label'] as String));
+
+      await writeYamlFromMap({'subscriptions': newList}, subscriptionsPath);
+
+      if (mounted) {
+        setState(() => subscriptions = newList);
       }
     } catch (e) {
       showErrorSnackBarGlobal('刷新订阅失败: $e');
@@ -173,7 +177,6 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
       settings['selected'] = 'merge';
       await writeYamlFromMap(settings, settingsPath);
       await dio.put('http://127.0.0.1:$port/configs', queryParameters: params, data: data, options: Options(headers: {'Content-Type': 'application/json'}));
-
     } catch (e) {
       showErrorSnackBarGlobal('$e');
     } finally {
@@ -230,6 +233,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
 
   Future<void> _addSubscription() async {
     final controller = TextEditingController();
+
     final result = await showDialog<String>(
       context: context,
       builder: (context) {
@@ -256,25 +260,50 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
     if (!mounted) return;
 
     final close = await showLoadingDialogGlobal();
+
     try {
       final settings = await readYamlAsMap(settingsPath);
       final ua = settings['ua'];
       final timeout = settings['timeout'];
-      final links = result.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
 
-      for (final link in links) {
-        if (subscriptions.any((s) => s['link'] == link)) {
-          showErrorSnackBarGlobal('订阅已存在: $link');
-          continue;
+      final data = await readYamlAsMap(subscriptionsPath);
+      final list = (data['subscriptions'] is List) ? List<Map<String, dynamic>>.from(data['subscriptions']) : <Map<String, dynamic>>[];
+
+      final existingLinks = list.map((e) => e['link']).toSet();
+
+      final links = result.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet(); // 去重输入
+
+      final newLinks = links.where((l) => !existingLinks.contains(l)).toList();
+
+      // 并行下载
+      final futures =
+          newLinks.map((link) async {
+            final id = DateTime.now().microsecondsSinceEpoch.toString();
+            try {
+              final r = await downloadYamlFile(link, ua, id, timeout);
+              return r;
+            } catch (e) {
+              showErrorSnackBarGlobal('订阅添加失败: $link');
+              return null;
+            }
+          }).toList();
+
+      final results = await Future.wait(futures);
+
+      // 只加入成功的
+      for (var r in results) {
+        if (r != null) {
+          list.add(r);
         }
-        final id = DateTime.now().millisecondsSinceEpoch.toString();
-        final downloadResult = await downloadYamlFile(link, ua, id, timeout);
-        subscriptions.add(downloadResult);
       }
 
-      final data = {'subscriptions': subscriptions};
-      await writeYamlFromMap(data, subscriptionsPath);
-      setState(() {});
+      list.sort((a, b) => (a['label'] as String).compareTo(b['label'] as String));
+
+      await writeYamlFromMap({'subscriptions': list}, subscriptionsPath);
+
+      if (mounted) {
+        setState(() => subscriptions = list);
+      }
     } catch (e) {
       showErrorSnackBarGlobal('$e');
     } finally {
@@ -336,7 +365,20 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        ClipRRect(borderRadius: BorderRadius.circular(6), child: Container(height: 12, color: Theme.of(context).colorScheme.surfaceContainerHighest, child: Row(children: [if ((sub['upload'] as int) > 0) Expanded(flex: scale(sub['upload'] as int), child: Container(color: Theme.of(context).colorScheme.primary)), if ((sub['download'] as int) > 0) Expanded(flex: scale(sub['download'] as int), child: Container(color: Theme.of(context).colorScheme.secondary)), Expanded(flex: (100 - scale(sub['upload'] as int) - scale(sub['download'] as int)).clamp(0, 100), child: Container(color: Theme.of(context).colorScheme.surface))]))),
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(6),
+                                          child: Container(
+                                            height: 12,
+                                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                            child: Row(
+                                              children: [
+                                                if ((sub['upload'] as int) > 0) Expanded(flex: scale(sub['upload'] as int), child: Container(color: Theme.of(context).colorScheme.primary)),
+                                                if ((sub['download'] as int) > 0) Expanded(flex: scale(sub['download'] as int), child: Container(color: Theme.of(context).colorScheme.secondary)),
+                                                Expanded(flex: (100 - scale(sub['upload'] as int) - scale(sub['download'] as int)).clamp(0, 100), child: Container(color: Theme.of(context).colorScheme.surface)),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
                                         const SizedBox(height: 6),
                                         Text(totalValue == 0 ? '上传: ∞  下载: ∞  总量: ∞' : '上传: ${formatGB(sub['upload'] as int)}GB  下载: ${formatGB(sub['download'] as int)}GB  总量: ${formatGB(totalValue)}GB', style: Theme.of(context).textTheme.bodySmall),
                                         const SizedBox(height: 4),
