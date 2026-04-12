@@ -76,6 +76,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
       final params = {'force': 'true'};
       final data = {"path": configPath};
       await dio.put('http://127.0.0.1:$port/configs', queryParameters: params, data: data, options: Options(headers: {'Content-Type': 'application/json'}));
+      await dio.delete('http://127.0.0.1:$port/connections',  options: Options(headers: {'Content-Type': 'application/json'}));
     } catch (e) {
       showErrorSnackBarGlobal('$e');
     } finally {
