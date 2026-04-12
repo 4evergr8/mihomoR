@@ -113,12 +113,17 @@ Future<Map<String, dynamic>> downloadYamlFile(String url, String ua, String id, 
     final file = File(filePath);
     final text = await file.readAsString();
 
-    // 校验 YAML
+    dynamic obj;
     try {
-      const yamlCodec = YamlCodec();
-      yamlCodec.decode(text);
+      obj = const YamlCodec().decode(text);
     } catch (e) {
       throw Exception('YAML 解析失败: $e');
+    }
+
+    final converted = _convertYaml(obj);
+
+    if (converted is! Map<String, dynamic>) {
+      throw Exception('不是有效配置（顶层不是 Map）');
     }
 
     final result = await Process.run('su', ['-c', 'cp $filePath /data/adb/mihomo/config/$id.yaml && chmod 777 /data/adb/mihomo/config/$id.yaml']);
