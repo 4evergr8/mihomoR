@@ -271,9 +271,28 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
 
       final existingLinks = list.map((e) => e['link']).toSet();
 
-      final links = result.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet(); // 去重输入
+      final inputLinks = result.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
 
-      final newLinks = links.where((l) => !existingLinks.contains(l)).toList();
+      // 输入内部去重（保留顺序）
+      final seen = <String>{};
+      final links = <String>[];
+      for (var l in inputLinks) {
+        if (!seen.contains(l)) {
+          seen.add(l);
+          links.add(l);
+        }
+      }
+
+      // 分离重复 & 新增
+      final newLinks = <String>[];
+
+      for (var link in links) {
+        if (existingLinks.contains(link)) {
+          showErrorSnackBarGlobal('订阅已存在: $link'); // ✅ 每个都提示
+        } else {
+          newLinks.add(link);
+        }
+      }
 
       // 并行下载
       final futures =
