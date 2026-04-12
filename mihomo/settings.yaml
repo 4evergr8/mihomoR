@@ -1,4 +1,4 @@
-start: "su -c 'cd /data/adb/mihomo && chmod +x ./mihomo && nohup ./mihomo -d . >/dev/null 2>&1 &'"
+start: "su -c 'cd /data/adb/mihomo && chmod +x ./mihomo && nohup setsid ./mihomo -d . >/dev/null 2>&1 &'"
 #mihomo启动命令
 kill: "su -c 'killall mihomo'"
 #mihomo停止命令
