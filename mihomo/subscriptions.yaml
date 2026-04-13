@@ -15,4 +15,5 @@ subscriptions:
     #订阅到期时间(来自服务商)
     update: 0
     #上次更新时间
-
+    count: 0
+    #可用节点数量
