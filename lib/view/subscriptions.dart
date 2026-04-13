@@ -378,8 +378,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(sub['label'], style: Theme.of(context).textTheme.titleMedium),
-                              const SizedBox(height: 12),
+                              Chip(label: Text('${sub['count']}', style: const TextStyle(fontSize: 12)), padding: EdgeInsets.zero, visualDensity: VisualDensity.compact, materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, backgroundColor: Theme.of(context).colorScheme.primaryContainer),
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
