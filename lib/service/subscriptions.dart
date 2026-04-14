@@ -132,7 +132,7 @@ Future<Map<String, dynamic>> downloadYamlFile(String url, String ua, String id, 
       throw Exception('root 拷贝失败: ${result.stderr}');
     }
 
-    return {'id': id, 'link': url, 'label': label, 'upload': upload, 'download': downloadBytes, 'total': total, 'expire': expire, 'update': DateTime.now().millisecondsSinceEpoch.toString(),'count': 0};
+    return {'id': id, 'link': url, 'label': label, 'upload': upload, 'download': downloadBytes, 'total': total, 'expire': expire, 'update': DateTime.now().millisecondsSinceEpoch.toString()};
   } catch (e) {
     final f = File(filePath);
     if (await f.exists()) {
