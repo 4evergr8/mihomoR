@@ -116,7 +116,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
       // 合并结果（成功才覆盖）
       for (var r in results) {
         if (r != null) {
-          resultMap[r['id']] = r['data'];
+          resultMap[r['id']] = {...(resultMap[r['id']] ?? {}), ...r['data']};
         }
       }
 
@@ -432,7 +432,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                                 final downloadResult = await downloadYamlFile(sub['link'], ua, sub['id'], timeout);
                                                 final index = subscriptions.indexWhere((s) => s['id'] == sub['id']);
                                                 if (index != -1) {
-                                                  subscriptions[index] = downloadResult;
+                                                  subscriptions[index] = {...subscriptions[index], ...downloadResult};
                                                 }
                                                 final data = {'subscriptions': subscriptions};
                                                 await writeYamlFromMap(data, subscriptionsPath);
