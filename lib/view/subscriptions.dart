@@ -15,7 +15,7 @@ class SubscriptionView extends StatefulWidget {
 
 class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepAliveClientMixin {
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => false;
   List<Map<String, dynamic>> subscriptions = [];
   bool isLoading = true;
   String? selectedId;
