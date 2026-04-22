@@ -405,70 +405,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     ),
                                   ),
 
-                                  MenuAnchor(
-                                    builder: (context, controller, child) {
-                                      return IconButton(
-                                        padding: EdgeInsets.zero,
-                                        constraints: const BoxConstraints(),
-                                        iconSize: 18,
-                                        icon: Icon(
-                                          Icons.more_vert,
-                                          color: Theme.of(context).colorScheme.onSurface,
-                                        ),
-                                        onPressed: controller.open,
-                                      );
-                                    },
-                                    menuChildren: [
-                                      MenuItemButton(
-                                        onPressed: () async {
-                                          final settings = await readYamlAsMap(settingsPath);
-                                          final ua = settings['ua'];
-                                          final timeout = settings['timeout'];
-
-                                          final close = await showLoadingDialogGlobal();
-                                          try {
-                                            final downloadResult =
-                                            await downloadYamlFile(sub['link'], ua, sub['id'], timeout);
-
-                                            final index =
-                                            subscriptions.indexWhere((s) => s['id'] == sub['id']);
-
-                                            if (index != -1) {
-                                              subscriptions[index] = {
-                                                ...subscriptions[index],
-                                                ...downloadResult
-                                              };
-                                            }
-
-                                            await writeYamlFromMap(
-                                                {'subscriptions': subscriptions}, subscriptionsPath);
-
-                                            setState(() {});
-                                          } catch (e) {
-                                            showErrorSnackBarGlobal('刷新失败: $e');
-                                          } finally {
-                                            close();
-                                          }
-                                        },
-                                        child: const Text('刷新'),
-                                      ),
-
-                                      MenuItemButton(
-                                        onPressed: () {
-                                          _deleteSubscription(context, sub);
-                                        },
-                                        child: const Text('删除'),
-                                      ),
-
-                                      MenuItemButton(
-                                        onPressed: () async {
-                                          await Clipboard.setData(ClipboardData(text: sub['link']));
-                                          showErrorSnackBarGlobal('链接已复制');
-                                        },
-                                        child: const Text('复制'),
-                                      ),
-                                    ],
-                                  )
+                            
                                 ],
                               ),
                               // 3. info + switch
