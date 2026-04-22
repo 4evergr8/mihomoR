@@ -491,7 +491,8 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                       mainAxisSize: MainAxisSize.min,
                                       crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
-                                        PopupMenuButton<int>(
+                                        // 1. 展开菜单（IconButton + showMenu）
+                                        IconButton(
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(
                                             minWidth: 20,
@@ -502,12 +503,54 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                             size: 20,
                                             color: Theme.of(context).colorScheme.onSurface,
                                           ),
-                                          onSelected: (value) async {
+                                          onPressed: () async {
+                                            final RenderBox overlay =
+                                            Overlay.of(context).context.findRenderObject() as RenderBox;
+
+                                            final result = await showMenu<int>(
+                                              context: context,
+                                              position: RelativeRect.fromLTRB(1000, 100, 0, 0),
+                                              items: const [
+                                                PopupMenuItem(
+                                                  value: 1,
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.refresh, size: 18),
+                                                      SizedBox(width: 8),
+                                                      Text('刷新'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                PopupMenuItem(
+                                                  value: 2,
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.delete, size: 18),
+                                                      SizedBox(width: 8),
+                                                      Text('删除'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                PopupMenuItem(
+                                                  value: 3,
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.copy, size: 18),
+                                                      SizedBox(width: 8),
+                                                      Text('复制'),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+
+                                            if (result == null) return;
+
                                             final settings = await readYamlAsMap(settingsPath);
                                             final ua = settings['ua'];
                                             final timeout = settings['timeout'];
 
-                                            switch (value) {
+                                            switch (result) {
                                               case 1:
                                                 final close = await showLoadingDialogGlobal();
                                                 try {
@@ -549,21 +592,11 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                                 break;
                                             }
                                           },
-                                          itemBuilder: (_) => const [
-                                            PopupMenuItem(value: 1, child: Text('刷新')),
-                                            PopupMenuItem(value: 2, child: Text('删除')),
-                                            PopupMenuItem(value: 3, child: Text('复制')),
-                                          ],
                                         ),
 
-
-
+                                        // 2. 选中按钮（保持不变）
                                         IconButton(
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(
-                                            minWidth: 20,
-                                            minHeight: 20,
-                                          ),
+                                
                                           icon: Icon(
                                             (sub['selected'] ?? false)
                                                 ? Icons.check_circle
@@ -603,7 +636,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                           },
                                         ),
                                       ],
-                                    ),
+                                    )
                                   ],
                                 )
 
