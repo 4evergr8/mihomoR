@@ -450,11 +450,9 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                   PopupMenuButton<int>(
                                     icon: Icon(
                                       Icons.more_vert,
-                                      size: 14,
+                                      size: 15,
                                       color: Theme.of(context).colorScheme.onSurface,
                                     ),
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
                                     itemBuilder: (_) => const [
                                       PopupMenuItem(value: 1, child: Text('刷新')),
                                       PopupMenuItem(value: 2, child: Text('删除')),
@@ -532,15 +530,29 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     ),
                                   ),
 
-                                  Switch(
-                                    value: sub['selected'] ?? false,
-                                    onChanged: (value) async {
-                                      setState(() => sub['selected'] = value);
-                                      final close = await showLoadingDialogGlobal();
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    icon: Icon(
+                                      (sub['selected'] ?? false)
+                                          ? Icons.check_circle
+                                          : Icons.radio_button_unchecked,
+                                      size: 20,
+                                      color: (sub['selected'] ?? false)
+                                          ? Theme.of(context).colorScheme.primary
+                                          : Theme.of(context).colorScheme.onSurface,
+                                    ),
+                                    onPressed: () async {
+                                      final value = !(sub['selected'] ?? false);
 
+                                      setState(() => sub['selected'] = value);
+
+                                      final close = await showLoadingDialogGlobal();
                                       try {
                                         final data = await readYamlAsMap(subscriptionsPath);
-                                        final list = (data['subscriptions'] as List).map((e) => Map<String, dynamic>.from(e)).toList();
+                                        final list = (data['subscriptions'] as List)
+                                            .map((e) => Map<String, dynamic>.from(e))
+                                            .toList();
 
                                         final index = list.indexWhere((s) => s['id'] == sub['id']);
 
@@ -549,12 +561,12 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                           await writeYamlFromMap({'subscriptions': list}, subscriptionsPath);
                                         }
                                       } catch (e) {
-                                        showErrorSnackBarGlobal('保存开关失败: $e');
+                                        showErrorSnackBarGlobal('保存失败: $e');
                                       } finally {
                                         close();
                                       }
                                     },
-                                  ),
+                                  )
                                 ],
                               ),
                             ],
