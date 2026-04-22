@@ -484,7 +484,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       IconButton(
-                                
+
                                         icon: Icon(
                                           (sub['selected'] ?? false)
                                               ? Icons.check_circle
