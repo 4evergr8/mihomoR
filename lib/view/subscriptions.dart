@@ -392,7 +392,6 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          // 1. count + label
                                           Row(
                                             children: [
                                               Container(
@@ -406,7 +405,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                                   style: const TextStyle(fontSize: 12),
                                                 ),
                                               ),
-                                             // const SizedBox(width: 8),
+                                              const SizedBox(width: 2),
                                               Expanded(
                                                 child: Text(
                                                   sub['label'],
@@ -418,7 +417,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                             ],
                                           ),
 
-                                          const SizedBox(height: 6),
+                                          const SizedBox(height: 8),
 
                                           // 2. 进度条
                                           ClipRRect(
@@ -457,7 +456,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                             ),
                                           ),
 
-                                          const SizedBox(height: 6),
+                                          const SizedBox(height: 8),
 
                                           // 3. 用量
                                           Text(
@@ -485,7 +484,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                       ),
                                     ),
 
-                                    //const SizedBox(width: 8),
+
 
                                     // 右侧
                                     Column(
@@ -495,8 +494,8 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                         PopupMenuButton<int>(
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(
-                                            minWidth: 24,
-                                            minHeight: 24,
+                                            minWidth: 20,
+                                            minHeight: 20,
                                           ),
                                           icon: Icon(
                                             Icons.more_vert,
@@ -557,13 +556,13 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                           ],
                                         ),
 
-                          
+
 
                                         IconButton(
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(
-                                            minWidth: 24,
-                                            minHeight: 24,
+                                            minWidth: 20,
+                                            minHeight: 20,
                                           ),
                                           icon: Icon(
                                             (sub['selected'] ?? false)
