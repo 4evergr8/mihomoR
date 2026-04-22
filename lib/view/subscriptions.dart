@@ -386,31 +386,15 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                               children: [
                                 Row(
                                   children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        final selected = !(sub['count_selected'] ?? false);
-                                        setState(() {
-                                          sub['count_selected'] = selected;
-                                        });
-                                      },
-                                      child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 150),
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: (sub['count_selected'] ?? false)
-                                              ? Theme.of(context).colorScheme.primary
-                                              : Theme.of(context).colorScheme.primaryContainer,
-                                          borderRadius: BorderRadius.circular(999),
-                                        ),
-                                        child: Text(
-                                          '${sub['count'] ?? 0}',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: (sub['count_selected'] ?? false)
-                                                ? Theme.of(context).colorScheme.onPrimary
-                                                : Theme.of(context).colorScheme.onPrimaryContainer,
-                                          ),
-                                        ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.primary,
+                                        borderRadius: BorderRadius.circular(999),
+                                      ),
+                                      child: Text(
+                                        '${sub['count'] ?? 0}',
+                                        style: const TextStyle(fontSize: 12),
                                       ),
                                     ),
                                     const SizedBox(width: 2),
@@ -486,7 +470,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                             overflow: TextOverflow.ellipsis,
                                           ),
 
-                                          const SizedBox(height: 2),
+                                          const SizedBox(height: 8),
 
                                           // 4. 时间
                                           Text(
@@ -575,6 +559,46 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
 
 
 
+                                        IconButton(
+                                          padding: EdgeInsets.zero,
+                                          icon: Icon(
+                                            (sub['selected'] ?? false)
+                                                ? Icons.check_circle
+                                                : Icons.radio_button_unchecked,
+                                            size: 20,
+                                            color: (sub['selected'] ?? false)
+                                                ? Theme.of(context).colorScheme.primary
+                                                : Theme.of(context).colorScheme.onSurface,
+                                          ),
+                                          onPressed: () async {
+                                            final value = !(sub['selected'] ?? false);
+
+                                            setState(() => sub['selected'] = value);
+
+                                            final close = await showLoadingDialogGlobal();
+                                            try {
+                                              final data = await readYamlAsMap(subscriptionsPath);
+                                              final list = (data['subscriptions'] as List)
+                                                  .map((e) => Map<String, dynamic>.from(e))
+                                                  .toList();
+
+                                              final index =
+                                              list.indexWhere((s) => s['id'] == sub['id']);
+
+                                              if (index != -1) {
+                                                list[index]['selected'] = value;
+                                                await writeYamlFromMap(
+                                                  {'subscriptions': list},
+                                                  subscriptionsPath,
+                                                );
+                                              }
+                                            } catch (e) {
+                                              showErrorSnackBarGlobal('保存失败: $e');
+                                            } finally {
+                                              close();
+                                            }
+                                          },
+                                        ),
                                       ],
                                     ),
                                   ],
