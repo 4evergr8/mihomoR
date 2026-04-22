@@ -405,7 +405,102 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     ),
                                   ),
 
-                            
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    icon: Icon(
+                                      Icons.more_vert,
+                                      size: 18,
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                    ),
+                                    onPressed: () async {
+                                      final RenderBox button = context.findRenderObject() as RenderBox;
+                                      final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+                                      final position = RelativeRect.fromRect(
+                                        Rect.fromPoints(
+                                          button.localToGlobal(Offset.zero, ancestor: overlay),
+                                          button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                                        ),
+                                        Offset.zero & overlay.size,
+                                      );
+
+                                      final value = await showMenu<int>(
+                                        context: context,
+                                        position: position,
+                                          items: [
+                                            PopupMenuItem(
+                                              value: 1,
+                                              child: ListTile(
+                                                leading: Icon(Icons.refresh, size: 18),
+                                                title: Text('刷新'),
+                                                contentPadding: EdgeInsets.zero,
+                                                dense: true,
+                                              ),
+                                            ),
+                                            PopupMenuItem(
+                                              value: 2,
+                                              child: ListTile(
+                                                leading: Icon(Icons.delete, size: 18),
+                                                title: Text('删除'),
+                                                contentPadding: EdgeInsets.zero,
+                                                dense: true,
+                                              ),
+                                            ),
+                                            PopupMenuItem(
+                                              value: 3,
+                                              child: ListTile(
+                                                leading: Icon(Icons.copy, size: 18),
+                                                title: Text('复制'),
+                                                contentPadding: EdgeInsets.zero,
+                                                dense: true,
+                                              ),
+                                            ),
+                                          ]
+                                      );
+
+                                      if (value == null) return;
+
+                                      final settings = await readYamlAsMap(settingsPath);
+                                      final ua = settings['ua'];
+                                      final timeout = settings['timeout'];
+
+                                      switch (value) {
+                                        case 1:
+                                          final close = await showLoadingDialogGlobal();
+                                          try {
+                                            final downloadResult = await downloadYamlFile(sub['link'], ua, sub['id'], timeout);
+
+                                            final index = subscriptions.indexWhere((s) => s['id'] == sub['id']);
+
+                                            if (index != -1) {
+                                              subscriptions[index] = {
+                                                ...subscriptions[index],
+                                                ...downloadResult,
+                                              };
+                                            }
+
+                                            await writeYamlFromMap({'subscriptions': subscriptions}, subscriptionsPath);
+
+                                            setState(() {});
+                                          } catch (e) {
+                                            showErrorSnackBarGlobal('刷新失败: $e');
+                                          } finally {
+                                            close();
+                                          }
+                                          break;
+
+                                        case 2:
+                                          _deleteSubscription(context, sub);
+                                          break;
+
+                                        case 3:
+                                          await Clipboard.setData(ClipboardData(text: sub['link']));
+                                          showErrorSnackBarGlobal('链接已复制');
+                                          break;
+                                      }
+                                    },
+                                  )
                                 ],
                               ),
                               // 3. info + switch
