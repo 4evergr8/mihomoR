@@ -406,7 +406,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                                   style: const TextStyle(fontSize: 12),
                                                 ),
                                               ),
-                                              const SizedBox(width: 8),
+                                             // const SizedBox(width: 8),
                                               Expanded(
                                                 child: Text(
                                                   sub['label'],
@@ -457,7 +457,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                             ),
                                           ),
 
-                                          const SizedBox(height: 4),
+                                          const SizedBox(height: 6),
 
                                           // 3. 用量
                                           Text(
@@ -485,7 +485,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                       ),
                                     ),
 
-                                    const SizedBox(width: 8),
+                                    //const SizedBox(width: 8),
 
                                     // 右侧
                                     Column(
@@ -557,7 +557,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                           ],
                                         ),
 
-                                        const SizedBox(height: 4),
+                          
 
                                         IconButton(
                                           padding: EdgeInsets.zero,
