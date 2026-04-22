@@ -398,7 +398,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: Theme.of(context).colorScheme.onPrimary
-                                           
+
                                         ),
                                       ),
                                     ),
@@ -477,12 +477,16 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
 
                                           const SizedBox(height: 8),
 
-                                          // 4. 时间
                                           Text(
-                                            '上次更新: ${formatTimeAgo(sub['update'] as String)}  ｜  '
-                                                '${(sub['expire'] as int) == 0
+                                            (sub['expire'] as int) == 0
                                                 ? '到期时间: ∞'
-                                                : '到期时间: ${DateTime.fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000).toString().split(" ")[0]}'}',
+                                                : '到期时间: ${DateTime.fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000).toString().split(" ")[0]}',
+                                            style: Theme.of(context).textTheme.bodySmall,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            '上次更新: ${formatTimeAgo(sub['update'] as String)}',
                                             style: Theme.of(context).textTheme.bodySmall,
                                             overflow: TextOverflow.ellipsis,
                                           ),
