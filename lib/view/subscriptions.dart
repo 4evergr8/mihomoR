@@ -493,6 +493,11 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                       crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
                                         PopupMenuButton<int>(
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(
+                                            minWidth: 24,
+                                            minHeight: 24,
+                                          ),
                                           icon: Icon(
                                             Icons.more_vert,
                                             size: 20,
@@ -556,7 +561,10 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
 
                                         IconButton(
                                           padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(),
+                                          constraints: const BoxConstraints(
+                                            minWidth: 24,
+                                            minHeight: 24,
+                                          ),
                                           icon: Icon(
                                             (sub['selected'] ?? false)
                                                 ? Icons.check_circle
