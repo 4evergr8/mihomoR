@@ -561,6 +561,10 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
 
                                         IconButton(
                                           padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(
+                                            minWidth: 20,
+                                            minHeight: 20,
+                                          ),
                                           icon: Icon(
                                             (sub['selected'] ?? false)
                                                 ? Icons.check_circle
