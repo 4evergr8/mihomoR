@@ -393,8 +393,13 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                         borderRadius: BorderRadius.circular(999),
                                       ),
                                       child: Text(
+
                                         '${sub['count'] ?? 0}',
-                                        style: const TextStyle(fontSize: 12),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Theme.of(context).colorScheme.onPrimary
+                                           
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 2),
