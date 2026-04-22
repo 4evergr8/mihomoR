@@ -433,48 +433,65 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                               final settings = await readYamlAsMap(settingsPath);
                                               final ua = settings['ua'];
                                               final timeout = settings['timeout'];
+
                                               switch (value) {
-                                                case 1: // 刷新
+                                                case 1:
                                                   final close = await showLoadingDialogGlobal();
                                                   try {
                                                     final downloadResult = await downloadYamlFile(sub['link'], ua, sub['id'], timeout);
+
                                                     final index = subscriptions.indexWhere((s) => s['id'] == sub['id']);
+
                                                     if (index != -1) {
                                                       subscriptions[index] = {...subscriptions[index], ...downloadResult};
                                                     }
-                                                    final data = {'subscriptions': subscriptions};
-                                                    await writeYamlFromMap(data, subscriptionsPath);
+
+                                                    await writeYamlFromMap({'subscriptions': subscriptions}, subscriptionsPath);
+
                                                     setState(() {});
                                                   } catch (e) {
-                                                    if (!mounted) return;
                                                     showErrorSnackBarGlobal('刷新失败: $e');
                                                   } finally {
-                                                    if (mounted) close();
+                                                    close();
                                                   }
                                                   break;
-                                                case 2: // 删除
+
+                                                case 2:
                                                   _deleteSubscription(context, sub);
                                                   break;
-                                                case 3: // 复制链接
+
+                                                case 3:
                                                   await Clipboard.setData(ClipboardData(text: sub['link']));
                                                   showErrorSnackBarGlobal('链接已复制');
                                                   break;
                                               }
                                             },
-                                            itemBuilder: (_) => [
-                                              PopupMenuItem(
-                                                value: 1,
-                                                child: Row(children: [Icon(Icons.refresh, size: 18, color: Theme.of(context).colorScheme.primary), const SizedBox(width: 8), const Text('刷新')]),
-                                              ),
-                                              PopupMenuItem(
-                                                value: 2,
-                                                child: Row(children: [Icon(Icons.delete_outline, size: 18, color: Theme.of(context).colorScheme.error), const SizedBox(width: 8), const Text('删除')]),
-                                              ),
-                                              PopupMenuItem(
-                                                value: 3,
-                                                child: Row(children: [Icon(Icons.copy, size: 18, color: Theme.of(context).colorScheme.onSurface), const SizedBox(width: 8), const Text('复制')]),
-                                              ),
-                                            ],
+                                            itemBuilder:
+                                                (_) => [
+                                                  PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.refresh, size: 18), SizedBox(width: 8), Text('刷新')])),
+                                                  PopupMenuItem(value: 2, child: Row(children: [Icon(Icons.delete_outline, size: 18), SizedBox(width: 8), Text('删除')])),
+                                                  PopupMenuItem(value: 3, child: Row(children: [Icon(Icons.copy, size: 18), SizedBox(width: 8), Text('复制')])),
+                                                ],
+                                          ),
+
+                                          Switch(
+                                            value: sub['selected'] ?? false,
+                                            onChanged: (value) async {
+                                              setState(() => sub['selected'] = value);
+                                              try {
+                                                final data = await readYamlAsMap(subscriptionsPath);
+                                                final list = (data['subscriptions'] as List).map((e) => Map<String, dynamic>.from(e)).toList();
+
+                                                final index = list.indexWhere((s) => s['id'] == sub['id']);
+
+                                                if (index != -1) {
+                                                  list[index]['selected'] = value;
+                                                  await writeYamlFromMap({'subscriptions': list}, subscriptionsPath);
+                                                }
+                                              } catch (e) {
+                                                showErrorSnackBarGlobal('保存开关失败: $e');
+                                              }
+                                            },
                                           ),
                                         ],
                                       ),
@@ -497,7 +514,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                         },
                                       ),
                                     ],
-                                  )
+                                  ),
                                 ],
                               ),
                             ],
