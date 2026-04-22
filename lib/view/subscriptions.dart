@@ -206,20 +206,6 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
       showErrorSnackBarGlobal('$e');
     } finally {
       close();
-      subscriptions = [
-        {
-          'id': 'debug_sub',
-          'label': '默认调试订阅',
-          'link': 'https://example.com/debug.yaml',
-          'count': 99,
-          'upload': 520000000,
-          'download': 2100000000,
-          'total': 10000000000,
-          'expire': DateTime.now().add(const Duration(days: 30)).millisecondsSinceEpoch ~/ 1000,
-          'update': DateTime.now().millisecondsSinceEpoch.toString(),
-          'selected': true,
-        }
-      ];
       if (mounted) setState(() => isLoading = false);
     }
   }
