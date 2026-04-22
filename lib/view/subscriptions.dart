@@ -385,6 +385,30 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                             crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.primaryContainer,
+                                        borderRadius: BorderRadius.circular(999),
+                                      ),
+                                      child: Text(
+                                        '${sub['count'] ?? 0}',
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Expanded(
+                                      child: Text(
+                                        sub['label'],
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context).textTheme.titleMedium,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     // 左侧
@@ -392,30 +416,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Row(
-                                            children: [
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                                                decoration: BoxDecoration(
-                                                  color: Theme.of(context).colorScheme.primaryContainer,
-                                                  borderRadius: BorderRadius.circular(999),
-                                                ),
-                                                child: Text(
-                                                  '${sub['count'] ?? 0}',
-                                                  style: const TextStyle(fontSize: 12),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 2),
-                                              Expanded(
-                                                child: Text(
-                                                  sub['label'],
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: Theme.of(context).textTheme.titleMedium,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+
 
                                           const SizedBox(height: 8),
 
@@ -491,8 +492,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                       mainAxisSize: MainAxisSize.min,
                                       crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
-                                        // 1. 展开菜单（IconButton + showMenu）
-                                        IconButton(
+                                        PopupMenuButton<int>(
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(
                                             minWidth: 20,
@@ -503,54 +503,12 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                             size: 20,
                                             color: Theme.of(context).colorScheme.onSurface,
                                           ),
-                                          onPressed: () async {
-                                            final RenderBox overlay =
-                                            Overlay.of(context).context.findRenderObject() as RenderBox;
-
-                                            final result = await showMenu<int>(
-                                              context: context,
-                                              position: RelativeRect.fromLTRB(1000, 100, 0, 0),
-                                              items: const [
-                                                PopupMenuItem(
-                                                  value: 1,
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(Icons.refresh, size: 18),
-                                                      SizedBox(width: 8),
-                                                      Text('刷新'),
-                                                    ],
-                                                  ),
-                                                ),
-                                                PopupMenuItem(
-                                                  value: 2,
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(Icons.delete, size: 18),
-                                                      SizedBox(width: 8),
-                                                      Text('删除'),
-                                                    ],
-                                                  ),
-                                                ),
-                                                PopupMenuItem(
-                                                  value: 3,
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(Icons.copy, size: 18),
-                                                      SizedBox(width: 8),
-                                                      Text('复制'),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            );
-
-                                            if (result == null) return;
-
+                                          onSelected: (value) async {
                                             final settings = await readYamlAsMap(settingsPath);
                                             final ua = settings['ua'];
                                             final timeout = settings['timeout'];
 
-                                            switch (result) {
+                                            switch (value) {
                                               case 1:
                                                 final close = await showLoadingDialogGlobal();
                                                 try {
@@ -592,11 +550,21 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                                 break;
                                             }
                                           },
+                                          itemBuilder: (_) => const [
+                                            PopupMenuItem(value: 1, child: Text('刷新')),
+                                            PopupMenuItem(value: 2, child: Text('删除')),
+                                            PopupMenuItem(value: 3, child: Text('复制')),
+                                          ],
                                         ),
 
-                                        // 2. 选中按钮（保持不变）
+
+
                                         IconButton(
-                                
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(
+                                            minWidth: 20,
+                                            minHeight: 20,
+                                          ),
                                           icon: Icon(
                                             (sub['selected'] ?? false)
                                                 ? Icons.check_circle
@@ -636,7 +604,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                           },
                                         ),
                                       ],
-                                    )
+                                    ),
                                   ],
                                 )
 
