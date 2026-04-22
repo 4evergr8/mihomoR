@@ -405,62 +405,10 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     ),
                                   ),
 
-                                  IconButton(
+                                  PopupMenuButton<int>(
                                     padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                    icon: Icon(
-                                      Icons.more_vert,
-                                      size: 18,
-                                      color: Theme.of(context).colorScheme.onSurface,
-                                    ),
-                                    onPressed: () async {
-                                      final RenderBox button = context.findRenderObject() as RenderBox;
-                                      final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-
-                                      final position = RelativeRect.fromRect(
-                                        Rect.fromPoints(
-                                          button.localToGlobal(Offset.zero, ancestor: overlay),
-                                          button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
-                                        ),
-                                        Offset.zero & overlay.size,
-                                      );
-
-                                      final value = await showMenu<int>(
-                                        context: context,
-                                        position: position,
-                                          items: [
-                                            PopupMenuItem(
-                                              value: 1,
-                                              child: ListTile(
-                                                leading: Icon(Icons.refresh, size: 18),
-                                                title: Text('刷新'),
-                                                contentPadding: EdgeInsets.zero,
-                                                dense: true,
-                                              ),
-                                            ),
-                                            PopupMenuItem(
-                                              value: 2,
-                                              child: ListTile(
-                                                leading: Icon(Icons.delete, size: 18),
-                                                title: Text('删除'),
-                                                contentPadding: EdgeInsets.zero,
-                                                dense: true,
-                                              ),
-                                            ),
-                                            PopupMenuItem(
-                                              value: 3,
-                                              child: ListTile(
-                                                leading: Icon(Icons.copy, size: 18),
-                                                title: Text('复制'),
-                                                contentPadding: EdgeInsets.zero,
-                                                dense: true,
-                                              ),
-                                            ),
-                                          ]
-                                      );
-
-                                      if (value == null) return;
-
+                                    icon: Icon(Icons.more_vert, size: 10, color: Theme.of(context).colorScheme.onSurface),
+                                    onSelected: (value) async {
                                       final settings = await readYamlAsMap(settingsPath);
                                       final ua = settings['ua'];
                                       final timeout = settings['timeout'];
@@ -474,10 +422,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                             final index = subscriptions.indexWhere((s) => s['id'] == sub['id']);
 
                                             if (index != -1) {
-                                              subscriptions[index] = {
-                                                ...subscriptions[index],
-                                                ...downloadResult,
-                                              };
+                                              subscriptions[index] = {...subscriptions[index], ...downloadResult};
                                             }
 
                                             await writeYamlFromMap({'subscriptions': subscriptions}, subscriptionsPath);
@@ -500,7 +445,8 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                           break;
                                       }
                                     },
-                                  )
+                                    itemBuilder: (_) => const [PopupMenuItem(value: 1, child: Text('刷新')), PopupMenuItem(value: 2, child: Text('删除')), PopupMenuItem(value: 3, child: Text('复制'))],
+                                  ),
                                 ],
                               ),
                               // 3. info + switch
