@@ -406,7 +406,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                   ),
 
                                   PopupMenuButton<int>(
-                                    icon: Icon(Icons.more_vert, size: 20, color: Theme.of(context).colorScheme.onSurface),
+                                    icon: Icon(Icons.more_vert, size: 15, color: Theme.of(context).colorScheme.onSurface),
                                     onSelected: (value) async {
                                       final settings = await readYamlAsMap(settingsPath);
                                       final ua = settings['ua'];
@@ -475,10 +475,11 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     ),
                                   ),
 
-                                  Switch(
+                                  Checkbox(
                                     value: sub['selected'] ?? false,
                                     onChanged: (value) async {
                                       setState(() => sub['selected'] = value);
+                                      final close = await showLoadingDialogGlobal();
 
                                       try {
                                         final data = await readYamlAsMap(subscriptionsPath);
@@ -492,6 +493,8 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                         }
                                       } catch (e) {
                                         showErrorSnackBarGlobal('保存开关失败: $e');
+                                      } finally {
+                                        close();
                                       }
                                     },
                                   ),
