@@ -409,9 +409,6 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     ),
                                   ],
                                 ),
-
-                                const SizedBox(height: 10),
-
                                 // 2. progress + menu
                                 Row(
                                   children: [
@@ -452,8 +449,6 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                         ),
                                       ),
                                     ),
-
-                                    const SizedBox(width: 8),
 
                                     PopupMenuButton<int>(
                                       icon: Icon(
@@ -516,22 +511,33 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     ),
                                   ],
                                 ),
-
-                                const SizedBox(height: 8),
-
                                 // 3. info + switch
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: Text(
-                                        totalValue == 0
-                                            ? '上传: ∞ 下载: ∞ 总量: ∞  ｜  到期: ∞'
-                                            : '上传: ${formatGB(sub['upload'] as int)}GB  '
-                                            '下载: ${formatGB(sub['download'] as int)}GB  '
-                                            '总量: ${formatGB(totalValue)}GB  ｜  '
-                                            '上次: ${formatTimeAgo(sub['update'] as String)}',
-                                        style: Theme.of(context).textTheme.bodySmall,
-                                        overflow: TextOverflow.ellipsis,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            totalValue == 0
+                                                ? '上传: ∞  下载: ∞  总量: ∞'
+                                                : '上传: ${formatGB(sub['upload'] as int)}GB  '
+                                                '下载: ${formatGB(sub['download'] as int)}GB  '
+                                                '总量: ${formatGB(totalValue)}GB',
+                                            style: Theme.of(context).textTheme.bodySmall,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 2),
+
+                                          Text(
+                                            '上次更新: ${formatTimeAgo(sub['update'] as String)}  ｜  '
+                                                '${(sub['expire'] as int) == 0
+                                                ? '到期时间: ∞'
+                                                : '到期时间: ${DateTime.fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000).toString().split(" ")[0]}'}',
+                                            style: Theme.of(context).textTheme.bodySmall,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
                                       ),
                                     ),
 
@@ -546,8 +552,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                               .map((e) => Map<String, dynamic>.from(e))
                                               .toList();
 
-                                          final index =
-                                          list.indexWhere((s) => s['id'] == sub['id']);
+                                          final index = list.indexWhere((s) => s['id'] == sub['id']);
 
                                           if (index != -1) {
                                             list[index]['selected'] = value;
@@ -562,7 +567,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                       },
                                     ),
                                   ],
-                                ),
+                                )
                               ]
                           ),
                         ),
