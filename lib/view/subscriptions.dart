@@ -384,41 +384,43 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // 1. count + label
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).colorScheme.primaryContainer,
-                                        borderRadius: BorderRadius.circular(999),
-                                      ),
-                                      child: Text(
-                                        '${sub['count'] ?? 0}',
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        sub['label'],
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: Theme.of(context).textTheme.titleMedium,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                // 2. progress + menu
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // 左侧三行
+                                    // 左侧
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          // 1. 进度条
+                                          // 1. count + label
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context).colorScheme.primaryContainer,
+                                                  borderRadius: BorderRadius.circular(999),
+                                                ),
+                                                child: Text(
+                                                  '${sub['count'] ?? 0}',
+                                                  style: const TextStyle(fontSize: 12),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  sub['label'],
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: Theme.of(context).textTheme.titleMedium,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+
+                                          const SizedBox(height: 6),
+
+                                          // 2. 进度条
                                           ClipRRect(
                                             borderRadius: BorderRadius.circular(6),
                                             child: SizedBox(
@@ -457,7 +459,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
 
                                           const SizedBox(height: 4),
 
-                                          // 2. 用量文字
+                                          // 3. 用量
                                           Text(
                                             totalValue == 0
                                                 ? '上传: ∞  下载: ∞  总量: ∞'
@@ -470,7 +472,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
 
                                           const SizedBox(height: 2),
 
-                                          // 3. 时间文字
+                                          // 4. 时间
                                           Text(
                                             '上次更新: ${formatTimeAgo(sub['update'] as String)}  ｜  '
                                                 '${(sub['expire'] as int) == 0
@@ -483,12 +485,13 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                       ),
                                     ),
 
-                                    // 右侧两行
+                                    const SizedBox(width: 8),
+
+                                    // 右侧
                                     Column(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisSize: MainAxisSize.min,
                                       crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
-                                        // 1. 展开按钮
                                         PopupMenuButton<int>(
                                           icon: Icon(
                                             Icons.more_vert,
@@ -549,7 +552,8 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                           ],
                                         ),
 
-                                        // 2. 选中按钮
+                                        const SizedBox(height: 4),
+
                                         IconButton(
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(),
@@ -595,6 +599,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     ),
                                   ],
                                 )
+
                               ]
                           ),
                         ),
