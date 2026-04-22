@@ -368,7 +368,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
 
                     return Card(
                       color: isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surface,
-                 //     margin: const EdgeInsets.only(bottom: 16),
+                      //     margin: const EdgeInsets.only(bottom: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
@@ -381,36 +381,15 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(16),
-                          child:
-                          Column(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // 1. 第一行：count 和 label
                               Row(
                                 children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.primary,
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: Text(
-                                      '${sub['count'] ?? 0}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                      ),
-                                    ),
-                                  ),
+                                  Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2), decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, borderRadius: BorderRadius.circular(999)), child: Text('${sub['count'] ?? 0}', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onPrimary))),
                                   const SizedBox(width: 2),
-                                  Expanded(
-                                    child: Text(
-                                      sub['label'],
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context).textTheme.titleMedium,
-                                    ),
-                                  ),
+                                  Expanded(child: Text(sub['label'], maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium)),
                                 ],
                               ),
                               const SizedBox(height: 8),
@@ -422,20 +401,9 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                   height: 10,
                                   child: Row(
                                     children: [
-                                      if ((sub['upload'] as int) > 0)
-                                        Expanded(
-                                          flex: scale(sub['upload'] as int),
-                                          child: Container(color: Theme.of(context).colorScheme.primary),
-                                        ),
-                                      if ((sub['download'] as int) > 0)
-                                        Expanded(
-                                          flex: scale(sub['download'] as int),
-                                          child: Container(color: Theme.of(context).colorScheme.secondary),
-                                        ),
-                                      Expanded(
-                                        flex: (100 - scale(sub['upload'] as int) - scale(sub['download'] as int)).clamp(0, 100),
-                                        child: Container(color: Theme.of(context).colorScheme.surfaceContainerHighest),
-                                      ),
+                                      if ((sub['upload'] as int) > 0) Expanded(flex: scale(sub['upload'] as int), child: Container(color: Theme.of(context).colorScheme.primary)),
+                                      if ((sub['download'] as int) > 0) Expanded(flex: scale(sub['download'] as int), child: Container(color: Theme.of(context).colorScheme.secondary)),
+                                      Expanded(flex: (100 - scale(sub['upload'] as int) - scale(sub['download'] as int)).clamp(0, 100), child: Container(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
                                     ],
                                   ),
                                 ),
@@ -451,30 +419,11 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          totalValue == 0
-                                              ? '上传: ∞  下载: ∞  总量: ∞'
-                                              : '上传: ${formatGB(sub['upload'] as int)}GB  下载: ${formatGB(sub['download'] as int)}GB  总量: ${formatGB(totalValue)}GB',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context).textTheme.bodySmall,
-                                        ),
+                                        Text(totalValue == 0 ? '上传: ∞  下载: ∞  总量: ∞' : '上传: ${formatGB(sub['upload'] as int)}GB  下载: ${formatGB(sub['download'] as int)}GB  总量: ${formatGB(totalValue)}GB', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
                                         const SizedBox(height: 3),
-                                        Text(
-                                          (sub['expire'] as int) == 0
-                                              ? '到期时间: ∞'
-                                              : '到期时间: ${DateTime.fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000).toString().split(" ")[0]}',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context).textTheme.bodySmall,
-                                        ),
+                                        Text((sub['expire'] as int) == 0 ? '到期时间: ∞' : '到期时间: ${DateTime.fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000).toString().split(" ")[0]}', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
                                         const SizedBox(height: 3),
-                                        Text(
-                                          '上次更新: ${formatTimeAgo(sub['update'] as String)}',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context).textTheme.bodySmall,
-                                        ),
+                                        Text('上次更新: ${formatTimeAgo(sub['update'] as String)}', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
                                       ],
                                     ),
                                   ),
@@ -484,16 +433,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       IconButton(
-
-                                        icon: Icon(
-                                          (sub['selected'] ?? false)
-                                              ? Icons.check_circle
-                                              : Icons.radio_button_unchecked,
-                                          size: 20,
-                                          color: (sub['selected'] ?? false)
-                                              ? Theme.of(context).colorScheme.primary
-                                              : Theme.of(context).colorScheme.onSurface,
-                                        ),
+                                        icon: Icon((sub['selected'] ?? false) ? Icons.check_circle : Icons.radio_button_unchecked, size: 20, color: (sub['selected'] ?? false) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface),
                                         onPressed: () async {
                                           final value = !(sub['selected'] ?? false);
 
@@ -502,18 +442,13 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                           final close = await showLoadingDialogGlobal();
                                           try {
                                             final data = await readYamlAsMap(subscriptionsPath);
-                                            final list = (data['subscriptions'] as List)
-                                                .map((e) => Map<String, dynamic>.from(e))
-                                                .toList();
+                                            final list = (data['subscriptions'] as List).map((e) => Map<String, dynamic>.from(e)).toList();
 
                                             final index = list.indexWhere((s) => s['id'] == sub['id']);
 
                                             if (index != -1) {
                                               list[index]['selected'] = value;
-                                              await writeYamlFromMap(
-                                                {'subscriptions': list},
-                                                subscriptionsPath,
-                                              );
+                                              await writeYamlFromMap({'subscriptions': list}, subscriptionsPath);
                                             }
                                           } catch (e) {
                                             showErrorSnackBarGlobal('保存失败: $e');
@@ -524,11 +459,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                       ),
 
                                       PopupMenuButton<int>(
-                                        icon: Icon(
-                                          Icons.more_vert,
-                                          size: 20,
-                                          color: Theme.of(context).colorScheme.onSurface,
-                                        ),
+                                        icon: Icon(Icons.more_vert, size: 20, color: Theme.of(context).colorScheme.onSurface),
                                         onSelected: (value) async {
                                           final settings = await readYamlAsMap(settingsPath);
                                           final ua = settings['ua'];
@@ -538,26 +469,15 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                             case 1:
                                               final close = await showLoadingDialogGlobal();
                                               try {
-                                                final downloadResult = await downloadYamlFile(
-                                                  sub['link'],
-                                                  ua,
-                                                  sub['id'],
-                                                  timeout,
-                                                );
+                                                final downloadResult = await downloadYamlFile(sub['link'], ua, sub['id'], timeout);
 
                                                 final index = subscriptions.indexWhere((s) => s['id'] == sub['id']);
 
                                                 if (index != -1) {
-                                                  subscriptions[index] = {
-                                                    ...subscriptions[index],
-                                                    ...downloadResult,
-                                                  };
+                                                  subscriptions[index] = {...subscriptions[index], ...downloadResult};
                                                 }
 
-                                                await writeYamlFromMap(
-                                                  {'subscriptions': subscriptions},
-                                                  subscriptionsPath,
-                                                );
+                                                await writeYamlFromMap({'subscriptions': subscriptions}, subscriptionsPath);
 
                                                 setState(() {});
                                               } catch (e) {
@@ -577,45 +497,19 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                               break;
                                           }
                                         },
-                                        itemBuilder: (_) => const [
-                                          PopupMenuItem(
-                                            value: 1,
-                                            child: Row(
-                                              children: [
-                                                Icon(Icons.refresh, size: 18),
-                                                SizedBox(width: 8),
-                                                Text('刷新'),
-                                              ],
-                                            ),
-                                          ),
-                                          PopupMenuItem(
-                                            value: 2,
-                                            child: Row(
-                                              children: [
-                                                Icon(Icons.delete, size: 18),
-                                                SizedBox(width: 8),
-                                                Text('删除'),
-                                              ],
-                                            ),
-                                          ),
-                                          PopupMenuItem(
-                                            value: 3,
-                                            child: Row(
-                                              children: [
-                                                Icon(Icons.copy, size: 18),
-                                                SizedBox(width: 8),
-                                                Text('复制'),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
+                                        itemBuilder:
+                                            (_) => const [
+                                              PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.refresh, size: 18), SizedBox(width: 8), Text('刷新')])),
+                                              PopupMenuItem(value: 2, child: Row(children: [Icon(Icons.delete, size: 18), SizedBox(width: 8), Text('删除')])),
+                                              PopupMenuItem(value: 3, child: Row(children: [Icon(Icons.copy, size: 18), SizedBox(width: 8), Text('复制')])),
+                                            ],
                                       ),
                                     ],
-                                  )
+                                  ),
                                 ],
                               ),
                             ],
-                          )
+                          ),
                         ),
                       ),
                     );
