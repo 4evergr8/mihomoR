@@ -191,7 +191,12 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
       final data = await readYamlAsMap(subscriptionsPath);
       final list = (data['subscriptions'] is List) ? data['subscriptions'] as List : [];
       subscriptions = list.map((e) => Map<String, dynamic>.from(e)).toList();
-      subscriptions.sort((a, b) => (a['label'] as String).compareTo(b['label'] as String));
+      subscriptions.sort((a, b) {
+        final aSel = a['selected'] == true ? 0 : 1;
+        final bSel = b['selected'] == true ? 0 : 1;
+        if (aSel != bSel) return aSel - bSel; // selected=true 在前
+        return (a['label'] as String).compareTo(b['label'] as String); // label 排序
+      });
 
       final settings = await readYamlAsMap(settingsPath);
       selectedId = settings['selected'] as String?;
