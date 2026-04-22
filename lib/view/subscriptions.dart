@@ -145,6 +145,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
       for (final subMap in list) {
         try {
           final sub = Map<String, dynamic>.from(subMap);
+          if (sub['selected'] != true) continue; // 只合并开启的
           final subYaml = await readYamlAsMap("/data/adb/mihomo/config/${sub['id']}.yaml");
           if (subYaml['proxies'] is List) {
             final proxies = List<Map<String, dynamic>>.from(subYaml['proxies']);
