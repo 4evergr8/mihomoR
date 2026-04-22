@@ -495,24 +495,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                           ),
                                         ],
                                       ),
-                                      const SizedBox(width: 8),
-                                      Switch(
-                                        value: sub['selected'] ?? false,
-                                        onChanged: (value) async {
-                                          setState(() => sub['selected'] = value);
-                                          try {
-                                            final data = await readYamlAsMap(subscriptionsPath);
-                                            final list = (data['subscriptions'] as List).map((e) => Map<String, dynamic>.from(e)).toList();
-                                            final index = list.indexWhere((s) => s['id'] == sub['id']);
-                                            if (index != -1) {
-                                              list[index]['selected'] = value;
-                                              await writeYamlFromMap({'subscriptions': list}, subscriptionsPath);
-                                            }
-                                          } catch (e) {
-                                            showErrorSnackBarGlobal('保存开关失败: $e');
-                                          }
-                                        },
-                                      ),
+                               //       const SizedBox(width: 8),
                                     ],
                                   ),
                                 ],
