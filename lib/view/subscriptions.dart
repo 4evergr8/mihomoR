@@ -410,7 +410,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     child: Text(
                                       '${sub['alive'] ?? 0}/${sub['count'] ?? 0}',
                                       style: TextStyle(
-                                        fontSize: 11,
+                                        fontSize: 8,
                                         height: 1,
                                         fontWeight: FontWeight.w600,
                                         color: Theme.of(context).colorScheme.onPrimary,
