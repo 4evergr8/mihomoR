@@ -412,8 +412,21 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                       style: TextStyle(
                                         fontSize: 12,
                                         height: 1,
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        color: (() {
+                                          final cs = Theme.of(context).colorScheme;
+                                          final count = sub['count'] ?? 0;
+                                          final alive = sub['alive'] ?? 0;
+
+                                          if (count == 0) return cs.onError;
+
+                                          final r = alive / count;
+
+                                          if (r >= 0.8) return cs.onPrimary;
+                                          if (r >= 0.3) return cs.onSecondary;
+                                          if (r > 0) return cs.onTertiary;
+
+                                          return cs.onError;
+                                        })(),
                                       ),
                                     ),
                                   ),
