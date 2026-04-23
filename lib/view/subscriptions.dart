@@ -388,6 +388,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                               Row(
                                 children: [
                                   Container(
+                                    alignment: Alignment.center,
                                     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: (() {
