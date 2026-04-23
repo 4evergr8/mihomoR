@@ -42,17 +42,26 @@ class _ProxiesViewState extends State<ProxiesView> with AutomaticKeepAliveClient
     setState(() => isTesting = true);
     try {
       final config = await readYamlAsMap(configPath);
-      final groups = config['proxy-groups'] as List? ?? [];
-      final firstGroupName = groups.isNotEmpty ? groups.first['name'] as String? : null;
+
+      // === 读取 proxies（真实节点）===
+      final proxies = (config['proxies'] as List? ?? [])
+          .map((e) => e['name'] as String)
+          .toList();
+
       final settings = await readYamlAsMap(settingsPath);
       final port = settings['port'];
       final url = settings['url'];
       timeout = settings['testtimeout'];
-      final uri = Uri.parse('http://127.0.0.1:$port/group/$firstGroupName/delay?url=$url&timeout=$timeout');
+
+      // === 固定 GLOBAL ===
+      final uri = Uri.parse(
+          'http://127.0.0.1:$port/group/GLOBAL/delay?url=$url&timeout=$timeout');
+
       final req = await HttpClient().getUrl(uri);
       final res = await req.close();
       final body = await res.transform(utf8.decoder).join();
       final Map<String, dynamic> data = json.decode(body);
+
       if (data.containsKey('message')) {
         message = data['message'] as String?;
         delayList = [];
@@ -60,18 +69,42 @@ class _ProxiesViewState extends State<ProxiesView> with AutomaticKeepAliveClient
         successCount = 0;
       } else {
         message = null;
-        final list =
-            data.entries.map((e) {
-              return DelayItem(e.key, (e.value ?? 0) as int);
-            }).toList();
+
+        final List<DelayItem> list = [];
+
+        // === 只取 proxies 内的结果 ===
+        for (final name in proxies) {
+          final delay = data[name];
+
+          if (delay == null) {
+            // 没返回 = 超时
+            list.add(DelayItem(name, 0));
+          } else {
+            list.add(DelayItem(name, delay as int));
+          }
+        }
+
         totalCount = list.length;
-        successCount = list.where((e) => e.delay <= timeout).length;
-        list.sort((a, b) => a.delay.compareTo(b.delay));
+
+        // === 成功定义：>0 且 <= timeout ===
+        successCount =
+            list.where((e) => e.delay > 0 && e.delay <= timeout).length;
+
+        list.sort((a, b) {
+          // timeout排最后
+          if (a.delay == 0) return 1;
+          if (b.delay == 0) return -1;
+          return a.delay.compareTo(b.delay);
+        });
+
         delayList = list;
+
         // ===== 写入 YAML 的 count =====
         try {
           final data = await readYamlAsMap(subscriptionsPath);
-          final subs = (data['subscriptions'] is List) ? List<Map<String, dynamic>>.from(data['subscriptions']) : <Map<String, dynamic>>[];
+          final subs = (data['subscriptions'] is List)
+              ? List<Map<String, dynamic>>.from(data['subscriptions'])
+              : <Map<String, dynamic>>[];
 
           final settings = await readYamlAsMap(settingsPath);
           final selectedId = settings['selected'];
@@ -86,6 +119,7 @@ class _ProxiesViewState extends State<ProxiesView> with AutomaticKeepAliveClient
           await writeYamlFromMap({'subscriptions': subs}, subscriptionsPath);
         } catch (_) {}
       }
+
       setState(() {});
     } catch (e) {
       showErrorSnackBarGlobal('$e');
