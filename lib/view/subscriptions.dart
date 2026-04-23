@@ -388,7 +388,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                               Row(
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: (() {
                                         final cs = Theme.of(context).colorScheme;
@@ -410,7 +410,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     child: Text(
                                       '${sub['alive'] ?? 0}/${sub['count'] ?? 0}',
                                       style: TextStyle(
-                                        fontSize: 8,
+                                        fontSize: 10,
                                         height: 1,
                                         fontWeight: FontWeight.w600,
                                         color: Theme.of(context).colorScheme.onPrimary,
