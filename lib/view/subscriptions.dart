@@ -388,7 +388,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                               Row(
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: (() {
                                         final cs = Theme.of(context).colorScheme;
