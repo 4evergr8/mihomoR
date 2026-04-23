@@ -387,7 +387,36 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                               // 1. 第一行：count 和 label
                               Row(
                                 children: [
-                                  Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2), decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, borderRadius: BorderRadius.circular(999)), child: Text('${sub['count'] ?? 0}', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onPrimary))),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: (() {
+                                        final cs = Theme.of(context).colorScheme;
+                                        final count = sub['count'] ?? 0;
+                                        final alive = sub['alive'] ?? 0;
+
+                                        if (count == 0) return cs.error;
+
+                                        final r = alive / count;
+
+                                        if (r >= 0.8) return cs.primary;
+                                        if (r >= 0.3) return cs.secondary;
+                                        if (r > 0) return cs.tertiary;
+
+                                        return cs.error;
+                                      })(),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      '${sub['alive'] ?? 0}/${sub['count'] ?? 0}',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        height: 1,
+                                        fontWeight: FontWeight.w600,
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                      ),
+                                    ),
+                                  ),
                                   const SizedBox(width: 2),
                                   Expanded(child: Text(sub['label'], maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium)),
                                 ],
