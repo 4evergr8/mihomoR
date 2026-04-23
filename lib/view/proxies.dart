@@ -111,8 +111,8 @@ class _ProxiesViewState extends State<ProxiesView> with AutomaticKeepAliveClient
 
           for (final sub in subs) {
             if (sub['id'] == selectedId) {
-              sub['count'] = successCount;
-              sub['total'] = totalCount; // 新增这一行
+              sub['count'] = totalCount;
+              sub['alive'] = successCount;
               break;
             }
           }
