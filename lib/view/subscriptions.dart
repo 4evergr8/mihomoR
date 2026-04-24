@@ -462,7 +462,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(totalValue == 0 ? '上传: ∞  下载: ∞  总量: ∞' : '上传: ${formatGB(sub['upload'] as int)}GB  下载: ${formatGB(sub['download'] as int)}GB  总量: ${formatGB(totalValue)}GB', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
+                                        Text(totalValue == 0 ? '上传: ∞  下载: ∞  总量: ∞' : '上传: ${formatGB(sub['upload'] as int)}G 下载: ${formatGB(sub['download'] as int)}G 总量: ${formatGB(totalValue)}G', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
                                         const SizedBox(height: 3),
                                         Text((sub['expire'] as int) == 0 ? '到期时间: ∞' : '到期时间: ${DateTime.fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000).toString().split(" ")[0]}', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
                                         const SizedBox(height: 3),
