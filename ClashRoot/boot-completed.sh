@@ -1,15 +1,11 @@
 #!/system/bin/sh
 
-
-
-
-
-set -x
 DAEMON_LOG="/data/adb/modules/ClashRoot/daemon.log"
 CLASH_DIR="/data/adb/modules/ClashRoot"
 CLASH_BIN="$CLASH_DIR/clash"
 CLASH_LOG="$CLASH_DIR/clash.log"
 CMD="$1"
+
 log() {
     echo "[$(date '+%F %T')] $*"
 }
@@ -20,6 +16,7 @@ start_clash() {
 
 kill_clash() {
     log "kill_clash"
+    kill loop脚本
     killall clash
 }
 
@@ -46,14 +43,13 @@ elif [ "$CMD" = "check" ]; then
 
 
 else
-    exec >"$DAEMON_LOG" 2>&1
-    log "boot start"
     kill_clash
     start_clash
-
+    exec >"$DAEMON_LOG" 2>&1
     while true; do
         sleep 3600
         : > "$CLASH_LOG"
         log "clash.log 已清空"
     done
+
 fi
