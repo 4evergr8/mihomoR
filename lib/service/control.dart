@@ -2,6 +2,17 @@ import 'dart:io';
 
 import 'package:clashroot/service/path.dart';
 import 'package:quick_settings_with_flutter_plugins/quick_settings.dart';
+import 'package:workmanager/workmanager.dart';
+
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    await Process.run("su", ["-c", "sh", scriptPath, "loop"]);
+    return Future.value(true);
+  });
+}
+
+
 
 
 Future<String> clashKill() async {
@@ -14,6 +25,7 @@ Future<String> clashKill() async {
   if (code != 0) {
     throw Exception("FAIL\n$output\n$error");
   }
+  Workmanager().cancelAll();
   await QuickSettings.syncTile(
     Tile(
       label: "ClashRoot",
@@ -33,8 +45,15 @@ Future<String> clashStart() async {
   final error = result.stderr.toString();
 
   if (code != 0) {
+    Workmanager().cancelAll();
     throw Exception("FAIL\n$output\n$error");
+
   }
+  Workmanager().registerPeriodicTask(
+    "clash_loop",
+    "循环任务",
+    frequency: Duration(minutes: 20),
+  );
   await QuickSettings.syncTile(
     Tile(
       label: "ClashRoot",
