@@ -1,9 +1,10 @@
 #!/system/bin/sh
 
-DAEMON_LOG="/data/adb/modules/ClashRoot/daemon.log"
+
 CLASH_DIR="/data/adb/modules/ClashRoot"
 CLASH_BIN="$CLASH_DIR/clash"
 CLASH_LOG="$CLASH_DIR/clash.log"
+DAEMON_LOG="$CLASH_DIR/daemon.log"
 CMD="$1"
 
 log() {
@@ -16,7 +17,6 @@ start_clash() {
 
 kill_clash() {
     log "kill_clash"
-    kill loop脚本
     killall clash
 }
 
@@ -41,15 +41,12 @@ elif [ "$CMD" = "check" ]; then
     eval "ps -p \$(pidof clash) -o pid,ppid,%cpu,%mem,cmd; cat /proc/\$(pidof clash)/status"
 
 
-
+elif [ "$CMD" = "loop" ]; then
+    log "CMD=loop"
+    exec >>"$DAEMON_LOG" 2>&1
+    : > "$CLASH_LOG"
 else
     kill_clash
     start_clash
-    exec >"$DAEMON_LOG" 2>&1
-    while true; do
-        sleep 3600
-        : > "$CLASH_LOG"
-        log "clash.log 已清空"
-    done
-
+    : > "$DAEMON_LOG"
 fi
