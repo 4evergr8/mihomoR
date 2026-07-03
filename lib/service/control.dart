@@ -25,7 +25,7 @@ Future<String> clashKill() async {
   if (code != 0) {
     throw Exception("FAIL\n$output\n$error");
   }
-  Workmanager().cancelAll();
+  await Workmanager().cancelAll();
   await QuickSettings.syncTile(
     Tile(
       label: "ClashRoot",
@@ -49,8 +49,8 @@ Future<String> clashStart() async {
     throw Exception("FAIL\n$output\n$error");
 
   }
-  Workmanager().initialize(callbackDispatcher);
-  Workmanager().registerPeriodicTask(
+  await Workmanager().initialize(callbackDispatcher);
+  await Workmanager().registerPeriodicTask(
     "clash_loop",
     "循环任务",
     frequency: Duration(minutes: 20),
