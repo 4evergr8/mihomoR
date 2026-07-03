@@ -382,7 +382,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
               await startMonitorService();
               SystemNavigator.pop();
             },
-            child: const Icon(Icons.settings),
+            child: const Icon(Icons.speed),
           ),
           const SizedBox(width: 12),
           FloatingActionButton(
