@@ -117,7 +117,7 @@ Future<void> startMonitorService() async{
       const NotificationButton(id: 'delete', text: '断开连接'),
       const NotificationButton(id: 'close', text: '关闭监控'),
     ],
-    serviceTypes: [ForegroundServiceTypes.dataSync],
+    serviceTypes: [ForegroundServiceTypes.specialUse],
     notificationTitle: '服务已启动',
     notificationText: '准备监控...',
     callback: startCallback,
