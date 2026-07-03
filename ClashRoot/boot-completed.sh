@@ -42,8 +42,8 @@ elif [ "$CMD" = "check" ]; then
 
 
 elif [ "$CMD" = "loop" ]; then
-    log "CMD=loop"
     exec >>"$DAEMON_LOG" 2>&1
+    log "CMD=loop"
     : > "$CLASH_LOG"
 else
     kill_clash
