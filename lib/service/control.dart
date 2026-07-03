@@ -49,6 +49,7 @@ Future<String> clashStart() async {
     throw Exception("FAIL\n$output\n$error");
 
   }
+  Workmanager().initialize(callbackDispatcher);
   Workmanager().registerPeriodicTask(
     "clash_loop",
     "循环任务",
