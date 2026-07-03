@@ -1,8 +1,6 @@
-import 'package:clashroot/service/notification.dart';
 import 'package:clashroot/service/tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:quick_settings_with_flutter_plugins/quick_settings.dart';
 
 import 'theme/theme.dart';
@@ -15,11 +13,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   QuickSettings.setup(onTileClicked: onTileClicked, onTileAdded: onTileAdded, onTileRemoved: onTileRemoved);
-  final status = await Permission.notification.status;
-  if (status.isGranted) {
-    await startMonitorService();}
   runApp(const MyApp());
 }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
