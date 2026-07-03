@@ -53,7 +53,7 @@ Future<String> clashStart() async {
   await Workmanager().registerPeriodicTask(
     "clash_loop",
     "循环任务",
-    frequency: Duration(minutes: 20),
+    frequency: Duration(minutes: 60),
   );
   await QuickSettings.syncTile(
     Tile(
