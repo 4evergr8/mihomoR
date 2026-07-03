@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:clashroot/service/notification.dart';
 import 'package:clashroot/service/path.dart';
 import 'package:clashroot/service/subscriptions.dart';
 import 'package:clashroot/service/yaml.dart';
@@ -119,13 +118,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
 
             return Card(
               color:
-              isSelected ? Theme
-                  .of(context)
-                  .colorScheme
-                  .primaryContainer : Theme
-                  .of(context)
-                  .colorScheme
-                  .surface,
+                  isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surface,
               //     margin: const EdgeInsets.only(bottom: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               clipBehavior: Clip.antiAlias,
@@ -147,23 +140,21 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                             decoration: BoxDecoration(
                               color:
-                              (() {
-                                final cs = Theme
-                                    .of(context)
-                                    .colorScheme;
-                                final count = sub['count'] ?? 0;
-                                final alive = sub['alive'] ?? 0;
+                                  (() {
+                                    final cs = Theme.of(context).colorScheme;
+                                    final count = sub['count'] ?? 0;
+                                    final alive = sub['alive'] ?? 0;
 
-                                if (count == 0) return cs.error;
+                                    if (count == 0) return cs.error;
 
-                                final r = count == 0 ? 0.0 : alive / count;
+                                    final r = count == 0 ? 0.0 : alive / count;
 
-                                if (r >= 2 / 3) return cs.primary; // 健康
-                                if (r >= 1 / 3) return cs.secondary; // 一般
-                                if (r > 0) return cs.tertiary; // 较差
+                                    if (r >= 2 / 3) return cs.primary; // 健康
+                                    if (r >= 1 / 3) return cs.secondary; // 一般
+                                    if (r > 0) return cs.tertiary; // 较差
 
-                                return cs.error; // 全挂
-                              })(),
+                                    return cs.error; // 全挂
+                                  })(),
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Text(
@@ -172,23 +163,21 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                 fontSize: 12,
                                 height: 1,
                                 color:
-                                (() {
-                                  final cs = Theme
-                                      .of(context)
-                                      .colorScheme;
-                                  final count = sub['count'] ?? 0;
-                                  final alive = sub['alive'] ?? 0;
+                                    (() {
+                                      final cs = Theme.of(context).colorScheme;
+                                      final count = sub['count'] ?? 0;
+                                      final alive = sub['alive'] ?? 0;
 
-                                  if (count == 0) return cs.onError;
+                                      if (count == 0) return cs.onError;
 
-                                  final r = count == 0 ? 0.0 : alive / count;
+                                      final r = count == 0 ? 0.0 : alive / count;
 
-                                  if (r >= 2 / 3) return cs.onPrimary; // 健康
-                                  if (r >= 1 / 3) return cs.onSecondary; // 一般
-                                  if (r > 0) return cs.onTertiary; // 较差
+                                      if (r >= 2 / 3) return cs.onPrimary; // 健康
+                                      if (r >= 1 / 3) return cs.onSecondary; // 一般
+                                      if (r > 0) return cs.onTertiary; // 较差
 
-                                  return cs.onError; // 全挂
-                                })(),
+                                      return cs.onError; // 全挂
+                                    })(),
                               ),
                             ),
                           ),
@@ -198,10 +187,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                               sub['label'],
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme
-                                  .of(context)
-                                  .textTheme
-                                  .titleMedium,
+                              style: Theme.of(context).textTheme.titleMedium,
                             ),
                           ),
                         ],
@@ -218,28 +204,19 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                               if ((sub['upload'] as int) > 0)
                                 Expanded(
                                   flex: scale(sub['upload'] as int),
-                                  child: Container(color: Theme
-                                      .of(context)
-                                      .colorScheme
-                                      .primary),
+                                  child: Container(color: Theme.of(context).colorScheme.primary),
                                 ),
                               if ((sub['download'] as int) > 0)
                                 Expanded(
                                   flex: scale(sub['download'] as int),
-                                  child: Container(color: Theme
-                                      .of(context)
-                                      .colorScheme
-                                      .secondary),
+                                  child: Container(color: Theme.of(context).colorScheme.secondary),
                                 ),
                               Expanded(
                                 flex: (100 - scale(sub['upload'] as int) - scale(sub['download'] as int)).clamp(
                                   0,
                                   100,
                                 ),
-                                child: Container(color: Theme
-                                    .of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest),
+                                child: Container(color: Theme.of(context).colorScheme.surfaceContainerHighest),
                               ),
                             ],
                           ),
@@ -259,39 +236,26 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                 Text(
                                   totalValue == 0
                                       ? '上传: ∞  下载: ∞  总量: ∞'
-                                      : '上传: ${formatSize(sub['upload'] as int)} 下载: ${formatSize(
-                                      sub['download'] as int)} 总量: ${formatSize(totalValue)}',
+                                      : '上传: ${formatSize(sub['upload'] as int)} 下载: ${formatSize(sub['download'] as int)} 总量: ${formatSize(totalValue)}',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: Theme
-                                      .of(context)
-                                      .textTheme
-                                      .bodySmall,
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
                                   (sub['expire'] as int) == 0
                                       ? '到期时间: ∞'
-                                      : '到期时间: ${DateTime
-                                      .fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000)
-                                      .toString()
-                                      .split(" ")[0]}',
+                                      : '到期时间: ${DateTime.fromMillisecondsSinceEpoch((sub['expire'] as int) * 1000).toString().split(" ")[0]}',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: Theme
-                                      .of(context)
-                                      .textTheme
-                                      .bodySmall,
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
                                   '上次更新: ${formatTimeAgo(sub['update'])}',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: Theme
-                                      .of(context)
-                                      .textTheme
-                                      .bodySmall,
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
                               ],
                             ),
@@ -306,15 +270,9 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                   (sub['favorite'] ?? false) ? Icons.star : Icons.star_border,
                                   size: 20,
                                   color:
-                                  (sub['favorite'] ?? false)
-                                      ? Theme
-                                      .of(context)
-                                      .colorScheme
-                                      .primary
-                                      : Theme
-                                      .of(context)
-                                      .colorScheme
-                                      .onSurface,
+                                      (sub['favorite'] ?? false)
+                                          ? Theme.of(context).colorScheme.primary
+                                          : Theme.of(context).colorScheme.onSurface,
                                 ),
                                 onPressed: () async {
                                   final value = !(sub['favorite'] ?? false);
@@ -332,10 +290,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                               ),
 
                               PopupMenuButton<int>(
-                                icon: Icon(Icons.more_vert, size: 20, color: Theme
-                                    .of(context)
-                                    .colorScheme
-                                    .onSurface),
+                                icon: Icon(Icons.more_vert, size: 20, color: Theme.of(context).colorScheme.onSurface),
                                 onSelected: (value) async {
                                   final ua = data['ua'];
                                   final timeout = data['timeout'];
@@ -385,27 +340,26 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
                                   }
                                 },
                                 itemBuilder:
-                                    (_) =>
-                                const [
-                                  PopupMenuItem(
-                                    value: 1,
-                                    child: Row(
-                                      children: [Icon(Icons.refresh, size: 18), SizedBox(width: 8), Text('刷新')],
-                                    ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 2,
-                                    child: Row(
-                                      children: [Icon(Icons.delete, size: 18), SizedBox(width: 8), Text('删除')],
-                                    ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 3,
-                                    child: Row(
-                                      children: [Icon(Icons.copy, size: 18), SizedBox(width: 8), Text('复制')],
-                                    ),
-                                  ),
-                                ],
+                                    (_) => const [
+                                      PopupMenuItem(
+                                        value: 1,
+                                        child: Row(
+                                          children: [Icon(Icons.refresh, size: 18), SizedBox(width: 8), Text('刷新')],
+                                        ),
+                                      ),
+                                      PopupMenuItem(
+                                        value: 2,
+                                        child: Row(
+                                          children: [Icon(Icons.delete, size: 18), SizedBox(width: 8), Text('删除')],
+                                        ),
+                                      ),
+                                      PopupMenuItem(
+                                        value: 3,
+                                        child: Row(
+                                          children: [Icon(Icons.copy, size: 18), SizedBox(width: 8), Text('复制')],
+                                        ),
+                                      ),
+                                    ],
                               ),
                             ],
                           ),
@@ -419,34 +373,15 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
           },
         ),
       ),
-      floatingActionButton: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton(
-            onPressed: () async {
-              try {
-                await startMonitorService();
-                SystemNavigator.pop();
-              } catch (e) {
-                showSnackBarGlobal("error", "$e");
-              }
-            },
-            child: const Icon(Icons.speed),
-          ),
-          const SizedBox(width: 12),
-          FloatingActionButton(
-            onPressed: () async {
-              final links = await _dialogSubscriptionAdd(context);
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final links = await _dialogSubscriptionAdd(context);
 
-              if (links != null && links
-                  .trim()
-                  .isNotEmpty) {
-                await _subscriptionsAdd(links);
-              }
-            },
-            child: const Icon(Icons.add),
-          ),
-        ],
+          if (links != null && links.trim().isNotEmpty) {
+            await _subscriptionsAdd(links);
+          }
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -494,8 +429,7 @@ Future<bool?> _dialogSubscriptionDelete(BuildContext context, Map<String, dynami
   return showDialog<bool>(
     context: context,
     builder:
-        (_) =>
-        AlertDialog(
+        (_) => AlertDialog(
           title: const Text('确认删除'),
           content: Text('确定删除订阅 "${sub['label']}" 吗？'),
           actions: [
