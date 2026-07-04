@@ -5,20 +5,29 @@ import 'package:quick_settings_with_flutter_plugins/quick_settings.dart';
 Tile onTileClicked(Tile tile) {
   final oldStatus = tile.tileStatus;
   if (oldStatus == TileStatus.active) {
-    clashKill();
-    tile
-      ..tileStatus = TileStatus.inactive
-      ..label = "ClashRoot"
-      ..drawableName = "alarm_off"
-      ..contentDescription = "Clash核心已停止";
+    try {
+      clashKill();
+      tile
+        ..tileStatus = TileStatus.inactive
+        ..label = "ClashRoot"
+        ..drawableName = "alarm_off"
+        ..contentDescription = "Clash核心已停止";
+    } catch (e) {
+      return tile;
+    }
   } else {
-    clashStart();
-    tile
-      ..tileStatus = TileStatus.active
-      ..label = "ClashRoot"
-      ..drawableName = "alarm_on"
-      ..contentDescription = "Clash核心已启动";
+    try {
+      clashStart();
+      tile
+        ..tileStatus = TileStatus.active
+        ..label = "ClashRoot"
+        ..drawableName = "alarm_on"
+        ..contentDescription = "Clash核心已启动";
+    } catch (e) {
+      return tile;
+    }
   }
+
   return tile;
 }
 
