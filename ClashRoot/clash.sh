@@ -4,7 +4,7 @@
 CLASH_DIR="/data/adb/modules/ClashRoot"
 CLASH_BIN="$CLASH_DIR/clash"
 CLASH_LOG="$CLASH_DIR/clash.log"
-LOOP_LOG="$CLASH_DIR/LOOP.log"
+LOOP_LOG="$CLASH_DIR/loop.log"
 CMD="$1"
 
 log() {
