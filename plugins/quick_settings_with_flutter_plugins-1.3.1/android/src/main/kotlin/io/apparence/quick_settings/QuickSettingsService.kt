@@ -79,7 +79,7 @@ class QuickSettingsService : TileService() {
 
     override fun onStartListening() {
         super.onStartListening()
-        applyCachedTile()
+        setStartTile()
         dispatchTileAddedEvent(force = false)
     }
 
@@ -150,6 +150,14 @@ class QuickSettingsService : TileService() {
     }
 
     private fun applyCachedTile(): Boolean {
+        val cachedTile = QuickSettingsTileStateStore.load(applicationContext)
+        if (cachedTile != null) {
+            updateTile(cachedTile)
+            return true
+        }
+        return false
+    }
+    private fun setStartTile(): Boolean {
         val cachedTile = QuickSettingsTileStateStore.load(applicationContext)
         if (cachedTile != null) {
 
