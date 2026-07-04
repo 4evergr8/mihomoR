@@ -44,6 +44,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
       });
       await subscriptionsSwitch(id);
       await yamlWrite(data, dataPath);
+      showSnackBarGlobal("success", '切换完成');
     } catch (e) {
       showSnackBarGlobal("error", '$e');
     }
@@ -126,7 +127,7 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
               child: InkWell(
                 onTap: () async {
                   await _subscriptionsSwitch(sub['id']);
-                  await yamlWrite(data['subscriptions'], dataPath);
+
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(16),
