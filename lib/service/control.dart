@@ -7,16 +7,13 @@ import 'package:workmanager/workmanager.dart';
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    await Process.run("su", ["-c", "sh", scriptPath, "loop"]);
+    await Process.run("su", ["-c","busybox", "sh", scriptPath, "loop"]);
     return Future.value(true);
   });
 }
 
-
-
-
 Future<String> clashKill() async {
-  final result = await Process.run("su", ["-c", "sh", scriptPath, "kill"]);
+  final result = await Process.run("su", ["-c", "busybox","sh", scriptPath, "kill"]);
 
   final code = result.exitCode;
   final output = result.stdout.toString();
@@ -38,7 +35,7 @@ Future<String> clashKill() async {
 }
 
 Future<String> clashStart() async {
-  final result = await Process.run("su", ["-c", "sh", scriptPath, "start"]);
+  final result = await Process.run("su", ["-c", "busybox", "sh", scriptPath, "start"]);
 
   final code = result.exitCode;
   final output = result.stdout.toString();
@@ -47,14 +44,9 @@ Future<String> clashStart() async {
   if (code != 0) {
     Workmanager().cancelAll();
     throw Exception("FAIL\n$output\n$error");
-
   }
   await Workmanager().initialize(callbackDispatcher);
-  await Workmanager().registerPeriodicTask(
-    "clash_loop",
-    "循环任务",
-    frequency: Duration(minutes: 60),
-  );
+  await Workmanager().registerPeriodicTask("clash_loop", "循环任务", frequency: Duration(minutes: 60));
   await QuickSettings.syncTile(
     Tile(
       label: "ClashRoot",
@@ -67,7 +59,7 @@ Future<String> clashStart() async {
 }
 
 Future<String> clashTest() async {
-  final result = await Process.run("su", ["-c", "sh", scriptPath, "test"]);
+  final result = await Process.run("su", ["-c", "busybox","sh", scriptPath, "test"]);
 
   final code = result.exitCode;
   final output = result.stdout.toString();
@@ -77,7 +69,7 @@ Future<String> clashTest() async {
 }
 
 Future<String> clashCheck() async {
-  final result = await Process.run("su", ["-c", "sh", scriptPath, "check"]);
+  final result = await Process.run("su", ["-c","busybox", "sh", scriptPath, "check"]);
 
   final code = result.exitCode;
   final output = result.stdout.toString();
