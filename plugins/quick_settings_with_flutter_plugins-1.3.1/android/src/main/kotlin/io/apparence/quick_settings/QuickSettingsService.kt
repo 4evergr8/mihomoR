@@ -155,10 +155,15 @@ class QuickSettingsService : TileService() {
         val cachedTile = QuickSettingsTileStateStore.load(applicationContext)
 
         if (cachedTile != null) {
-            val forced = cachedTile.copy(
-                status = TileStatus.OFF
+            val forcedTile = Tile(
+                cachedTile.label,
+                TileStatus.OFF,
+                cachedTile.contentDescription,
+                cachedTile.stateDescription,
+                cachedTile.drawableName,
+                cachedTile.subtitle
             )
-            updateTile(forced)
+            updateTile(forcedTile)
             return true
         }
 
