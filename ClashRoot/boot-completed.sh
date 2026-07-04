@@ -40,13 +40,21 @@ elif [ "$CMD" = "check" ]; then
     log "CMD=check"
     eval "ps -p \$(pidof clash) -o pid,ppid,%cpu,%mem,cmd; cat /proc/\$(pidof clash)/status"
 
-
 elif [ "$CMD" = "loop" ]; then
     exec >>"$DAEMON_LOG" 2>&1
     log "CMD=loop"
-    : > "$CLASH_LOG"
+
+    HOUR=$(date +%H)
+
+    if [ "$HOUR" -eq 5 ]; then
+        log "hour=5, restart clash"
+
+        kill_clash
+        start_clash
+    else
+        log "not 5am, clean log only"
+        : > "$CLASH_LOG"
+    fi
 else
-    kill_clash
-    start_clash
     : > "$DAEMON_LOG"
 fi
