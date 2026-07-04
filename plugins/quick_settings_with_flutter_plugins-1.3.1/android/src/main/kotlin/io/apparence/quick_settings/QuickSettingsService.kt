@@ -156,7 +156,6 @@ class QuickSettingsService : TileService() {
             val forcedTile = cachedTile.copy(
                 tileStatus = TileStatus.INACTIVE
             )
-
             updateTile(forcedTile)
             return true
         }
