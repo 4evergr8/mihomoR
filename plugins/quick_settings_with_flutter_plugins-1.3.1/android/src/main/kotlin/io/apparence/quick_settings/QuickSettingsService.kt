@@ -157,6 +157,7 @@ class QuickSettingsService : TileService() {
         }
         return false
     }
+
     private fun setStartTile(): Boolean {
         val cachedTile = QuickSettingsTileStateStore.load(applicationContext)
         if (cachedTile != null) {
@@ -164,6 +165,10 @@ class QuickSettingsService : TileService() {
             val forcedTile = cachedTile.copy(
                 tileStatus = TileStatus.INACTIVE
             )
+
+            // 关键：同步修复持久化状态
+            QuickSettingsTileStateStore.save(applicationContext, forcedTile)
+
             updateTile(forcedTile)
             return true
         }
