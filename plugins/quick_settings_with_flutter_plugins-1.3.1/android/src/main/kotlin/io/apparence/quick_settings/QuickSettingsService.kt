@@ -152,6 +152,9 @@ class QuickSettingsService : TileService() {
     private fun applyCachedTile(): Boolean {
         val cachedTile = QuickSettingsTileStateStore.load(applicationContext)
         if (cachedTile != null) {
+
+            cachedTile.tileStatus = TileStatus.inactive
+
             updateTile(cachedTile)
             return true
         }
