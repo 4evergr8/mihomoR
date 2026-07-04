@@ -151,16 +151,11 @@ class QuickSettingsService : TileService() {
 
     private fun applyCachedTile(): Boolean {
         val cachedTile = QuickSettingsTileStateStore.load(applicationContext)
-
-        val forcedTile = cachedTile?.copy()?.apply {
-            state = Tile.STATE_INACTIVE
-        } ?: return false
-
-        updateTile(forcedTile)
-
-        QuickSettingsTileStateStore.save(applicationContext, forcedTile)
-
-        return true
+        if (cachedTile != null) {
+            updateTile(cachedTile)
+            return true
+        }
+        return false
     }
 
     private fun setupFlutter() {
