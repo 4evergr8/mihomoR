@@ -11,8 +11,9 @@ final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<Scaffol
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await QuickSettings.setup(onTileClicked: onTileClicked, onTileAdded: onTileAdded, onTileRemoved: onTileRemoved);
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  QuickSettings.setup(onTileClicked: onTileClicked, onTileAdded: onTileAdded, onTileRemoved: onTileRemoved);
+
   runApp(const MyApp());
 }
 
