@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:clashroot/service/control.dart';
 import 'package:clashroot/service/path.dart';
