@@ -46,7 +46,7 @@ Future<String> clashStart() async {
     throw Exception("FAIL\n$output\n$error");
   }
   await Workmanager().initialize(callbackDispatcher);
-  await Workmanager().registerPeriodicTask("clash_loop", "循环任务", frequency: Duration(minutes: 60));
+  await Workmanager().registerPeriodicTask("clash_loop", "循环任务", frequency: Duration(minutes:20));
   await QuickSettings.syncTile(
     Tile(
       label: "ClashRoot",
