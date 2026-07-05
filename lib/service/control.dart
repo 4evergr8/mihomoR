@@ -2,18 +2,9 @@ import 'dart:io';
 
 import 'package:clashroot/service/path.dart';
 import 'package:quick_settings_with_flutter_plugins/quick_settings.dart';
-import 'package:workmanager/workmanager.dart';
-
-@pragma('vm:entry-point')
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) async {
-    await Process.run("su", ["-c","busybox", "sh", scriptPath, "loop"]);
-    return Future.value(true);
-  });
-}
 
 Future<String> clashKill() async {
-  final result = await Process.run("su", ["-c", "busybox","sh", scriptPath, "kill"]);
+  final result = await Process.run("su", ["-c", "busybox", "sh", scriptPath, "kill"]);
 
   final code = result.exitCode;
   final output = result.stdout.toString();
@@ -22,7 +13,6 @@ Future<String> clashKill() async {
   if (code != 0) {
     throw Exception("FAIL\n$output\n$error");
   }
-  await Workmanager().cancelAll();
   await QuickSettings.syncTile(
     Tile(
       label: "ClashRoot",
@@ -42,11 +32,8 @@ Future<String> clashStart() async {
   final error = result.stderr.toString();
 
   if (code != 0) {
-    Workmanager().cancelAll();
     throw Exception("FAIL\n$output\n$error");
   }
-  await Workmanager().initialize(callbackDispatcher);
-  await Workmanager().registerPeriodicTask("clash_loop", "循环任务", frequency: Duration(minutes:20));
   await QuickSettings.syncTile(
     Tile(
       label: "ClashRoot",
@@ -59,7 +46,7 @@ Future<String> clashStart() async {
 }
 
 Future<String> clashTest() async {
-  final result = await Process.run("su", ["-c", "busybox","sh", scriptPath, "test"]);
+  final result = await Process.run("su", ["-c", "busybox", "sh", scriptPath, "test"]);
 
   final code = result.exitCode;
   final output = result.stdout.toString();
@@ -69,7 +56,7 @@ Future<String> clashTest() async {
 }
 
 Future<String> clashCheck() async {
-  final result = await Process.run("su", ["-c","busybox", "sh", scriptPath, "check"]);
+  final result = await Process.run("su", ["-c", "busybox", "sh", scriptPath, "check"]);
 
   final code = result.exitCode;
   final output = result.stdout.toString();
