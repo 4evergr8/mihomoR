@@ -128,7 +128,7 @@ class _SplitViewState extends State<SplitView> with AutomaticKeepAliveClientMixi
     }
 
     await yamlWrite(override, overridePath);
-    final data= await subscriptionsLoad();
+    final data = await subscriptionsLoad();
     final subs = data['subscriptions'];
     final selectedSub = subs.firstWhere((sub) => sub['select'] == true);
     await subscriptionsSwitch(selectedSub['id']);
