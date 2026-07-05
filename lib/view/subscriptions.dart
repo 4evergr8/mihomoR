@@ -127,7 +127,6 @@ class _SubscriptionViewState extends State<SubscriptionView> with AutomaticKeepA
               child: InkWell(
                 onTap: () async {
                   await _subscriptionsSwitch(sub['id']);
-
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(16),
