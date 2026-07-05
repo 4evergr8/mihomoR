@@ -1,6 +1,0 @@
-service clash /data/adb/modules/ClashRoot/clash -d /data/adb/modules/ClashRoot
-    user root
-    group root
-    seclabel u:r:ksu:s0
-    disabled
-    oneshot
