@@ -150,8 +150,21 @@ class QuickSettingsService : TileService() {
     }
 
     private fun applyCachedTile(): Boolean {
-        val cachedTile = QuickSettingsTileStateStore.load(applicationContext)
+        var cachedTile = QuickSettingsTileStateStore.load(applicationContext)
         if (cachedTile != null) {
+            val prefs = applicationContext.getSharedPreferences("quick_settings_tile_state", Context.MODE_PRIVATE)
+            val currentBootCount = android.provider.Settings.Global.getInt(
+                applicationContext.contentResolver,
+                android.provider.Settings.Global.BOOT_COUNT,
+                -1
+            )
+            val lastBootCount = prefs.getInt("last_boot_count", -1)
+
+            if (currentBootCount != -1 && currentBootCount != lastBootCount) {
+                prefs.edit().putInt("last_boot_count", currentBootCount).apply()
+                cachedTile = cachedTile.copy(tileStatus = TileStatus.INACTIVE)
+            }
+
             updateTile(cachedTile)
             return true
         }
@@ -179,8 +192,9 @@ class QuickSettingsService : TileService() {
          * Preconditions:
          *
          *
-         *  * The given `callbackHandle` must correspond to a registered Dart callback. If the
+         * * The given `callbackHandle` must correspond to a registered Dart callback. If the
          * handle does not resolve to a Dart callback then this method does nothing.
+         *
          *
          */
         fun startBackgroundIsolate(
@@ -257,31 +271,5 @@ class QuickSettingsService : TileService() {
             // specified by the incoming intent.
             return flutterBackgroundExecutor!!.executeDartCallback(tileEvent)
         }
-
-//        fun onHandleWork(status: Boolean) {
-//            if (!flutterBackgroundExecutor!!.isDartBackgroundHandlerRegistered()) {
-//                Log.w(
-//                    TAG,
-//                    "A background message could not be handled in Dart as no onBackgroundMessage handler has been registered."
-//                )
-//                return
-//            }
-//
-//            // If we're in the middle of processing queued messages, add the incoming
-//            // intent to the queue and return.
-//            synchronized(messagingQueue) {
-//                if (flutterBackgroundExecutor!!.isNotRunning()) {
-//                    Log.i(TAG, "Service has not yet started, messages will be queued.")
-//                    messagingQueue.add(status)
-//                    return
-//                }
-//            }
-//
-//            // There were no pre-existing callback requests. Execute the callback
-//            // specified by the incoming intent.
-//            Handler(Looper.getMainLooper()).post {
-//                flutterBackgroundExecutor!!.executeDartCallbackInBackgroundIsolate(status)
-//            }
-//        }
     }
 }
