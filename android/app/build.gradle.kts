@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "app.flutter.clashroot"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
