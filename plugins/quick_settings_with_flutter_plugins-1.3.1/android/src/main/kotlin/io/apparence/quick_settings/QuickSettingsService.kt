@@ -80,6 +80,7 @@ class QuickSettingsService : TileService() {
     override fun onStartListening() {
         super.onStartListening()
         setStartTile()
+        applyCachedTile()
         dispatchTileAddedEvent(force = false)
     }
 
@@ -165,11 +166,7 @@ class QuickSettingsService : TileService() {
             val forcedTile = cachedTile.copy(
                 tileStatus = TileStatus.INACTIVE
             )
-
-            // 关键：同步修复持久化状态
             QuickSettingsTileStateStore.save(applicationContext, forcedTile)
-
-            updateTile(forcedTile)
             return true
         }
         return false
