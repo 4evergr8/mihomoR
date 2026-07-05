@@ -4,8 +4,6 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
 
 
-
-
     <application
             android:label="ClashRoot"
             android:name="${applicationName}"
@@ -31,14 +29,14 @@
             </intent-filter>
 
             <intent-filter>
-                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES"/>
             </intent-filter>
 
         </activity>
-        
+
         <meta-data
                 android:name="flutterEmbedding"
-                android:value="2" />
+                android:value="2"/>
 
     </application>
 
