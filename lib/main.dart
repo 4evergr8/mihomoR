@@ -31,7 +31,6 @@ class MyApp extends StatelessWidget {
       title: 'ClashRoot',
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       home: const HomeScreen(),
-
     );
   }
 }
