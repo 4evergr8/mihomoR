@@ -14,7 +14,7 @@ jobs:
       - name: 设置Flutter环境
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.1'
+          flutter-version: '3.44.4'
 
       - name: 安装依赖
         run: flutter pub get
