@@ -6,10 +6,10 @@ OLD_PATH="/data/adb/modules/ClashRoot"
 mkdir -p "$MODPATH/config"
 mkdir -p "$MODPATH/log"
 
-if [ -d "$OLD_PATH/config" ]; then
-    ui_print "恢复 config 文件夹"
-    cp -rf "$OLD_PATH/config" "$MODPATH/"
-fi
+ui_print "恢复 config 文件夹"
+cp -rf "$OLD_PATH/config" "$MODPATH/"
+ui_print "恢复 log 文件夹"
+cp -rf "$OLD_PATH/log" "$MODPATH/"
 
 for FILE in override.yaml data.yaml config.yaml root; do
     if [ -f "$OLD_PATH/$FILE" ]; then
