@@ -53,12 +53,15 @@ elif [ "$CMD" = "loop" ]; then
         cp "$CLASH_LOG" "$LOGS_DIR/$NOW.log"
     fi
 
-    # 限制日志数量最多50个
     if [ -d "$LOGS_DIR" ]; then
-        LOG_COUNT=$(ls -1 "$LOGS_DIR" 2>/dev/null | wc -l)
+        LOG_COUNT=$(find "$LOGS_DIR" -type f 2>/dev/null | wc -l)
+
         if [ "$LOG_COUNT" -gt 50 ]; then
-            ls -1t "$LOGS_DIR" | tail -n +51 | while read f; do
-                rm -f "$LOGS_DIR/$f"
+            find "$LOGS_DIR" -type f -printf '%T@ %p\n' 2>/dev/null \
+            | sort -n \
+            | head -n $((LOG_COUNT - 50)) \
+            | while read -r _ f; do
+                rm -f "$f"
             done
         fi
     fi
