@@ -37,7 +37,7 @@ jobs:
 
       - name: Build APK (按 ABI 分割)
         run: |
-          flutter build apk --release --split-per-abi --no-tree-shake-icons
+          flutter build apk --release --split-per-abi
 
       - name: 重命名 APK（加入 hash）
         run: |
