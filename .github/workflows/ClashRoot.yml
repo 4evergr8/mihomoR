@@ -19,6 +19,12 @@ jobs:
       - name: 安装依赖
         run: flutter pub get
 
+      - name: 注入 Git 版本号
+        run: |
+          SHORT_HASH=$(git rev-parse --short=6 HEAD)
+          echo "commit hash: $SHORT_HASH"
+          sed -i "s/^version: .*/version: 1.1.1_${SHORT_HASH}+11/" pubspec.yaml
+          
       - name: Build APK (按 ABI 分割)
         run: flutter build apk --release --split-per-abi --no-tree-shake-icons
 
