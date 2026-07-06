@@ -23,19 +23,17 @@ jobs:
         run: |
           echo "SHORT_HASH=$(git rev-parse --short=6 HEAD)" >> $GITHUB_ENV
 
-      - name: 注入 pubspec.yaml 版本 hash（不改版本号）
+      - name: 注入 pubspec.yaml 版本 hash
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
           BASE=${VERSION%%+*}
           CODE=${VERSION##*+}
+          sed -i "s/^version:.*/version: ${BASE}-${SHORT_HASH}+${CODE}/" pubspec.yaml
 
-          sed -i "s/^version:.*/version: ${BASE}_${SHORT_HASH}+${CODE}/" pubspec.yaml
-
-      - name: 注入 module.prop 版本 hash（不改 versionCode）
+      - name: 注入 module.prop 版本 hash
         run: |
           HASH=$SHORT_HASH
-
-          sed -i "s/^version=.*/version=2.2.2_${HASH}/" ClashRoot/module.prop
+          sed -i "s/^version=.*/version=2.2.2-${HASH}/" ClashRoot/module.prop
 
       - name: Build APK (按 ABI 分割)
         run: |
@@ -81,13 +79,11 @@ jobs:
           tar -xzf metacubexd.tgz -C ClashRoot/metacubexd
           rm metacubexd.tgz
 
-      - name: 打包 ClashRoot.zip（加入 hash）
+      - name: 打包 ClashRoot.zip
         run: |
           HASH=$SHORT_HASH
 
           (cd ClashRoot && zip -r ../ClashRoot-${HASH}.zip .)
-
-
 
       - name: 上传 ZIP
         uses: actions/upload-artifact@v7
