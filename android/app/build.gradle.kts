@@ -19,7 +19,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "app.flutter.clashroot"
         minSdk = 28
         targetSdk = 35
@@ -30,8 +29,8 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
-            isMinifyEnabled = false // 禁用代码混淆
-            isShrinkResources = false // 禁用资源压缩
+            isMinifyEnabled = false
+            isShrinkResources = false
 
         }
     }
