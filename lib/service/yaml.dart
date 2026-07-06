@@ -163,7 +163,7 @@ Future<Map<String, dynamic>> yamlDownload(String url, String ua, String id, int 
     final converted = _convertYaml(obj);
 
     if (converted is! Map<String, dynamic>) {
-      throw Exception('不是有效配置');
+      throw Exception(text);
     }
 
     final result = await Process.run('su', ['-c', 'cp $filePath $mainPath/config/$id.yaml']);
