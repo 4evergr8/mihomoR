@@ -50,8 +50,19 @@ elif [ "$CMD" = "loop" ]; then
     NOW=$(date '+%F_%H-%M-%S')
 
     if [ -f "$CLASH_LOG" ]; then
-        cp "$CLASH_LOG" "$LOGS_DIR/clash_$NOW.log"
+        cp "$CLASH_LOG" "$LOGS_DIR/$NOW.log"
     fi
+
+    # 限制日志数量最多50个
+    if [ -d "$LOGS_DIR" ]; then
+        LOG_COUNT=$(ls -1 "$LOGS_DIR" 2>/dev/null | wc -l)
+        if [ "$LOG_COUNT" -gt 50 ]; then
+            ls -1t "$LOGS_DIR" | tail -n +51 | while read f; do
+                rm -f "$LOGS_DIR/$f"
+            done
+        fi
+    fi
+
     HOUR=$(date +%H)
     if [ "$HOUR" -eq 5 ]; then
         log "hour=5, restart clash"
