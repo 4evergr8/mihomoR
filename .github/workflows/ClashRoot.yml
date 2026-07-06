@@ -48,8 +48,8 @@ jobs:
           mkdir -p output_apk
 
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk \
-             output_apk/ClashRoot-arm64-v8a-${HASH}.apk
-          
+             output_apk/ClashRoot-${HASH}.apk
+
       - name: 上传 APK
         uses: actions/upload-artifact@v7
         with:
