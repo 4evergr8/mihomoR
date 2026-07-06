@@ -67,12 +67,12 @@ elif [ "$CMD" = "loop" ]; then
     fi
 
     HOUR=$(date +%H)
-    if [ "$HOUR" -eq 5 ]; then
+    if [ "$HOUR" -eq 6 ]; then
         log "hour=5, restart clash"
         kill_clash
         start_clash
     else
-        log "not 5am, clean log only"
+        log "not 6am, clean log only"
         : > "$CLASH_LOG"
     fi
 else
