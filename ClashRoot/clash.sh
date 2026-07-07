@@ -68,7 +68,7 @@ elif [ "$CMD" = "loop" ]; then
 
     HOUR=$(date +%H)
     if [ "$HOUR" -eq 6 ]; then
-        log "hour=5, restart clash"
+        log "hour=6, restart clash"
         kill_clash
         start_clash
     else
