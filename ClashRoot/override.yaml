@@ -1,5 +1,6 @@
 mode: rule
 external-controller: 127.0.0.1:9090
+secret: "111111"
 external-ui: ./metacubexd
 allow-lan: false
 log-level: warning
