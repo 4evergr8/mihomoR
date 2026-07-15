@@ -71,7 +71,7 @@ class _ProxiesViewState extends State<ProxiesView> with AutomaticKeepAliveClient
       final settings = await yamlRead(dataPath);
 
       final port = settings['port'];
-      final secret = settings['secret'];
+      final secret = settings['secret'] ?? '';
       final url = settings['url'];
 
       timeout = settings['testtimeout'];
