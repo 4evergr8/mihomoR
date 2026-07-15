@@ -71,6 +71,7 @@ class _ProxiesViewState extends State<ProxiesView> with AutomaticKeepAliveClient
       final settings = await yamlRead(dataPath);
 
       final port = settings['port'];
+      final secret = settings['secret'];
       final url = settings['url'];
 
       timeout = settings['testtimeout'];
@@ -78,7 +79,11 @@ class _ProxiesViewState extends State<ProxiesView> with AutomaticKeepAliveClient
 
       for (int i = 1; i < 7; i++) {
         try {
-          final r = await HttpClient().getUrl(Uri.parse('http://127.0.0.1:$port/version')).then((req) => req.close());
+          final client = HttpClient();
+          final req = await client.getUrl(Uri.parse('http://127.0.0.1:$port/version'));
+          req.headers.set('Authorization', 'Bearer $secret');
+
+          final r = await req.close();
 
           if (r.statusCode == 200) {
             break;
@@ -90,8 +95,8 @@ class _ProxiesViewState extends State<ProxiesView> with AutomaticKeepAliveClient
       }
 
       final uri = Uri.parse('http://127.0.0.1:$port/group/GLOBAL/delay?url=$url&timeout=$timeout&expected=$expected');
-
       final req = await HttpClient().getUrl(uri);
+      req.headers.set('Authorization', 'Bearer $secret');
       final res = await req.close();
 
       final body = await res.transform(utf8.decoder).join();
