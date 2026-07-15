@@ -6,6 +6,8 @@ timeout: 10000
 #下载订阅超时,毫秒
 url: "https://www.google.com"
 #节点测速链接
+secret: "111111"
+#Clash API密码
 testtimeout: 3000
 #节点测速超时,毫秒
 expected: 200
