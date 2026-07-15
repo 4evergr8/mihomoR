@@ -76,6 +76,8 @@ timeout: 10000
 #下载订阅超时,毫秒
 url: "https://www.google.com"
 #节点测速链接
+secret: "111111"
+#Clash API密码
 testtimeout: 3000
 #节点测速超时,毫秒
 expected: 200
@@ -110,14 +112,15 @@ subscriptions:
 ```yaml
 mode: rule
 external-controller: 127.0.0.1:9090
+secret: "111111"
 external-ui: ./metacubexd
 allow-lan: false
 log-level: warning
-ipv6: true
-keep-alive-idle: 15
-keep-alive-interval: 10
-disable-keep-alive: false
-unified-delay: true
+ipv6: false
+disable-keep-alive: true
+keep-alive-idle: 10
+keep-alive-interval: 60
+unified-delay: false
 tcp-concurrent: true
 geodata-loader: memconservative
 find-process-mode: off
@@ -126,11 +129,12 @@ geo-update-interval: 24
 etag-support: true
 geodata-mode: true
 geox-url:
-  geoip: "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat"
-  geosite: "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat"
+  geoip: "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat"
+  geosite: "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat"
 profile:
   store-selected: false
   store-fake-ip: true
+
 
 tun:
   enable: true
@@ -141,27 +145,136 @@ tun:
   strict-route: true
 
 
-
 dns:
   enable: true
   cache-algorithm: lru
-  prefer-h3: false
   listen: 0.0.0.0:1053
-  ipv6: true
+  ipv6: false
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
   fake-ip-filter-mode: blacklist
   fake-ip-filter:
-    - geosite:cn
-    - geosite:private
-  use-hosts: false
-  use-system-hosts: true
-  default-nameserver:
-    - tls://1.12.12.12:853
-    - tls://223.5.5.5:853
+    - GEOSITE,cn
+    - GEOSITE,googlefcm
+    - GEOSITE,samsung
+    - GEOSITE,private
   nameserver:
-    - https://dns.alidns.com/dns-query#h3=true
-    - https://doh.pub/dns-query
+    - tls://119.29.29.29:853
+    - tls://223.5.5.5:853
+
+
+rules:
+  - GEOSITE,category-ads-all,REJECT
+  - RULE-SET,Advertising_OCD_IP,REJECT,no-resolve
+
+  - GEOIP,private,DIRECT,no-resolve
+  - DOMAIN-SUFFIX,pages.dev,DIRECT
+  - GEOSITE,cn,DIRECT
+  - GEOSITE,googlefcm,DIRECT
+  - GEOSITE,samsung,DIRECT
+  - GEOSITE,private,DIRECT
+
+  - GEOIP,telegram,⚖️负载均衡⚖️,no-resolve
+  - GEOSITE,telegram,⚖️负载均衡⚖️
+  - GEOSITE,huggingface,⚖️负载均衡⚖️
+  - GEOSITE,category-netdisk-!cn,⚖️负载均衡⚖️
+
+  - GEOSITE,category-ai-!cn,🧠人工智能🧠
+
+  - GEOSITE,dlsite,🇯🇵日本节点🇯🇵
+  - GEOSITE,dmm,🇯🇵日本节点🇯🇵
+  - GEOSITE,pixiv,🇯🇵日本节点🇯🇵
+
+  - GEOSITE,geolocation-!cn,📍节点选择📍
+  - GEOSITE,tld-!cn,📍节点选择📍
+
+  - GEOIP,cn,DIRECT
+
+  - MATCH,📍节点选择📍
+
+
+
+rule-providers:
+  Advertising_OCD_IP:
+    type: http
+    path: ./rule/Advertising_OCD_IP.mrs
+    url: "https://cdn.jsdelivr.net/gh/peiyingyao/Rule-for-OCD@master/rule/Clash/Advertising/Advertising_OCD_IP.mrs"
+    interval: 86400
+    proxy: DIRECT
+    behavior: ipcidr
+    format: mrs
+
+
+proxy-groups:
+  - name: 📍节点选择📍
+    type: select
+    interval: 0
+    proxies:
+      - ⚡自动选择⚡
+      - ⚖️负载均衡⚖️
+      - 🇯🇵日本节点🇯🇵
+      - 🇺🇸美国节点🇺🇸
+
+  - name: ⚡自动选择⚡
+    type: url-test
+    url: https://www.google.com/generate_204
+    expected-status: 204
+    interval: 1800
+    timeout: 3000
+    max-failed-times: 3
+    tolerance: 100
+    exclude-filter: 订阅|频道|到期|官网|剩余|RU|俄罗斯|🇷🇺|KR|韩国|🇰🇷
+    include-all-proxies: true
+    proxies: [ ]
+
+  - name: 🧠人工智能🧠
+    type: url-test
+    url: https://api.openai.com/v1/models
+    expected-status: 401
+    interval: 1800
+    timeout: 3000
+    max-failed-times: 3
+    tolerance: 100
+    exclude-filter: 订阅|频道|到期|官网|剩余|RU|俄罗斯|🇷🇺 #|HK|香港|🇭🇰|US|美国|🇺🇸
+    include-all-proxies: true
+    proxies: [ ]
+
+  - name: ⚖️负载均衡⚖️
+    type: load-balance
+    strategy: consistent-hashing
+    url: https://cdn5.telegram.org
+    interval: 1800
+    timeout: 3000
+    max-failed-times: 3
+    tolerance: 100
+    exclude-filter: 订阅|频道|到期|官网|剩余|RU|俄罗斯|🇷🇺|KR|韩国|🇰🇷  #|VN|越南|🇻🇳|MY|马来西亚|🇲🇾|🇷🇺
+    include-all-proxies: true
+    proxies: [ ]
+
+  - name: 🇯🇵日本节点🇯🇵
+    type: url-test
+    url: https://www.google.com/generate_204
+    expected-status: 204
+    interval: 1800
+    timeout: 3000
+    max-failed-times: 3
+    tolerance: 100
+    filter: JP|日本|🇯🇵
+    include-all-proxies: true
+    proxies: [ ]
+
+  - name: 🇺🇸美国节点🇺🇸
+    type: url-test
+    url: https://www.google.com/generate_204
+    expected-status: 204
+    interval: 1800
+    timeout: 3000
+    max-failed-times: 3
+    tolerance: 100
+    filter: US|美国|🇺🇸
+    include-all-proxies: true
+    proxies: [ ]
+
 ```
 
 ## 引用
