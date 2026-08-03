@@ -1,6 +1,3 @@
-#!/system/bin/sh
-
-
 CLASH_DIR="/data/adb/modules/ClashRoot"
 CLASH_BIN="$CLASH_DIR/clash"
 CLASH_LOG="$CLASH_DIR/clash.log"
@@ -70,7 +67,7 @@ elif [ "$CMD" = "loop" ]; then
     fi
 
     HOUR=$(date +%H)
-    if [ "$HOUR" -eq 6 ]; then
+    if [ "$HOUR" -eq 6 ] || [ "$HOUR" -eq 18 ]; then
         log "hour=6, restart clash"
         kill_clash
         start_clash
